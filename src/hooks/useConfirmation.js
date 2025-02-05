@@ -8,6 +8,8 @@ const useConfirmation = (
   currentUser,
   selectedDay,
   selectedTime,
+  startTime,
+  endTime,
   therapyType,
   onDateSelection,
   formatTime,
@@ -15,8 +17,8 @@ const useConfirmation = (
   const [isConfirmed, setIsConfirmed] = useState(false);
 
   const handleConfirmHours = async () => {
-    if (!selectedDay.length || selectedTime === null) {
-      alert('Por favor, selecciona al menos un día y una hora.');
+    if (!selectedDay.length || (collectionName === 'pros' && (startTime === undefined || endTime === undefined))) {
+      alert('Por favor, selecciona al menos un día y define un horario válido.');
       return;
     }
 
@@ -25,32 +27,44 @@ const useConfirmation = (
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
-        console.error('El usuario no existe en Firestore.');
+        console.error('El profesional no existe en Firestore.');
         return;
       }
 
-      const userData = userSnap.data();
-      const prevCitas = userData.Citas || [];
+      // 🔍 Verifica que los valores sean correctos
+      console.log('selectedDay:', selectedDay);
+      console.log('startTime:', startTime);
+      console.log('endTime:', endTime);
+      console.log('formatted startTime:', formatTime(startTime));
+      console.log('formatted endTime:', formatTime(endTime));
 
-      const newCitas = selectedDay.map(({ date, monthOffset }) => {
+      const newHorarios = selectedDay.map(({ date, monthOffset }) => {
         const monthIndex = new Date().getMonth() + monthOffset;
         const calculatedMonthName = new Date(2023, monthIndex).toLocaleString('es-ES', { month: 'long' });
 
         return {
           date,
           month: calculatedMonthName.toLowerCase(),
-          time: formatTime(selectedTime),
-          therapyType,
-          status: 'pending',
+          startTime: formatTime(startTime) || 'Hora inválida',
+          endTime: formatTime(endTime) || 'Hora inválida',
+          status: 'available',
         };
-      });
+      }).filter((h) => h.startTime !== 'Hora inválida' && h.endTime !== 'Hora inválida');
 
-      const updatedCitas = [...prevCitas, ...newCitas];
-      await updateDoc(userRef, { Citas: updatedCitas });
-      console.log('Citas creadas en Firestore:', updatedCitas);
-      alert('Citas confirmadas correctamente.');
+      if (!newHorarios.length) {
+        console.error('Error: No se generaron horarios válidos.');
+        return;
+      }
+
+      const userData = userSnap.data();
+      const prevHorarios = Array.isArray(userData.horarios) ? userData.horarios : [];
+      const updatedHorarios = [...prevHorarios, ...newHorarios];
+
+      await updateDoc(userRef, { horarios: updatedHorarios });
+
+      console.log('Horarios guardados en Firestore:', updatedHorarios);
+      alert('Horarios confirmados correctamente.');
       setIsConfirmed(true);
-      onDateSelection(updatedCitas); // Llamar a onDateSelection aquí
     } catch (error) {
       console.error('Error al confirmar horarios:', error);
     }

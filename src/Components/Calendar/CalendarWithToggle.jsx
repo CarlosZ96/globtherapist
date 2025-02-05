@@ -19,6 +19,7 @@ const Calendar = ({
   const { currentUser } = useAuth();
 
   const normalizeText = (text) => {
+    if (!text) return '';
     return text
       .toLowerCase()
       .normalize('NFD')
@@ -26,6 +27,7 @@ const Calendar = ({
       .replace(/\s+/g, '');
   };
 
+  const normalizedTherapyType = normalizeText(therapyType);
   // Hook useDateTime
   const {
     startTime,
@@ -61,12 +63,12 @@ const Calendar = ({
     currentUser,
     selectedDay,
     selectedTime,
+    startTime,
+    endTime,
     therapyType,
     onDateSelection,
     formatTime,
   );
-
-  const normalizedTherapyType = normalizeText(therapyType);
 
   const handleDayClick = (day) => {
     if (collectionName === 'users') {
