@@ -167,35 +167,40 @@ const Calendar = ({
       </div>
       <hr className="date-blue-line" />
       <div className="Hours-cont">
-        {collectionName === 'pros' ? (
-          <div className="Hours-selector">
-            <div className="Time-selector">
-              <h3>De:</h3>
-              <div className="Time-control">
-                <button type="button" onClick={() => decrementTime(setStartTime, startTime, 8)}>-</button>
-                <div>{formatTime(startTime)}</div>
-                <button type="button" onClick={() => incrementTime(setStartTime, startTime, endTime - 1)}>+</button>
+        <div className="Hours-selector-cont">
+          <div className="Hours-lunch-btn">
+            <button type="button">lunch</button>
+          </div>
+          {collectionName === 'pros' ? (
+            <div className="Hours-selector">
+              <div className="Time-selector">
+                <h3>De:</h3>
+                <div className="Time-control">
+                  <button type="button" onClick={() => decrementTime(setStartTime, startTime, 8)}>-</button>
+                  <button type="button" onClick={() => incrementTime(setStartTime, startTime, endTime - 1)}>+</button>
+                  <div>{formatTime(startTime)}</div>
+                </div>
+              </div>
+              <div className="Time-selector">
+                <h3>A:</h3>
+                <div className="Time-control">
+                  <button type="button" onClick={() => decrementTime(setEndTime, endTime, startTime + 1)}>-</button>
+                  <button type="button" onClick={() => incrementTime(setEndTime, endTime, 22)}>+</button>
+                  <div>{formatTime(endTime)}</div>
+                </div>
               </div>
             </div>
-            <div className="Time-selector">
-              <h3>A:</h3>
+          ) : (
+            <div className="Hours-selector">
+              <h3>Selecciona horario:</h3>
               <div className="Time-control">
-                <button type="button" onClick={() => decrementTime(setEndTime, endTime, startTime + 1)}>-</button>
-                <div>{formatTime(endTime)}</div>
-                <button type="button" onClick={() => incrementTime(setEndTime, endTime, 22)}>+</button>
+                <button type="button" onClick={() => decrementTime(setSelectedTime, selectedTime, 7)}>-</button>
+                <div>{formatTimeRange(selectedTime)}</div>
+                <button type="button" onClick={() => incrementTime(setSelectedTime, selectedTime, 22)}>+</button>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="Hours-selector">
-            <h3>Selecciona horario:</h3>
-            <div className="Time-control">
-              <button type="button" onClick={() => decrementTime(setSelectedTime, selectedTime, 7)}>-</button>
-              <div>{formatTimeRange(selectedTime)}</div>
-              <button type="button" onClick={() => incrementTime(setSelectedTime, selectedTime, 22)}>+</button>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
         <div className="Confirm-button">
           <button
             type="button"

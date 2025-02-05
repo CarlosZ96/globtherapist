@@ -149,8 +149,13 @@
 }
 
 .Hours-cont {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
     width: 90%;
-    height: max-content;
+    height: 20vh;
     background-color: #fff;
 }
 
@@ -355,6 +360,34 @@
     width: 100%;
 }
 
-.user-info-comt h3{
+.user-info-comt h3 {
     height: 10%;
+}
+
+.Hours-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40%;
+}
+
+.Time-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Time-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Hours-selector-cont{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    height: 80%;
+    width: 100%;
 }
