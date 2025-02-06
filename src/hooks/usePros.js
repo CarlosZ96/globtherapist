@@ -4,7 +4,6 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
-// Función para normalizar texto
 const normalizeText = (text) => {
   return text
     .toLowerCase() // Convertir a minúsculas
