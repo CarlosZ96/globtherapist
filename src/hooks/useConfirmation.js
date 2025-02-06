@@ -103,7 +103,6 @@ const useConfirmation = (
         return;
       }
 
-      // Eliminar todos los horarios
       await updateDoc(userRef, { horarios: {} });
       console.log('Horarios eliminados.');
       setIsConfirmed(false);
