@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { getAuth } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
 import Calendar from './Calendar/CalendarWithToggle';
@@ -16,15 +17,21 @@ const Therapy = () => {
     pros,
   } = useAuth();
 
+  const normalizeText = (text) => {
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+  };
+
   const [selectedAppointments, setSelectedAppointments] = useState([]);
   const [showAppointmentError, setShowAppointmentError] = useState(false);
   const [selectedPro, setSelectedPro] = useState(null);
 
-  const normalizeText = (text) => {
-    return text
-      .normalize('NFD') // Normaliza caracteres con tildes
-      .replace(/[\u0300-\u036f]/g, '') // Elimina diacríticos
-      .toLowerCase(); // Convierte a minúsculas
+  const handleDateSelection = (appointments) => {
+    console.log('Citas seleccionadas recibidas:', appointments);
+    setSelectedAppointments(appointments);
+    setShowAppointmentError(false);
   };
 
   const [formData, setFormData] = useState({
@@ -35,26 +42,6 @@ const Therapy = () => {
     description: '',
   });
 
-  const [errors, setErrors] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    therapyType: '',
-  });
-
-  const fieldRefs = {
-    name: React.createRef(),
-    phone: React.createRef(),
-    email: React.createRef(),
-    therapyType: React.createRef(),
-  };
-
-  const handleDateSelection = (appointments) => {
-    console.log('Citas seleccionadas recibidas:', appointments);
-    setSelectedAppointments(appointments);
-    setShowAppointmentError(false);
-  };
-
   const handleProSelection = async (proId) => {
     if (!selectedAppointments.length || !formData.therapyType) {
       alert('Por favor, selecciona un día y un tipo de terapia antes de ver los profesionales.');
@@ -63,9 +50,7 @@ const Therapy = () => {
 
     try {
       const normalizedTherapyType = normalizeText(formData.therapyType);
-      const selectedAppointment = selectedAppointments[0]; // Tomar la primera cita seleccionada
-
-      // Obtener el profesional seleccionado
+      const selectedAppointment = selectedAppointments[0];
       const proDocRef = doc(db, 'pros', proId);
       const proDoc = await getDoc(proDocRef);
 
@@ -77,16 +62,11 @@ const Therapy = () => {
       const proData = proDoc.data();
       const { horarios, terapias } = proData;
 
-      // Normalizar las terapias del profesional
       const normalizedTerapias = terapias?.map((t) => normalizeText(t));
-
-      // Verificar si el profesional ofrece el tipo de terapia seleccionado
       if (!normalizedTerapias?.includes(normalizedTherapyType)) {
         alert('El profesional no ofrece este tipo de terapia.');
         return;
       }
-
-      // Verificar si el profesional tiene disponibilidad en el día y mes seleccionados
       const hasAvailability = horarios?.[selectedAppointment.month]?.some((day) => {
         return (
           day.date === selectedAppointment.date
@@ -103,6 +83,20 @@ const Therapy = () => {
     } catch (error) {
       console.error('Error al verificar disponibilidad del profesional:', error);
     }
+  };
+
+  const [errors, setErrors] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    therapyType: '',
+  });
+
+  const fieldRefs = {
+    name: React.createRef(),
+    phone: React.createRef(),
+    email: React.createRef(),
+    therapyType: React.createRef(),
   };
 
   const validateForm = () => {
@@ -177,17 +171,32 @@ const Therapy = () => {
     try {
       const normalizedTherapyType = normalizeText(formData.therapyType);
 
+      // Crear el array de citas para el usuario
       const updatedCitas = selectedAppointments.map((app) => ({
-        ...app,
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        therapyType: normalizedTherapyType,
+        date: app.date,
+        time: app.time,
+        month: app.month.toLowerCase(),
+        therapyType: normalizedTherapyType, // Guardar el tipo de terapia normalizado
         description: formData.description,
         status: 'confirmed',
       }));
 
-      await updateUserCitas(updatedCitas);
+      // Guardar las citas en el array Citas del usuario
+      const userRef = doc(db, 'users', currentUser.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        console.error('El usuario no existe en Firestore.');
+        return;
+      }
+
+      const userData = userSnap.data();
+      const prevCitas = userData.Citas || [];
+      const newCitas = [...prevCitas, ...updatedCitas];
+
+      await updateDoc(userRef, { Citas: newCitas }); // Actualizar el array Citas en Firestore
+
+      console.log('Citas guardadas en Firestore:', newCitas);
 
       // Buscar el profesional por su ID
       const pro = pros.find((p) => p.id === selectedPro);
@@ -197,11 +206,12 @@ const Therapy = () => {
         return;
       }
 
+      // Crear el array de citas para el profesional
       const newMisCitas = selectedAppointments.map((app) => ({
         date: app.date,
         time: app.time,
         month: app.month.toLowerCase(),
-        therapyType: normalizedTherapyType,
+        therapyType: normalizedTherapyType, // Guardar el tipo de terapia normalizado
         description: formData.description,
         userName: formData.name,
         userEmail: formData.email,
@@ -213,6 +223,7 @@ const Therapy = () => {
 
       alert('¡Formulario enviado exitosamente!');
 
+      // Reiniciar el formulario
       setFormData({
         name: '',
         phone: '',
