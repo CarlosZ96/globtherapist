@@ -20,14 +20,11 @@ const Therapy = () => {
   const [showAppointmentError, setShowAppointmentError] = useState(false);
   const [selectedPro, setSelectedPro] = useState(null);
 
-  const handleDateSelection = (appointments) => {
-    console.log('Citas seleccionadas recibidas:', appointments);
-    setSelectedAppointments(appointments);
-    setShowAppointmentError(false);
-  };
-
-  const handleProSelection = (proId) => {
-    setSelectedPro(proId);
+  const normalizeText = (text) => {
+    return text
+      .normalize('NFD') // Normaliza caracteres con tildes
+      .replace(/[\u0300-\u036f]/g, '') // Elimina diacríticos
+      .toLowerCase(); // Convierte a minúsculas
   };
 
   const [formData, setFormData] = useState({
@@ -52,11 +49,60 @@ const Therapy = () => {
     therapyType: React.createRef(),
   };
 
-  const normalizeText = (text) => {
-    return text
-      .normalize('NFD') // Normaliza caracteres con tildes
-      .replace(/[\u0300-\u036f]/g, '') // Elimina diacríticos
-      .toLowerCase(); // Convierte a minúsculas
+  const handleDateSelection = (appointments) => {
+    console.log('Citas seleccionadas recibidas:', appointments);
+    setSelectedAppointments(appointments);
+    setShowAppointmentError(false);
+  };
+
+  const handleProSelection = async (proId) => {
+    if (!selectedAppointments.length || !formData.therapyType) {
+      alert('Por favor, selecciona un día y un tipo de terapia antes de ver los profesionales.');
+      return;
+    }
+
+    try {
+      const normalizedTherapyType = normalizeText(formData.therapyType);
+      const selectedAppointment = selectedAppointments[0]; // Tomar la primera cita seleccionada
+
+      // Obtener el profesional seleccionado
+      const proDocRef = doc(db, 'pros', proId);
+      const proDoc = await getDoc(proDocRef);
+
+      if (!proDoc.exists()) {
+        console.error('Profesional no encontrado.');
+        return;
+      }
+
+      const proData = proDoc.data();
+      const { horarios, terapias } = proData;
+
+      // Normalizar las terapias del profesional
+      const normalizedTerapias = terapias?.map((t) => normalizeText(t));
+
+      // Verificar si el profesional ofrece el tipo de terapia seleccionado
+      if (!normalizedTerapias?.includes(normalizedTherapyType)) {
+        alert('El profesional no ofrece este tipo de terapia.');
+        return;
+      }
+
+      // Verificar si el profesional tiene disponibilidad en el día y mes seleccionados
+      const hasAvailability = horarios?.[selectedAppointment.month]?.some((day) => {
+        return (
+          day.date === selectedAppointment.date
+          && day.Timeslots.includes(selectedAppointment.time)
+        );
+      });
+
+      if (hasAvailability) {
+        setSelectedPro(proId);
+        alert('Profesional disponible para la cita seleccionada.');
+      } else {
+        alert('El profesional no tiene disponibilidad en la fecha y hora seleccionadas.');
+      }
+    } catch (error) {
+      console.error('Error al verificar disponibilidad del profesional:', error);
+    }
   };
 
   const validateForm = () => {
