@@ -1,5 +1,5 @@
+/* eslint-disable no-plusplus */
 import { useState } from 'react';
-
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -31,38 +31,55 @@ const useConfirmation = (
         return;
       }
 
-      // 🔍 Verifica que los valores sean correctos
-      console.log('selectedDay:', selectedDay);
-      console.log('startTime:', startTime);
-      console.log('endTime:', endTime);
-      console.log('formatted startTime:', formatTime(startTime));
-      console.log('formatted endTime:', formatTime(endTime));
-
-      const newHorarios = selectedDay.map(({ date, monthOffset }) => {
-        const monthIndex = new Date().getMonth() + monthOffset;
-        const calculatedMonthName = new Date(2023, monthIndex).toLocaleString('es-ES', { month: 'long' });
-
-        return {
-          date,
-          month: calculatedMonthName.toLowerCase(),
-          startTime: formatTime(startTime) || 'Hora inválida',
-          endTime: formatTime(endTime) || 'Hora inválida',
-          status: 'available',
-        };
-      }).filter((h) => h.startTime !== 'Hora inválida' && h.endTime !== 'Hora inválida');
-
-      if (!newHorarios.length) {
-        console.error('Error: No se generaron horarios válidos.');
-        return;
-      }
-
+      // Obtener los horarios existentes o inicializar un objeto vacío
       const userData = userSnap.data();
-      const prevHorarios = Array.isArray(userData.horarios) ? userData.horarios : [];
-      const updatedHorarios = [...prevHorarios, ...newHorarios];
+      const existingHorarios = userData.horarios || {};
 
-      await updateDoc(userRef, { horarios: updatedHorarios });
+      // Iterar sobre todos los días seleccionados
+      selectedDay.forEach((day) => {
+        // Obtener el mes actual basado en el monthOffset
+        const monthIndex = new Date().getMonth() + day.monthOffset;
+        const monthName = new Date(2023, monthIndex).toLocaleString('es-ES', { month: 'long' }).toLowerCase();
 
-      console.log('Horarios guardados en Firestore:', updatedHorarios);
+        // Generar los Timeslots dinámicamente
+        const timeslots = [];
+        for (let hour = startTime; hour < endTime; hour++) {
+          const startHourFormatted = formatTime(hour);
+          const endHourFormatted = formatTime(hour + 1);
+          timeslots.push(`${startHourFormatted}-${endHourFormatted}`);
+        }
+
+        // Crear el objeto para el día seleccionado
+        const newDay = {
+          date: day.date,
+          Timeslots: timeslots,
+        };
+
+        // Si el mes ya existe, agregar el nuevo día al array del mes
+        if (existingHorarios[monthName]) {
+          const existingDays = existingHorarios[monthName];
+          const existingDayIndex = existingDays.findIndex((d) => d.date === newDay.date);
+
+          // Si el día ya existe, actualizar sus Timeslots
+          if (existingDayIndex !== -1) {
+            existingDays[existingDayIndex].Timeslots = [
+              ...existingDays[existingDayIndex].Timeslots,
+              ...newDay.Timeslots,
+            ];
+          } else {
+            // Si el día no existe, agregarlo al array del mes
+            existingHorarios[monthName].push(newDay);
+          }
+        } else {
+          // Si el mes no existe, crear un nuevo array con el día seleccionado
+          existingHorarios[monthName] = [newDay];
+        }
+      });
+
+      // Guardar los horarios actualizados en Firestore
+      await updateDoc(userRef, { horarios: existingHorarios });
+
+      console.log('Horarios guardados en Firestore:', existingHorarios);
       alert('Horarios confirmados correctamente.');
       setIsConfirmed(true);
     } catch (error) {
@@ -80,9 +97,9 @@ const useConfirmation = (
         return;
       }
 
-      const horariosKey = collectionName === 'pros' ? 'horarios' : 'Citas';
-      await updateDoc(userRef, { [horariosKey]: [] });
-      console.log(`${horariosKey} eliminados.`);
+      // Eliminar todos los horarios
+      await updateDoc(userRef, { horarios: {} });
+      console.log('Horarios eliminados.');
       setIsConfirmed(false);
     } catch (error) {
       console.error('Error al eliminar horarios:', error);

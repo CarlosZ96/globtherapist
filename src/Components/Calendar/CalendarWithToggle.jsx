@@ -28,7 +28,6 @@ const Calendar = ({
   };
 
   const normalizedTherapyType = normalizeText(therapyType);
-  // Hook useDateTime
   const {
     startTime,
     endTime,
