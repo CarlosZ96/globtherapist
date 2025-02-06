@@ -41,7 +41,6 @@ const Calendar = ({
     formatTimeRange,
   } = useDateTime();
 
-  // Hook para manejar profesionales
   const {
     availablePros,
     selectedPro,

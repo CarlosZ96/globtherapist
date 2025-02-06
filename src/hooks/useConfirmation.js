@@ -21,55 +21,44 @@ const useConfirmation = (
       alert('Por favor, selecciona al menos un día.');
       return;
     }
-
     try {
       const userRef = doc(db, collectionName, currentUser.uid);
       const userSnap = await getDoc(userRef);
-
       if (!userSnap.exists()) {
         console.error('El usuario no existe en Firestore.');
         return;
       }
-
       const appointments = selectedDay.map((day) => {
         const monthIndex = new Date().getMonth() + day.monthOffset;
         const monthName = new Date(2023, monthIndex).toLocaleString('es-ES', { month: 'long' }).toLowerCase();
-
         return {
           date: day.date,
           month: monthName,
-          time: collectionName === 'users' ? formatTime(selectedTime) : formatTime(startTime), // Usar selectedTime para users
+          time: collectionName === 'users' ? formatTime(selectedTime) : formatTime(startTime),
         };
       });
-
-      // Pasar las citas seleccionadas al componente padre
-      onDateSelection(appointments);
-
-      // Guardar en Firestore solo para pros
+      if (typeof onDateSelection === 'function') {
+        onDateSelection(appointments);
+      }
       if (collectionName === 'pros') {
         const userData = userSnap.data();
         const existingHorarios = userData.horarios || {};
-
         selectedDay.forEach((day) => {
           const monthIndex = new Date().getMonth() + day.monthOffset;
           const monthName = new Date(2023, monthIndex).toLocaleString('es-ES', { month: 'long' }).toLowerCase();
-
           const timeslots = [];
           for (let hour = startTime; hour < endTime; hour++) {
             const startHourFormatted = formatTime(hour);
             const endHourFormatted = formatTime(hour + 1);
             timeslots.push(`${startHourFormatted}-${endHourFormatted}`);
           }
-
           const newDay = {
             date: day.date,
             Timeslots: timeslots,
           };
-
           if (existingHorarios[monthName]) {
             const existingDays = existingHorarios[monthName];
             const existingDayIndex = existingDays.findIndex((d) => d.date === newDay.date);
-
             if (existingDayIndex !== -1) {
               existingDays[existingDayIndex].Timeslots = [
                 ...existingDays[existingDayIndex].Timeslots,
@@ -82,11 +71,9 @@ const useConfirmation = (
             existingHorarios[monthName] = [newDay];
           }
         });
-
         await updateDoc(userRef, { horarios: existingHorarios });
         console.log('Horarios guardados en Firestore:', existingHorarios);
       }
-
       alert('Horarios confirmados correctamente.');
       setIsConfirmed(true);
     } catch (error) {
