@@ -42,12 +42,24 @@ const Therapy = () => {
     description: '',
   });
 
+  const normalizeTime = (time) => {
+    const timeLower = time.toLowerCase();
+    const [hour, minute] = timeLower.replace(/[^0-9:]/g, '').split(':');
+    let normalizedHour = parseInt(hour, 10);
+
+    if (timeLower.includes('pm') && normalizedHour !== 12) {
+      normalizedHour += 12;
+    }
+    if (timeLower.includes('am') && normalizedHour === 12) {
+      normalizedHour = 0;
+    }
+    return `${String(normalizedHour).padStart(2, '0')}:${minute}`;
+  };
   const handleProSelection = async (proId) => {
     if (!selectedAppointments.length || !formData.therapyType) {
       alert('Por favor, selecciona un día y un tipo de terapia antes de ver los profesionales.');
       return;
     }
-
     try {
       const normalizedTherapyType = normalizeText(formData.therapyType);
       const selectedAppointment = selectedAppointments[0];
@@ -58,19 +70,22 @@ const Therapy = () => {
         console.error('Profesional no encontrado.');
         return;
       }
-
       const proData = proDoc.data();
       const { horarios, terapias } = proData;
-
       const normalizedTerapias = terapias?.map((t) => normalizeText(t));
       if (!normalizedTerapias?.includes(normalizedTherapyType)) {
         alert('El profesional no ofrece este tipo de terapia.');
         return;
       }
+      const normalizedSelectedTime = normalizeTime(selectedAppointment.time);
       const hasAvailability = horarios?.[selectedAppointment.month]?.some((day) => {
         return (
           day.date === selectedAppointment.date
-          && day.Timeslots.includes(selectedAppointment.time)
+          && day.Timeslots.some((timeslot) => {
+            const [startTime] = timeslot.split('-');
+            const normalizedStartTime = normalizeTime(startTime);
+            return normalizedStartTime === normalizedSelectedTime;
+          })
         );
       });
 
@@ -84,7 +99,6 @@ const Therapy = () => {
       console.error('Error al verificar disponibilidad del profesional:', error);
     }
   };
-
   const [errors, setErrors] = useState({
     name: '',
     phone: '',

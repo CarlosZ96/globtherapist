@@ -41,12 +41,9 @@ const usePros = () => {
       }
 
       const { month, date, time } = firstAppointment;
-
       console.log('Cita del usuario:', { month, date, time }); // Depuración
-
       const prosCollectionRef = collection(db, 'pros');
       const prosQuerySnapshot = await getDocs(prosCollectionRef);
-
       const matchingPros = [];
 
       // Normalizar el therapyType
@@ -56,38 +53,30 @@ const usePros = () => {
       prosQuerySnapshot.forEach((proDoc) => {
         const proData = proDoc.data();
         const { horarios, terapias, Nombre } = proData;
-
-        console.log('Profesional:', Nombre); // Depuración
-        console.log('Terapias del profesional:', terapias); // Depuración
-        console.log('Horarios del profesional:', horarios); // Depuración
-
-        // Normalizar las terapias del profesional
+        console.log('Profesional:', Nombre);
+        console.log('Terapias del profesional:', terapias);
+        console.log('Horarios del profesional:', horarios);
         const normalizedTerapias = terapias?.map((t) => normalizeText(t));
-        console.log('Terapias del profesional normalizadas:', normalizedTerapias); // Depuración
-
+        console.log('Terapias del profesional normalizadas:', normalizedTerapias);
         if (normalizedTerapias && normalizedTerapias.includes(normalizedTherapyType)) {
-          console.log('El profesional ofrece la terapia:', therapyType); // Depuración
+          console.log('El profesional ofrece la terapia:', therapyType);
+          const monthHorarios = horarios?.[month];
+          if (monthHorarios) {
+            const dayHorario = monthHorarios.find((d) => d.date === date);
+            if (dayHorario) {
+              const hasMatchingTime = dayHorario.Timeslots.some((timeSlot) => {
+                const [startTimeStr] = timeSlot.split('-');
+                return startTimeStr === time;
+              });
 
-          const hasMatchingSchedule = horarios?.some((horario) => {
-            const isMonthMatch = horario.month?.toLowerCase() === month?.toLowerCase();
-            const isDateMatch = horario.date === date;
-            const isTimeMatch = horario.timeSlots?.some((timeSlot) => {
-              const [startTimeStr] = timeSlot.split('-');
-              return startTimeStr === time;
-            });
-
-            console.log('Coincidencia de horario:', { isMonthMatch, isDateMatch, isTimeMatch }); // Depuración
-
-            return isMonthMatch && isDateMatch && isTimeMatch;
-          });
-
-          if (hasMatchingSchedule) {
-            console.log('Profesional coincide:', Nombre); // Depuración
-            matchingPros.push({ id: proDoc.id, name: Nombre });
+              if (hasMatchingTime) {
+                console.log('Profesional coincide:', Nombre); // Depuración
+                matchingPros.push({ id: proDoc.id, name: Nombre });
+              }
+            }
           }
         }
       });
-
       console.log('Profesionales encontrados:', matchingPros); // Depuración
       setAvailablePros(matchingPros);
     } catch (error) {
