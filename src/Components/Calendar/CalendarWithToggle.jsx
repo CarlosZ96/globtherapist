@@ -83,6 +83,9 @@ const Calendar = ({
   const handleProClick = (proId) => {
     setSelectedPro((prev) => (prev === proId ? null : proId));
     onProSelection(proId);
+  };
+
+  const handleShowDetails = (proId) => {
     setSelectedProId(proId);
   };
 
@@ -251,7 +254,7 @@ const Calendar = ({
               <button
                 type="button"
                 className="show-modal-btn"
-                onClick={() => setSelectedProId(pro.id)}
+                onClick={() => handleShowDetails(pro.id)}
               >
                 Ver detalles
               </button>
