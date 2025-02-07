@@ -97,6 +97,7 @@ const Calendar = ({
     console.log('Componente Calendar renderizado');
     console.log('therapyType:', therapyType);
     console.log('therapyType normalizado:', normalizedTherapyType);
+    console.log('isConfirmed:', isConfirmed);
     console.log('availablePros:', availablePros);
     console.log('selectedDay:', selectedDay);
   }, [therapyType, isConfirmed, availablePros, selectedDay]);
