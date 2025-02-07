@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import Swal from 'sweetalert2';
 import '../../stylesheets/windo.css';
 import { auth, db } from '../../firebase';
 
@@ -72,7 +73,11 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
         role: 'usuario',
       });
 
-      alert('Usuario creado con éxito');
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Usuario creado con éxito.',
+      });
       setFormData({
         email: '',
         phone: '',
@@ -83,7 +88,11 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
       toggleCreate();
     } catch (error) {
       console.error('Error creando el usuario:', error);
-      alert('Hubo un error al crear el usuario.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al crear el usuario.',
+      });
     }
   };
 

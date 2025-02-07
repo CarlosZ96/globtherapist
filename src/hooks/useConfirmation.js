@@ -1,6 +1,7 @@
 /* eslint-disable no-plusplus */
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import Swal from 'sweetalert2';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -20,7 +21,11 @@ const useConfirmation = (
 
   const handleConfirmHours = async () => {
     if (!selectedDay.length) {
-      alert('Por favor, selecciona al menos un día.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Selección incompleta',
+        text: 'Por favor, selecciona al menos un día.',
+      });
       return;
     }
 
@@ -102,7 +107,11 @@ const useConfirmation = (
         console.log('Cita guardada en Firestore:', newCita);
         setCurrentAppointmentId(newCita.uid);
       }
-      alert('Horarios confirmados correctamente.');
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Horarios confirmados correctamente.',
+      });
       setIsConfirmed(true);
     } catch (error) {
       console.error('Error al confirmar horarios:', error);
