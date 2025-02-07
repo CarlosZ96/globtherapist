@@ -2,14 +2,20 @@ import React, { useState } from 'react';
 import '../stylesheets/homepage.css';
 import '../stylesheets/windo.css';
 import Globody from './Globody';
+import Admin from './admin';
+import ProSpace from './ProSpace';
 import Login from './windows/login';
 import Create from './windows/Create';
+import CreatePro from './CreatePro';
 import { useAuth } from '../AuthContext';
 
 const Homepage = () => {
-  const { currentUser, logout, userData } = useAuth();
+  const {
+    currentUser, logout, userData, currentPro,
+  } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [showCreatePro, setShowCreatePro] = useState(false);
 
   const toggleLogin = () => {
     setShowLogin((prev) => !prev);
@@ -17,6 +23,20 @@ const Homepage = () => {
 
   const toggleCreate = () => {
     setShowCreate((prev) => !prev);
+  };
+
+  const toggleCreatePro = () => {
+    setShowCreatePro((prev) => !prev);
+  };
+
+  const renderContent = () => {
+    if (currentPro) {
+      return <ProSpace />;
+    }
+    if (userData?.role === 'admin') {
+      return <Admin />;
+    }
+    return <Globody />;
   };
 
   return (
@@ -40,9 +60,8 @@ const Homepage = () => {
           <div className="Log-Btn-Cont">
             <div>
               <h3>
-                Hola,
-                {' '}
-                {userData?.Nombre || 'Usuario'}
+                {currentPro?.username || userData?.username || 'Usuario'}
+                {console.log(currentPro?.username || userData?.username)}
               </h3>
             </div>
             <button type="button" className="Log-Btn" onClick={logout}>
@@ -51,13 +70,14 @@ const Homepage = () => {
           </div>
         )}
       </header>
-      <Globody />
+      {renderContent()}
       <div style={{ display: showLogin ? 'block' : 'none' }}>
         <Login toggleLogin={toggleLogin} />
       </div>
       <div style={{ display: showCreate ? 'block' : 'none' }}>
-        <Create toggleCreate={toggleCreate} />
+        <Create toggleCreate={toggleCreate} toggleCreatePro={toggleCreatePro} />
       </div>
+      {showCreatePro && <CreatePro toggleCreatePro={toggleCreatePro} />}
     </div>
   );
 };

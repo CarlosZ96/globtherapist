@@ -10,9 +10,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-}
-
-.Home-txt h1 {
+    color: #fff;
     margin: 0;
 }
 
@@ -23,10 +21,6 @@
     width: 100%;
     height: 8vh;
     background-color: #01268d;
-}
-
-.Home-txt {
-    color: #fff;
 }
 
 .Home-windows {
@@ -104,7 +98,7 @@
     margin: 0;
     color: #ffffffb4;
     font-size: 8vw;
-    font-family: "Itim", serif;
+    font-family: Itim, serif;
     font-weight: 400;
     font-style: normal;
 }
@@ -129,10 +123,8 @@
 
 .Glob-txt-btn-conts {
     display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-content: center;
-    justify-content: space-around;
+    flex-flow: column wrap;
+    place-content: center space-around;
     align-items: center;
     width: 50%;
     height: 89%;
@@ -142,10 +134,8 @@
 
 .Glob-txt-cont {
     display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-content: center;
-    justify-content: end;
+    flex-flow: column wrap;
+    place-content: center end;
     height: 49%;
 }
 
@@ -163,7 +153,7 @@
     color: #2b3e9d;
     border: none;
     border-radius: 50px;
-    font-family: "Itim", serif;
+    font-family: Itim, serif;
     font-weight: 400;
     font-style: normal;
 }
@@ -176,12 +166,11 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    align-items: center;
-    justify-items: center;
-    row-gap: 1%;
-    column-gap: 0;
+    place-items: center center;
+    gap: 1% 0;
     width: 90vw;
     height: 54vh;
+    margin-bottom: 8%;
 }
 
 .Theras-cont>.Therapy:nth-child(1) {
@@ -214,7 +203,7 @@
 
 .Therapy-title {
     color: #01268d;
-    font-family: "Itim", serif;
+    font-family: Itim, serif;
     font-weight: 400;
     font-style: normal;
     font-size: 6vw;
@@ -244,7 +233,7 @@
     margin: 0;
     font-size: 4vw;
     color: #fff;
-    font-family: "Itim", serif;
+    font-family: Itim, serif;
     font-weight: 400;
     font-style: normal;
 }

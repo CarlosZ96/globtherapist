@@ -4,6 +4,7 @@ import len from '../img/SyafriStudio 1.png';
 import exe from '../img/exercise (1) 1.png';
 import bra from '../img/brain 1.png';
 import cas from '../img/briefcase 1.png';
+import Therapy from './Therapy';
 import '../stylesheets/homepage.css';
 
 const Globody = () => {
@@ -73,6 +74,7 @@ const Globody = () => {
           </div>
         </div>
       </div>
+      <Therapy />
     </div>
   );
 };

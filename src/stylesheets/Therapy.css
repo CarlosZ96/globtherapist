@@ -1,0 +1,225 @@
+.Therapy-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 98vw;
+    background-color: #2b3e9d;
+    margin: 0;
+    padding: 0;
+}
+
+.Therapy-title-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    height: 15vh;
+}
+
+.Therapy-title-cont h1 {
+    color: #ffffff21;
+    margin: 1% 0;
+    font-family: Itim, serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 8vw;
+}
+
+.Ask-Therapy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 92%;
+}
+
+.Ask-Therapy-subtittle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 9vh;
+    width: 80%;
+    background-color: #1c2e88;
+}
+
+.Ask-Therapy-subtittle h2 {
+    color: #ffd;
+    margin: 1% 0;
+    font-family: Itim, serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 4vw;
+}
+
+.Ask-Therapy-fields-conts {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    height: 35vh;
+    margin-bottom: 2%;
+}
+
+.Ask-Therapy-field-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.Ask-Therapy-field-cont h3 {
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 3vw;
+    margin: 1% 0;
+}
+
+.Ask-Therapy-fields-input {
+    height: 48%;
+    width: 100%;
+}
+
+.Ask-Therapy-field-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+}
+
+.Ask-Therapy-txt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+}
+
+.Ask-Therapy-txt {
+    font-size: 4vw;
+    font-family: Itim, serif;
+    font-weight: 300;
+    font-style: normal;
+    color: #fff;
+}
+
+.Therapies-cont {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    place-items: center center;
+    width: 100%;
+    height: 38vh;
+}
+
+.white-line {
+    height: 5px;
+    width: 86%;
+    background-color: #fff;
+}
+
+.Therapy-tittle-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    height: 60%;
+}
+
+.Therapy-tittle {
+    font-size: 6vw;
+    font-family: Itim, serif;
+    font-weight: 400;
+    font-style: normal;
+    color: #0c2292;
+}
+
+.Therapies-cont>.Therapy-tittle-cont:nth-child(1) {
+    background-color: #deB841;
+}
+
+.Therapies-cont>.Therapy-tittle-cont:nth-child(2) {
+    background-color: #7C95A6;
+}
+
+.Therapies-cont>.Therapy-tittle-cont:nth-child(3) {
+    background-color: #40F246;
+}
+
+.Therapies-cont>.Therapy-tittle-cont:nth-child(4) {
+    background-color: #2B3A67;
+}
+
+.Therapies-cont .Therapy-tittle-cont:last-child .Therapy-tittle {
+    color: #fff;
+}
+
+.Therapy-txt-field {
+    height: 30vh;
+    width: 100%;
+    background-color: #fff;
+}
+
+.Therapy-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    margin-bottom: 2%;
+}
+
+.Therapy-info h3 {
+    font-size: 4vw;
+    font-family: Itim, serif;
+    font-weight: 400;
+    font-style: normal;
+    color: #fff;
+}
+
+.Ask-Therapy-pros-cont {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    place-items: center center;
+    width: 100%;
+}
+
+.Ask-Therapy-txt {
+    width: 90%;
+}
+
+.Ask-Therapy-date-cont {
+    width: 90%;
+}
+
+.DynamiCanlendar-btn-cont {
+    width: 90%;
+    background-color: #ffd54f;
+}
+
+.error-text {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  .error-border {
+    border: 2px solid red;
+    border-radius: 5px;
+    padding: 0.5rem;
+  }
+
+  .therapy-error-cont {
+    margin-top: 1rem;
+    text-align: center;
+  }
