@@ -1,42 +1,17 @@
 {
-  "extends": [
-    "airbnb",
-    "eslint:recommended",
-    "plugin:react/recommended"
-  ],
-  "env": {
-    "browser": true,
-    "es2021": true
-  },
+  "extends": "stylelint-config-standard-scss",
   "rules": {
-    "semi": [
-      "error",
-      "always"
-    ],
-    "indent": [
-      "error",
-      4
-    ],
-    "react/function-component-definition": [
-      4,
-      {
-        "namedComponents": "arrow-function",
-        "unnamedComponents": "arrow-function"
-      }
-    ],
-    "arrow-body-style": [
-      "error",
-      "as-needed"
-    ],
-    "react/jsx-indent": [
-      "error",
-      4
-    ],
-    "eol-last": [
-      "error",
-      "always"
-    ],
-    "linebreak-style": 0,
-    "ignoreFiles": ["build/**", "dist/**", "**/reset*.css", "**/bootstrap*.css", "**/*.js", "**/*.jsx"]
-  }
+    "indentation": 4,
+    "number-leading-zero": "always",
+    "selector-class-pattern": null,
+    "color-hex-length": "short",
+    "at-rule-no-unknown": null,
+    "scss/at-rule-no-unknown": true
+  },
+  "ignoreFiles": [
+    "build/**",
+    "dist/**",
+    "**/reset*.css",
+    "**/bootstrap*.css"
+  ]
 }
