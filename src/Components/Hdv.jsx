@@ -12,7 +12,6 @@ const Hdv = () => {
   const [university, setUniversity] = useState('');
   const [professionalHistory, setProfessionalHistory] = useState('');
 
-  // Obtener la imagen de perfil del usuario
   useEffect(() => {
     const fetchProfileImage = async () => {
       const user = auth.currentUser;
@@ -101,7 +100,7 @@ const Hdv = () => {
                 className="hdv-year"
                 value={yearsOfExperience}
                 onChange={(e) => setYearsOfExperience(parseInt(e.target.value, 10))}
-                min="0" // Aquí se evita que el valor sea menor a 0
+                min="0"
               />
             </div>
           </div>

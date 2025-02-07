@@ -184,18 +184,14 @@ const Therapy = () => {
 
     try {
       const normalizedTherapyType = normalizeText(formData.therapyType);
-
-      // Crear el array de citas para el usuario
       const updatedCitas = selectedAppointments.map((app) => ({
         date: app.date,
         time: app.time,
         month: app.month.toLowerCase(),
-        therapyType: normalizedTherapyType, // Guardar el tipo de terapia normalizado
+        therapyType: normalizedTherapyType,
         description: formData.description,
         status: 'confirmed',
       }));
-
-      // Guardar las citas en el array Citas del usuario
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnap = await getDoc(userRef);
 
@@ -208,11 +204,8 @@ const Therapy = () => {
       const prevCitas = userData.Citas || [];
       const newCitas = [...prevCitas, ...updatedCitas];
 
-      await updateDoc(userRef, { Citas: newCitas }); // Actualizar el array Citas en Firestore
-
+      await updateDoc(userRef, { Citas: newCitas });
       console.log('Citas guardadas en Firestore:', newCitas);
-
-      // Buscar el profesional por su ID
       const pro = pros.find((p) => p.id === selectedPro);
       if (!pro) {
         console.error('Profesional no encontrado.');
@@ -220,12 +213,11 @@ const Therapy = () => {
         return;
       }
 
-      // Crear el array de citas para el profesional
       const newMisCitas = selectedAppointments.map((app) => ({
         date: app.date,
         time: app.time,
         month: app.month.toLowerCase(),
-        therapyType: normalizedTherapyType, // Guardar el tipo de terapia normalizado
+        therapyType: normalizedTherapyType,
         description: formData.description,
         userName: formData.name,
         userEmail: formData.email,
@@ -237,7 +229,6 @@ const Therapy = () => {
 
       alert('¡Formulario enviado exitosamente!');
 
-      // Reiniciar el formulario
       setFormData({
         name: '',
         phone: '',

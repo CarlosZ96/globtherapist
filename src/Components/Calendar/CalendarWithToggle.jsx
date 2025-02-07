@@ -237,17 +237,25 @@ const Calendar = ({
         </div>
         <div className="pro-img-def">
           {availablePros.map((pro) => (
-            <button
-              key={pro.id}
-              type="button"
-              className={`user-info-comt ${selectedPro === pro.id ? 'active' : 'inactive'}`}
-              onClick={() => handleProClick(pro.id)}
-            >
-              <div className="user-image-comt">
-                <img src={User} alt="user" className="pro-img" />
-              </div>
-              <h3>{pro.name}</h3>
-            </button>
+            <div key={pro.id} className="pro-item">
+              <button
+                type="button"
+                className={`user-info-comt ${selectedPro === pro.id ? 'active' : 'inactive'}`}
+                onClick={() => handleProClick(pro.id)}
+              >
+                <div className="user-image-comt">
+                  <img src={User} alt="user" className="pro-img" />
+                </div>
+                <h3>{pro.name}</h3>
+              </button>
+              <button
+                type="button"
+                className="show-modal-btn"
+                onClick={() => setSelectedProId(pro.id)}
+              >
+                Ver detalles
+              </button>
+            </div>
           ))}
           {selectedProId && (
             <ProModal proId={selectedProId} onClose={handleCloseModal} />

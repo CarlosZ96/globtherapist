@@ -30,7 +30,7 @@ const Hdvwindow = ({ proId, onClose }) => {
   React.useEffect(() => {
     const fetchProfileImage = async () => {
       try {
-        const imageRef = ref(storage, `profileImages/${proId}/profile.jpg`); // Ruta actualizada
+        const imageRef = ref(storage, `profileImages/${proId}/profile.jpg`);
         const url = await getDownloadURL(imageRef);
         setProfileImage(url);
       } catch (error) {
