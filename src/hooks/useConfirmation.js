@@ -23,6 +23,7 @@ const useConfirmation = (
       alert('Por favor, selecciona al menos un día.');
       return;
     }
+
     try {
       const userRef = doc(db, collectionName, currentUser.uid);
       const userSnap = await getDoc(userRef);
@@ -30,11 +31,13 @@ const useConfirmation = (
         console.error('El usuario no existe en Firestore.');
         return;
       }
-      const normalizedTherapyType = therapyType
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/\s+/g, '');
+      const normalizedTherapyType = collectionName === 'users'
+        ? therapyType
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, '')
+        : null;
       const appointments = selectedDay.map((day) => {
         const monthIndex = new Date().getMonth() + day.monthOffset;
         const monthName = new Date(2023, monthIndex).toLocaleString('es-ES', { month: 'long' }).toLowerCase();
@@ -99,7 +102,6 @@ const useConfirmation = (
         console.log('Cita guardada en Firestore:', newCita);
         setCurrentAppointmentId(newCita.uid);
       }
-
       alert('Horarios confirmados correctamente.');
       setIsConfirmed(true);
     } catch (error) {
