@@ -19,6 +19,10 @@ const useConfirmation = (
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [currentAppointmentId, setCurrentAppointmentId] = useState(null);
 
+  const removePendingCitas = (citas) => {
+    return citas.filter((cita) => cita.status !== 'pending');
+  };
+
   const handleConfirmHours = async () => {
     if (!selectedDay.length) {
       Swal.fire({
@@ -36,6 +40,7 @@ const useConfirmation = (
         console.error('El usuario no existe en Firestore.');
         return;
       }
+
       const normalizedTherapyType = collectionName === 'users'
         ? therapyType
           .toLowerCase()
@@ -43,6 +48,7 @@ const useConfirmation = (
           .replace(/[\u0300-\u036f]/g, '')
           .replace(/\s+/g, '')
         : null;
+
       const appointments = selectedDay.map((day) => {
         const monthIndex = new Date().getMonth() + day.monthOffset;
         const monthName = new Date(2023, monthIndex).toLocaleString('es-ES', { month: 'long' }).toLowerCase();
@@ -53,9 +59,11 @@ const useConfirmation = (
           therapyType: normalizedTherapyType,
         };
       });
+
       if (typeof onDateSelection === 'function') {
         onDateSelection(appointments);
       }
+
       if (collectionName === 'pros') {
         const userData = userSnap.data();
         const existingHorarios = userData.horarios || {};
@@ -91,7 +99,11 @@ const useConfirmation = (
         console.log('Horarios guardados en Firestore:', existingHorarios);
       } else if (collectionName === 'users') {
         const userData = userSnap.data();
-        const existingCitas = userData.Citas || [];
+        let existingCitas = userData.Citas || [];
+
+        // Eliminar citas con estado "pending"
+        existingCitas = removePendingCitas(existingCitas);
+
         const newCita = {
           uid: uuidv4(),
           date: selectedDay[0].date,
@@ -102,11 +114,13 @@ const useConfirmation = (
           therapyType: normalizedTherapyType,
           status: 'pending',
         };
+
         const updatedCitas = [...existingCitas, newCita];
         await updateDoc(userRef, { Citas: updatedCitas });
         console.log('Cita guardada en Firestore:', newCita);
         setCurrentAppointmentId(newCita.uid);
       }
+
       Swal.fire({
         icon: 'success',
         title: '¡Éxito!',
@@ -115,8 +129,14 @@ const useConfirmation = (
       setIsConfirmed(true);
     } catch (error) {
       console.error('Error al confirmar horarios:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al confirmar los horarios.',
+      });
     }
   };
+
   const handleEditHours = async () => {
     try {
       const userRef = doc(db, collectionName, currentUser.uid);
@@ -128,9 +148,9 @@ const useConfirmation = (
       }
 
       const userData = userSnap.data();
-      const existingCitas = userData.Citas || [];
+      let existingCitas = userData.Citas || [];
+      existingCitas = removePendingCitas(existingCitas);
 
-      // Buscar la cita actual por su uid
       const citaIndex = existingCitas.findIndex((cita) => cita.uid === currentAppointmentId);
 
       if (citaIndex === -1) {
@@ -138,11 +158,10 @@ const useConfirmation = (
         return;
       }
 
-      // Actualizar la cita existente
       const updatedCita = {
         ...existingCitas[citaIndex],
-        time: formatTime(selectedTime), // Actualizar la hora
-        status: 'edited', // Cambiar el estado a "edited"
+        time: formatTime(selectedTime),
+        status: 'edited',
       };
 
       const updatedCitas = [
@@ -154,10 +173,19 @@ const useConfirmation = (
       await updateDoc(userRef, { Citas: updatedCitas });
       console.log('Cita actualizada en Firestore:', updatedCita);
 
-      alert('Cita actualizada correctamente.');
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Cita actualizada correctamente.',
+      });
       setIsConfirmed(false);
     } catch (error) {
       console.error('Error al actualizar la cita:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al actualizar la cita.',
+      });
     }
   };
 
