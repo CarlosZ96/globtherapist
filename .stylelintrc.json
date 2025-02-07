@@ -1,5 +1,6 @@
 {
   "extends": "stylelint-config-standard-scss",
+  "configBasedir": ".",
   "rules": {
     "indentation": 4,
     "number-leading-zero": "always",
