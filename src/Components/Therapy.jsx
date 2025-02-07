@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import { getAuth } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -55,9 +56,14 @@ const Therapy = () => {
     }
     return `${String(normalizedHour).padStart(2, '0')}:${minute}`;
   };
+
   const handleProSelection = async (proId) => {
     if (!selectedAppointments.length || !formData.therapyType) {
-      alert('Por favor, selecciona un día y un tipo de terapia antes de ver los profesionales.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Selección incompleta',
+        text: 'Por favor, selecciona un día y un tipo de terapia antes de ver los profesionales.',
+      });
       return;
     }
     try {
@@ -74,7 +80,11 @@ const Therapy = () => {
       const { horarios, terapias } = proData;
       const normalizedTerapias = terapias?.map((t) => normalizeText(t));
       if (!normalizedTerapias?.includes(normalizedTherapyType)) {
-        alert('El profesional no ofrece este tipo de terapia.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'El profesional no ofrece este tipo de terapia.',
+        });
         return;
       }
       const normalizedSelectedTime = normalizeTime(selectedAppointment.time);
@@ -91,14 +101,23 @@ const Therapy = () => {
 
       if (hasAvailability) {
         setSelectedPro(proId);
-        alert('Profesional disponible para la cita seleccionada.');
+        Swal.fire({
+          icon: 'success',
+          title: 'Disponible',
+          text: 'Profesional disponible para la cita seleccionada.',
+        });
       } else {
-        alert('El profesional no tiene disponibilidad en la fecha y hora seleccionadas.');
+        Swal.fire({
+          icon: 'error',
+          title: 'No disponible',
+          text: 'El profesional no tiene disponibilidad en la fecha y hora seleccionadas.',
+        });
       }
     } catch (error) {
       console.error('Error al verificar disponibilidad del profesional:', error);
     }
   };
+
   const [errors, setErrors] = useState({
     name: '',
     phone: '',
@@ -168,7 +187,11 @@ const Therapy = () => {
 
     if (!currentUser) {
       console.error('Usuario no autenticado.');
-      alert('Debes iniciar sesión para agendar una cita.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Debes iniciar sesión para agendar una cita.',
+      });
       return;
     }
 
@@ -178,7 +201,11 @@ const Therapy = () => {
     }
 
     if (!selectedPro) {
-      alert('Por favor, selecciona un profesional.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Selección incompleta',
+        text: 'Por favor, selecciona un profesional.',
+      });
       return;
     }
 
@@ -209,7 +236,11 @@ const Therapy = () => {
       const pro = pros.find((p) => p.id === selectedPro);
       if (!pro) {
         console.error('Profesional no encontrado.');
-        alert('El profesional seleccionado no existe.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'El profesional seleccionado no existe.',
+        });
         return;
       }
 
@@ -227,7 +258,11 @@ const Therapy = () => {
 
       await updateProMisCitas(pro.id, newMisCitas);
 
-      alert('¡Formulario enviado exitosamente!');
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Formulario enviado exitosamente.',
+      });
 
       setFormData({
         name: '',
@@ -241,7 +276,11 @@ const Therapy = () => {
       setShowAppointmentError(false);
     } catch (error) {
       console.error('Error al actualizar los datos en Firestore:', error);
-      alert('Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo.',
+      });
     }
   };
 
