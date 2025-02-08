@@ -2,7 +2,9 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import Swal from 'sweetalert2';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import {
+  doc, getDoc, updateDoc, setDoc,
+} from 'firebase/firestore';
 import { db } from '../firebase';
 
 const useConfirmation = (
@@ -36,6 +38,7 @@ const useConfirmation = (
     try {
       const userRef = doc(db, collectionName, currentUser.uid);
       const userSnap = await getDoc(userRef);
+
       if (!userSnap.exists()) {
         console.error('El usuario no existe en Firestore.');
         return;
@@ -67,35 +70,50 @@ const useConfirmation = (
       if (collectionName === 'pros') {
         const userData = userSnap.data();
         const existingHorarios = userData.horarios || {};
+
         selectedDay.forEach((day) => {
           const monthIndex = new Date().getMonth() + day.monthOffset;
           const monthName = new Date(2023, monthIndex).toLocaleString('es-ES', { month: 'long' }).toLowerCase();
+
+          // Crear los timeslots para el día seleccionado
           const timeslots = [];
           for (let hour = startTime; hour < endTime; hour++) {
             const startHourFormatted = formatTime(hour);
             const endHourFormatted = formatTime(hour + 1);
             timeslots.push(`${startHourFormatted}-${endHourFormatted}`);
           }
+
+          // Crear el nuevo día con los timeslots
           const newDay = {
             date: day.date,
             Timeslots: timeslots,
           };
+
+          // Si el mes ya existe en horarios, actualizarlo
           if (existingHorarios[monthName]) {
             const existingDays = existingHorarios[monthName];
             const existingDayIndex = existingDays.findIndex((d) => d.date === newDay.date);
+
             if (existingDayIndex !== -1) {
+              // Si el día ya existe, actualizar los timeslots
               existingDays[existingDayIndex].Timeslots = [
                 ...existingDays[existingDayIndex].Timeslots,
                 ...newDay.Timeslots,
               ];
             } else {
+              // Si el día no existe, agregarlo al mes
               existingHorarios[monthName].push(newDay);
             }
           } else {
+            // Si el mes no existe, crearlo con el nuevo día
             existingHorarios[monthName] = [newDay];
           }
         });
-        await updateDoc(userRef, { horarios: existingHorarios });
+
+        // Guardar los horarios actualizados en Firestore
+        await setDoc(userRef, { horarios: existingHorarios }, { merge: true });
+        console.log('Usuario actual:', currentUser);
+        console.log('ID del usuario actual:', currentUser.uid);
         console.log('Horarios guardados en Firestore:', existingHorarios);
       } else if (collectionName === 'users') {
         const userData = userSnap.data();
