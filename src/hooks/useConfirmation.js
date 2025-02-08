@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import Swal from 'sweetalert2';
 import {
-  doc, getDoc, updateDoc, setDoc,
+  doc, getDoc, updateDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -111,7 +111,7 @@ const useConfirmation = (
         });
 
         // Guardar los horarios actualizados en Firestore
-        await setDoc(userRef, { horarios: existingHorarios }, { merge: true });
+        await updateDoc(userRef, { horarios: existingHorarios });
         console.log('Usuario actual:', currentUser);
         console.log('ID del usuario actual:', currentUser.uid);
         console.log('Horarios guardados en Firestore:', existingHorarios);
