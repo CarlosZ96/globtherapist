@@ -100,8 +100,6 @@ const useConfirmation = (
       } else if (collectionName === 'users') {
         const userData = userSnap.data();
         let existingCitas = userData.Citas || [];
-
-        // Eliminar citas con estado "pending"
         existingCitas = removePendingCitas(existingCitas);
 
         const newCita = {
