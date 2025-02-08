@@ -57,7 +57,7 @@ const ProData = () => {
 
     const hdvUrl = await handleFileUpload(hdvFile, 'hdvFiles');
     const profileImageUrl = await handleFileUpload(profileImage, 'profileImages');
-    const professionalCardUrl = await handleFileUpload(professionalCardFile, 'professionalCards'); // Subir tarjeta profesional
+    const professionalCardUrl = await handleFileUpload(professionalCardFile, 'professionalCards');
     const certificateUrls = await Promise.all(certificateFiles.map((file) => handleFileUpload(file, 'certificates')));
 
     console.log('HDV URL:', hdvUrl);

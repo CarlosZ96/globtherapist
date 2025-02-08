@@ -103,7 +103,7 @@ const CreatePro = ({ toggleCreatePro }) => {
         email: formData.email,
         telefono: formData.phone,
         terapias: normalizedTherapies,
-        horarios: [],
+        horarios: {},
       });
 
       Swal.fire({
