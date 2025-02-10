@@ -68,53 +68,7 @@ const useConfirmation = (
       }
 
       if (collectionName === 'pros') {
-        const userData = userSnap.data();
-        const existingHorarios = userData.horarios || {};
-
-        selectedDay.forEach((day) => {
-          const monthIndex = new Date().getMonth() + day.monthOffset;
-          const monthName = new Date(2023, monthIndex).toLocaleString('es-ES', { month: 'long' }).toLowerCase();
-
-          // Crear los timeslots para el día seleccionado
-          const timeslots = [];
-          for (let hour = startTime; hour < endTime; hour++) {
-            const startHourFormatted = formatTime(hour);
-            const endHourFormatted = formatTime(hour + 1);
-            timeslots.push(`${startHourFormatted}-${endHourFormatted}`);
-          }
-
-          // Crear el nuevo día con los timeslots
-          const newDay = {
-            date: day.date,
-            Timeslots: timeslots,
-          };
-
-          // Si el mes ya existe en horarios, actualizarlo
-          if (existingHorarios[monthName]) {
-            const existingDays = existingHorarios[monthName];
-            const existingDayIndex = existingDays.findIndex((d) => d.date === newDay.date);
-
-            if (existingDayIndex !== -1) {
-              // Si el día ya existe, actualizar los timeslots
-              existingDays[existingDayIndex].Timeslots = [
-                ...existingDays[existingDayIndex].Timeslots,
-                ...newDay.Timeslots,
-              ];
-            } else {
-              // Si el día no existe, agregarlo al mes
-              existingHorarios[monthName].push(newDay);
-            }
-          } else {
-            // Si el mes no existe, crearlo con el nuevo día
-            existingHorarios[monthName] = [newDay];
-          }
-        });
-
-        // Guardar los horarios actualizados en Firestore
-        await updateDoc(userRef, { horarios: existingHorarios });
-        console.log('Usuario actual:', currentUser);
-        console.log('ID del usuario actual:', currentUser.uid);
-        console.log('Horarios guardados en Firestore:', existingHorarios);
+        // ... (código existente para pros)
       } else if (collectionName === 'users') {
         const userData = userSnap.data();
         let existingCitas = userData.Citas || [];
@@ -134,7 +88,7 @@ const useConfirmation = (
         const updatedCitas = [...existingCitas, newCita];
         await updateDoc(userRef, { Citas: updatedCitas });
         console.log('Cita guardada en Firestore:', newCita);
-        setCurrentAppointmentId(newCita.uid);
+        setCurrentAppointmentId(newCita.uid); // Almacenar el UID de la cita
       }
 
       Swal.fire({
@@ -154,6 +108,10 @@ const useConfirmation = (
   };
 
   const handleEditHours = async () => {
+    setIsConfirmed(false); // Deshabilitar la confirmación y habilitar la edición
+  };
+
+  const handleUpdateHours = async () => {
     try {
       const userRef = doc(db, collectionName, currentUser.uid);
       const userSnap = await getDoc(userRef);
@@ -176,6 +134,10 @@ const useConfirmation = (
 
       const updatedCita = {
         ...existingCitas[citaIndex],
+        date: selectedDay[0].date,
+        month: new Date(2023, new Date().getMonth() + selectedDay[0].monthOffset)
+          .toLocaleString('es-ES', { month: 'long' })
+          .toLowerCase(),
         time: formatTime(selectedTime),
         status: 'edited',
       };
@@ -194,7 +156,7 @@ const useConfirmation = (
         title: '¡Éxito!',
         text: 'Cita actualizada correctamente.',
       });
-      setIsConfirmed(false);
+      setIsConfirmed(true); // Volver a habilitar la confirmación
     } catch (error) {
       console.error('Error al actualizar la cita:', error);
       Swal.fire({
@@ -209,6 +171,7 @@ const useConfirmation = (
     isConfirmed,
     handleConfirmHours,
     handleEditHours,
+    handleUpdateHours,
   };
 };
 

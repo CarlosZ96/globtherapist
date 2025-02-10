@@ -80,6 +80,10 @@ const Calendar = ({
     }
   };
 
+  const handleEditClick = () => {
+    handleEditHours();
+  };
+
   const handleProClick = (proId) => {
     setSelectedPro((prev) => (prev === proId ? null : proId));
     onProSelection(proId);
@@ -212,7 +216,7 @@ const Calendar = ({
             <h3>{collectionName === 'pros' ? 'Confirmar mis horarios' : 'Confirmar hora'}</h3>
           </button>
           {isConfirmed && (
-            <button type="button" className="Edit-Hours" onClick={handleEditHours}>
+            <button type="button" className="Edit-Hours" onClick={handleEditClick}>
               <h3>Editar</h3>
             </button>
           )}
