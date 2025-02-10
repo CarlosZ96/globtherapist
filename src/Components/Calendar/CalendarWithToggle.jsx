@@ -17,7 +17,7 @@ const Calendar = ({
     days, loading, monthName, monthOffset, changeMonth,
   } = useMonthData();
   const { currentUser } = useAuth();
-
+  const [showPros, setShowPros] = useState(false);
   const normalizeText = (text) => {
     if (!text) return '';
     return text
@@ -82,6 +82,16 @@ const Calendar = ({
 
   const handleEditClick = () => {
     handleEditHours();
+    setShowPros(false);
+  };
+
+  const handleShowPros = () => {
+    console.log('isConfirmed:', isConfirmed);
+    console.log('currentUser:', currentUser);
+    console.log('therapyType:', therapyType);
+    console.log('therapyType normalizado:', normalizedTherapyType);
+    filterDates(currentUser, normalizedTherapyType);
+    setShowPros(true); // Mostrar los pros al pulsar "Ver pros"
   };
 
   const handleProClick = (proId) => {
@@ -231,39 +241,40 @@ const Calendar = ({
           <button
             type="button"
             disabled={!isConfirmed}
-            onClick={() => {
-              console.log('isConfirmed:', isConfirmed);
-              console.log('currentUser:', currentUser);
-              console.log('therapyType:', therapyType);
-              console.log('therapyType normalizado:', normalizedTherapyType);
-              filterDates(currentUser, normalizedTherapyType);
-            }}
+            onClick={handleShowPros}
           >
             <h3>Ver pros</h3>
           </button>
         </div>
         <div className="pro-img-def">
-          {availablePros.map((pro) => (
-            <div key={pro.id} className="pro-item">
-              <button
-                type="button"
-                className={`user-info-comt ${selectedPro === pro.id ? 'active' : 'inactive'}`}
-                onClick={() => handleProClick(pro.id)}
-              >
-                <div className="user-image-comt">
-                  <img src={User} alt="user" className="pro-img" />
+          {showPros && ( // Mostrar los pros solo si showPros es true
+            <div className="pro-img-def">
+              {availablePros.map((pro) => (
+                <div key={pro.id} className="pro-item">
+                  <button
+                    type="button"
+                    className={`user-info-comt ${selectedPro === pro.id ? 'active' : 'inactive'}`}
+                    onClick={() => handleProClick(pro.id)}
+                  >
+                    <div className="user-image-comt">
+                      <img src={User} alt="user" className="pro-img" />
+                    </div>
+                    <h3>{pro.name}</h3>
+                  </button>
+                  <button
+                    type="button"
+                    className="show-modal-btn"
+                    onClick={() => handleShowDetails(pro.id)}
+                  >
+                    Ver detalles
+                  </button>
                 </div>
-                <h3>{pro.name}</h3>
-              </button>
-              <button
-                type="button"
-                className="show-modal-btn"
-                onClick={() => handleShowDetails(pro.id)}
-              >
-                Ver detalles
-              </button>
+              ))}
+              {selectedProId && (
+                <ProModal proId={selectedProId} onClose={handleCloseModal} />
+              )}
             </div>
-          ))}
+          )}
           {selectedProId && (
             <ProModal proId={selectedProId} onClose={handleCloseModal} />
           )}
