@@ -183,9 +183,11 @@ const Calendar = ({
       <hr className="date-blue-line" />
       <div className="Hours-cont">
         <div className="Hours-selector-cont">
-          <div className="Hours-lunch-btn">
-            <button type="button">lunch</button>
-          </div>
+          {collectionName === 'pros' && (
+            <div className="Hours-lunch-btn">
+              <button type="button">lunch</button>
+            </div>
+          )}
           {collectionName === 'pros' ? (
             <div className="Hours-selector">
               <div className="Time-selector">

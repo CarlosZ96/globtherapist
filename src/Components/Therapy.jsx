@@ -219,6 +219,8 @@ const Therapy = () => {
         description: formData.description,
         status: 'confirmed',
       }));
+
+      // Guardar la cita para el usuario
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnap = await getDoc(userRef);
 
@@ -233,17 +235,48 @@ const Therapy = () => {
 
       await updateDoc(userRef, { Citas: newCitas });
       console.log('Citas guardadas en Firestore:', newCitas);
-      const pro = pros.find((p) => p.id === selectedPro);
-      if (!pro) {
+
+      // Actualizar los horarios del profesional
+      const proRef = doc(db, 'pros', selectedPro);
+      const proSnap = await getDoc(proRef);
+
+      if (!proSnap.exists()) {
         console.error('Profesional no encontrado.');
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'El profesional seleccionado no existe.',
-        });
         return;
       }
 
+      const proData = proSnap.data();
+      const { horarios } = proData;
+
+      // Eliminar la hora seleccionada del profesional
+      const selectedAppointment = selectedAppointments[0];
+      const normalizedSelectedTime = normalizeTime(selectedAppointment.time);
+
+      if (horarios && horarios[selectedAppointment.month]) {
+        const updatedDays = horarios[selectedAppointment.month].map((day) => {
+          if (day.date === selectedAppointment.date) {
+            const updatedTimeslots = day.Timeslots.filter((timeslot) => {
+              const [startTime] = timeslot.split('-');
+              const normalizedStartTime = normalizeTime(startTime);
+              return normalizedStartTime !== normalizedSelectedTime;
+            });
+
+            return {
+              ...day,
+              Timeslots: updatedTimeslots,
+            };
+          }
+          return day;
+        });
+
+        horarios[selectedAppointment.month] = updatedDays;
+
+        // Actualizar los horarios del profesional en Firestore
+        await updateDoc(proRef, { horarios });
+        console.log('Horarios del profesional actualizados:', horarios);
+      }
+
+      // Guardar la cita para el profesional
       const newMisCitas = selectedAppointments.map((app) => ({
         date: app.date,
         time: app.time,
@@ -256,7 +289,7 @@ const Therapy = () => {
         status: 'pending',
       }));
 
-      await updateProMisCitas(pro.id, newMisCitas);
+      await updateProMisCitas(selectedPro, newMisCitas);
 
       Swal.fire({
         icon: 'success',
