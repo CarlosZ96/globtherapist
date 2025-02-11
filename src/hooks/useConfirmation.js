@@ -156,7 +156,7 @@ const useConfirmation = (
         title: '¡Éxito!',
         text: 'Cita actualizada correctamente.',
       });
-      setIsConfirmed(true); // Volver a habilitar la confirmación
+      setIsConfirmed(true);
     } catch (error) {
       console.error('Error al actualizar la cita:', error);
       Swal.fire({
