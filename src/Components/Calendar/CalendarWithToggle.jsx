@@ -18,16 +18,21 @@ const Calendar = ({
   } = useMonthData();
   const { currentUser } = useAuth();
   const [showPros, setShowPros] = useState(false);
+
   const normalizeText = (text) => {
     if (!text) return '';
-    return text
+    const normalized = text
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/\s+/g, '');
+    console.log(`Normalizing text: "${text}" -> "${normalized}"`);
+    return normalized;
   };
 
   const normalizedTherapyType = normalizeText(therapyType);
+  console.log('Therapy type passed to Calendar (normalized):', normalizedTherapyType);
+
   const {
     startTime,
     endTime,
@@ -52,11 +57,7 @@ const Calendar = ({
 
   const [selectedDay, setSelectedDay] = useState([]);
 
-  const {
-    isConfirmed,
-    handleConfirmHours,
-    handleEditHours,
-  } = useConfirmation(
+  const { isConfirmed, handleConfirmHours, handleEditHours } = useConfirmation(
     collectionName,
     currentUser,
     selectedDay,
@@ -69,11 +70,14 @@ const Calendar = ({
   );
 
   const handleDayClick = (day) => {
+    console.log('Day clicked:', day);
     if (collectionName === 'users') {
       setSelectedDay([{ date: day.date, monthOffset }]);
     } else {
       setSelectedDay((prev) => {
-        return prev.some((d) => d.date === day.date && d.monthOffset === monthOffset)
+        const exists = prev.some((d) => d.date === day.date && d.monthOffset === monthOffset);
+        console.log(`Day ${day.date} exists in selectedDay:`, exists);
+        return exists
           ? prev.filter((d) => !(d.date === day.date && d.monthOffset === monthOffset))
           : [...prev, { date: day.date, monthOffset }];
       });
@@ -81,39 +85,48 @@ const Calendar = ({
   };
 
   const handleEditClick = () => {
+    console.log('Editing hours...');
     handleEditHours();
     setShowPros(false);
   };
 
   const handleShowPros = () => {
+    console.log('handleShowPros invoked');
     console.log('isConfirmed:', isConfirmed);
     console.log('currentUser:', currentUser);
-    console.log('therapyType:', therapyType);
-    console.log('therapyType normalizado:', normalizedTherapyType);
+    console.log('Original therapyType:', therapyType);
+    console.log('Normalized therapyType:', normalizedTherapyType);
     filterDates(currentUser, normalizedTherapyType);
-    setShowPros(true); // Mostrar los pros al pulsar "Ver pros"
+    setShowPros(true);
   };
 
   const handleProClick = (proId) => {
-    setSelectedPro((prev) => (prev === proId ? null : proId));
+    console.log('Professional button clicked for proId:', proId);
+    setSelectedPro((prev) => {
+      const newValue = prev === proId ? null : proId;
+      console.log('Updated selectedPro:', newValue);
+      return newValue;
+    });
     onProSelection(proId);
   };
 
   const handleShowDetails = (proId) => {
+    console.log('Show details for proId:', proId);
     setSelectedProId(proId);
   };
 
   const handleCloseModal = () => {
+    console.log('Closing modal');
     setSelectedProId(null);
   };
 
   useEffect(() => {
-    console.log('Componente Calendar renderizado');
+    console.log('Calendar component rendered');
     console.log('therapyType:', therapyType);
-    console.log('therapyType normalizado:', normalizedTherapyType);
+    console.log('Normalized therapyType:', normalizedTherapyType);
     console.log('isConfirmed:', isConfirmed);
-    console.log('availablePros:', availablePros);
-    console.log('selectedDay:', selectedDay);
+    console.log('Available pros:', availablePros);
+    console.log('Selected day:', selectedDay);
   }, [therapyType, isConfirmed, availablePros, selectedDay]);
 
   if (loading) {
@@ -249,7 +262,7 @@ const Calendar = ({
           </button>
         </div>
         <div className="pro-img-def">
-          {showPros && ( // Mostrar los pros solo si showPros es true
+          {showPros && (
             <div className="pro-img-def">
               {availablePros.map((pro) => (
                 <div key={pro.id} className="pro-item">

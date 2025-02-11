@@ -12,10 +12,7 @@ const Therapy = () => {
   const auth = getAuth();
   const user = auth.currentUser;
   const {
-    currentUser,
-    updateUserCitas,
-    updateProMisCitas,
-    pros,
+    currentUser, updateUserCitas, updateProMisCitas, pros,
   } = useAuth();
 
   const normalizeText = (text) => {
@@ -68,7 +65,10 @@ const Therapy = () => {
     }
     try {
       const normalizedTherapyType = normalizeText(formData.therapyType);
+      console.log('Normalized therapyType from formData:', normalizedTherapyType);
       const selectedAppointment = selectedAppointments[0];
+      console.log('Selected appointment:', selectedAppointment);
+
       const proDocRef = doc(db, 'pros', proId);
       const proDoc = await getDoc(proDocRef);
 
@@ -77,9 +77,17 @@ const Therapy = () => {
         return;
       }
       const proData = proDoc.data();
+      console.log('Professional data:', proData);
       const { horarios, terapias } = proData;
-      const normalizedTerapias = terapias?.map((t) => normalizeText(t));
+      const normalizedTerapias = terapias?.map((t) => {
+        const normT = normalizeText(t);
+        console.log(`Therapy "${t}" normalized as:`, normT);
+        return normT;
+      });
+      console.log('Normalized therapies for professional:', normalizedTerapias);
+
       if (!normalizedTerapias?.includes(normalizedTherapyType)) {
+        console.error('Therapy type mismatch:', { normalizedTherapyType, normalizedTerapias });
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -88,16 +96,25 @@ const Therapy = () => {
         return;
       }
       const normalizedSelectedTime = normalizeTime(selectedAppointment.time);
+      console.log('Normalized selected time:', normalizedSelectedTime);
+      console.log('Horarios from professional:', horarios);
+
       const hasAvailability = horarios?.[selectedAppointment.month]?.some((day) => {
-        return (
-          day.date === selectedAppointment.date
-          && day.Timeslots.some((timeslot) => {
-            const [startTime] = timeslot.split('-');
-            const normalizedStartTime = normalizeTime(startTime);
-            return normalizedStartTime === normalizedSelectedTime;
-          })
-        );
+        console.log('Checking day:', day);
+        if (day.date !== selectedAppointment.date) {
+          console.log(`Day ${day.date} does not match selected appointment date ${selectedAppointment.date}`);
+          return false;
+        }
+        const timeSlotMatch = day.Timeslots.some((timeslot) => {
+          const [startTime] = timeslot.split('-');
+          const normalizedStartTime = normalizeTime(startTime);
+          console.log(`Comparing timeslot: normalizedStartTime=${normalizedStartTime} vs normalizedSelectedTime=${normalizedSelectedTime}`);
+          return normalizedStartTime === normalizedSelectedTime;
+        });
+        console.log('Result for day', day.date, ':', timeSlotMatch);
+        return timeSlotMatch;
       });
+      console.log('Availability check result:', hasAvailability);
 
       if (hasAvailability) {
         setSelectedPro(proId);
@@ -174,6 +191,7 @@ const Therapy = () => {
   };
 
   const handleTherapyTypeClick = (type) => {
+    console.log('Therapy type selected:', type);
     setFormData({ ...formData, therapyType: type });
   };
 
@@ -211,6 +229,7 @@ const Therapy = () => {
 
     try {
       const normalizedTherapyType = normalizeText(formData.therapyType);
+      console.log('Normalized therapyType for saving appointment:', normalizedTherapyType);
       const updatedCitas = selectedAppointments.map((app) => ({
         date: app.date,
         time: app.time,
@@ -251,6 +270,7 @@ const Therapy = () => {
       // Eliminar la hora seleccionada del profesional
       const selectedAppointment = selectedAppointments[0];
       const normalizedSelectedTime = normalizeTime(selectedAppointment.time);
+      console.log('Normalized selected time for updating professional:', normalizedSelectedTime);
 
       if (horarios && horarios[selectedAppointment.month]) {
         const updatedDays = horarios[selectedAppointment.month].map((day) => {
@@ -270,10 +290,10 @@ const Therapy = () => {
         });
 
         horarios[selectedAppointment.month] = updatedDays;
+        console.log('Updated horarios for professional:', horarios);
 
         // Actualizar los horarios del profesional en Firestore
         await updateDoc(proRef, { horarios });
-        console.log('Horarios del profesional actualizados:', horarios);
       }
 
       // Guardar la cita para el profesional
