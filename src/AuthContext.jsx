@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUserCitas,
     updateProMisCitas,
-  }), [currentUser, userData, currentPro, pros, isAdmin]);
+  }), [currentUser, userData, currentPro, pros, isAdmin, updateUserCitas]);
 
   return (
     <AuthContext.Provider value={value}>
