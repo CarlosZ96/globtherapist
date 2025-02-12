@@ -25,6 +25,14 @@ const useConfirmation = (
     return citas.filter((cita) => cita.status !== 'pending');
   };
 
+  const generateTimeSlots = (start, end) => {
+    const timeSlots = [];
+    for (let i = start; i < end; i++) {
+      timeSlots.push(`${formatTime(i)}-${formatTime(i + 1)}`);
+    }
+    return timeSlots;
+  };
+
   const handleConfirmHours = async () => {
     console.log('handleConfirmHours invoked');
     console.log('selectedDay:', selectedDay);
@@ -47,19 +55,21 @@ const useConfirmation = (
         : null;
       console.log('Normalized therapyType:', normalizedTherapyType);
 
+      const timeSlots = generateTimeSlots(startTime, endTime);
+
       const newCita = {
-        uid: uuidv4(), // Genera un ID único para la cita
+        uid: uuidv4(),
         date: selectedDay[0].date,
         month: new Date(2023, new Date().getMonth() + selectedDay[0].monthOffset)
           .toLocaleString('es-ES', { month: 'long' })
           .toLowerCase(),
         time: formatTime(selectedTime),
         therapyType: normalizedTherapyType,
-        status: 'pending', // Estado por defecto
-        proName: '', // Puedes agregar el nombre del profesional si lo tienes
+        status: 'pending',
+        proName: '',
+        timeSlots,
       };
 
-      // Actualiza la cita global en el contexto
       setCitaGlobal(newCita);
 
       console.log('Nueva cita global:', newCita);
