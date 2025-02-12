@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import {
-  collection, doc, getDocs, getDoc,
+  collection, getDocs,
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useAuth } from '../AuthContext';
 
 const normalizeText = (text) => {
   const normalized = text
@@ -15,35 +16,21 @@ const normalizeText = (text) => {
 };
 
 const usePros = () => {
+  const { citaGlobal } = useAuth();
   const [availablePros, setAvailablePros] = useState([]);
   const [selectedPro, setSelectedPro] = useState(null);
   const [selectedProId, setSelectedProId] = useState(null);
 
   const filterDates = async (currentUser, therapyType) => {
     try {
-      if (!currentUser) {
-        console.error('No hay usuario logueado.');
+      if (!citaGlobal) {
+        console.error('No hay cita seleccionada.');
         return;
       }
 
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      const userDocSnap = await getDoc(userDocRef);
+      const { month, date, time } = citaGlobal;
+      console.log('Cita global:', { month, date, time });
 
-      if (!userDocSnap.exists()) {
-        console.error('Usuario no encontrado en Firestore.');
-        return;
-      }
-
-      const userData = userDocSnap.data();
-      const firstAppointment = userData.Citas?.[0];
-
-      if (!firstAppointment) {
-        console.log('El usuario no tiene citas.');
-        return;
-      }
-
-      const { month, date, time } = firstAppointment;
-      console.log('Cita del usuario:', { month, date, time });
       const prosCollectionRef = collection(db, 'pros');
       const prosQuerySnapshot = await getDocs(prosCollectionRef);
       const matchingPros = [];

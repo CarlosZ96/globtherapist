@@ -12,7 +12,7 @@ const Therapy = () => {
   const auth = getAuth();
   const user = auth.currentUser;
   const {
-    currentUser, updateUserCitas, updateProMisCitas, pros,
+    currentUser, updateUserCitas, updateProMisCitas, pros, citaGlobal,
   } = useAuth();
 
   const normalizeText = (text) => {
@@ -55,19 +55,27 @@ const Therapy = () => {
   };
 
   const handleProSelection = async (proId) => {
-    if (!selectedAppointments.length || !formData.therapyType) {
+    if (!citaGlobal) {
       Swal.fire({
         icon: 'warning',
-        title: 'Selección incompleta',
-        text: 'Por favor, selecciona un día y un tipo de terapia antes de ver los profesionales.',
+        title: 'Cita no seleccionada',
+        text: 'Por favor, selecciona una cita antes de ver los profesionales.',
       });
       return;
     }
+
+    if (!formData.therapyType) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Selección incompleta',
+        text: 'Por favor, selecciona un tipo de terapia antes de ver los profesionales.',
+      });
+      return;
+    }
+
     try {
       const normalizedTherapyType = normalizeText(formData.therapyType);
       console.log('Normalized therapyType from formData:', normalizedTherapyType);
-      const selectedAppointment = selectedAppointments[0];
-      console.log('Selected appointment:', selectedAppointment);
 
       const proDocRef = doc(db, 'pros', proId);
       const proDoc = await getDoc(proDocRef);
@@ -76,6 +84,7 @@ const Therapy = () => {
         console.error('Profesional no encontrado.');
         return;
       }
+
       const proData = proDoc.data();
       console.log('Professional data:', proData);
       const { horarios, terapias } = proData;
@@ -95,14 +104,15 @@ const Therapy = () => {
         });
         return;
       }
-      const normalizedSelectedTime = normalizeTime(selectedAppointment.time);
+
+      const normalizedSelectedTime = normalizeTime(citaGlobal.time);
       console.log('Normalized selected time:', normalizedSelectedTime);
       console.log('Horarios from professional:', horarios);
 
-      const hasAvailability = horarios?.[selectedAppointment.month]?.some((day) => {
+      const hasAvailability = horarios?.[citaGlobal.month]?.some((day) => {
         console.log('Checking day:', day);
-        if (day.date !== selectedAppointment.date) {
-          console.log(`Day ${day.date} does not match selected appointment date ${selectedAppointment.date}`);
+        if (day.date !== citaGlobal.date) {
+          console.log(`Day ${day.date} does not match selected appointment date ${citaGlobal.date}`);
           return false;
         }
         const timeSlotMatch = day.Timeslots.some((timeslot) => {

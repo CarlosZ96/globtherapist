@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Swal from 'sweetalert2';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useAuth } from '../AuthContext';
 
 const useConfirmation = (
   collectionName,
@@ -16,8 +17,9 @@ const useConfirmation = (
   onDateSelection,
   formatTime,
 ) => {
+  const { setCitaGlobal } = useAuth();
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const [currentAppointmentId, setCurrentAppointmentId] = useState(null);
+  const [currentAppointmentId] = useState(null);
 
   const removePendingCitas = (citas) => {
     return citas.filter((cita) => cita.status !== 'pending');
@@ -36,16 +38,6 @@ const useConfirmation = (
     }
 
     try {
-      const userRef = doc(db, collectionName, currentUser.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        console.error('El usuario no existe en Firestore.');
-        return;
-      }
-      console.log('User data fetched:', userSnap.data());
-
-      // Normalizamos el therapyType (para usuarios, se remueven espacios)
       const normalizedTherapyType = collectionName === 'users'
         ? therapyType
           .toLowerCase()
@@ -55,55 +47,22 @@ const useConfirmation = (
         : null;
       console.log('Normalized therapyType:', normalizedTherapyType);
 
-      // Se crea un arreglo de citas basado en los días seleccionados
-      const appointments = selectedDay.map((day) => {
-        const monthIndex = new Date().getMonth() + day.monthOffset;
-        const monthName = new Date(2023, monthIndex).toLocaleString('es-ES', { month: 'long' }).toLowerCase();
-        const timeToUse = collectionName === 'users' ? formatTime(selectedTime) : formatTime(startTime);
-        console.log('Appointment for day:', {
-          date: day.date, month: monthName, time: timeToUse, therapyType: normalizedTherapyType,
-        });
-        return {
-          date: day.date,
-          month: monthName,
-          time: timeToUse,
-          therapyType: normalizedTherapyType,
-        };
-      });
+      const newCita = {
+        uid: uuidv4(), // Genera un ID único para la cita
+        date: selectedDay[0].date,
+        month: new Date(2023, new Date().getMonth() + selectedDay[0].monthOffset)
+          .toLocaleString('es-ES', { month: 'long' })
+          .toLowerCase(),
+        time: formatTime(selectedTime),
+        therapyType: normalizedTherapyType,
+        status: 'pending', // Estado por defecto
+        proName: '', // Puedes agregar el nombre del profesional si lo tienes
+      };
 
-      console.log('Appointments to save:', appointments);
-      if (typeof onDateSelection === 'function') {
-        onDateSelection(appointments);
-      }
+      // Actualiza la cita global en el contexto
+      setCitaGlobal(newCita);
 
-      if (collectionName === 'pros') {
-        // Si fuera la colección 'pros', se ejecutaría otra lógica (no modificada aquí)
-        console.log('Collection is "pros": se omite el guardado de cita para usuarios.');
-      } else if (collectionName === 'users') {
-        const userData = userSnap.data();
-        let existingCitas = userData.Citas || [];
-        console.log('Existing citas before filtering:', existingCitas);
-        existingCitas = removePendingCitas(existingCitas);
-        console.log('Existing citas after filtering pending:', existingCitas);
-
-        const newCita = {
-          uid: uuidv4(),
-          date: selectedDay[0].date,
-          month: new Date(2023, new Date().getMonth() + selectedDay[0].monthOffset)
-            .toLocaleString('es-ES', { month: 'long' })
-            .toLowerCase(),
-          time: formatTime(selectedTime),
-          therapyType: normalizedTherapyType,
-          status: 'pending',
-        };
-
-        console.log('New cita to be added:', newCita);
-        const updatedCitas = [...existingCitas, newCita];
-        console.log('Updated citas:', updatedCitas);
-        await updateDoc(userRef, { Citas: updatedCitas });
-        console.log('Cita guardada en Firestore:', newCita);
-        setCurrentAppointmentId(newCita.uid);
-      }
+      console.log('Nueva cita global:', newCita);
 
       Swal.fire({
         icon: 'success',

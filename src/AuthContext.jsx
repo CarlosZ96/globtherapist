@@ -19,6 +19,16 @@ export const AuthProvider = ({ children }) => {
   const [currentPro, setCurrentPro] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [citaGlobal, setCitaGlobal] = useState({
+    date: '',
+    month: '',
+    time: '',
+    therapyType: '',
+    description: '',
+    status: 'pending',
+    uid: '',
+    proName: '',
+  });
 
   const fetchUserData = async (user) => {
     try {
@@ -111,11 +121,13 @@ export const AuthProvider = ({ children }) => {
     currentPro,
     pros,
     isAdmin,
+    citaGlobal,
+    setCitaGlobal,
     login,
     logout,
     updateUserCitas,
     updateProMisCitas,
-  }), [currentUser, userData, currentPro, pros, isAdmin, updateUserCitas]);
+  }), [currentUser, userData, currentPro, pros, isAdmin, citaGlobal, updateUserCitas]);
 
   return (
     <AuthContext.Provider value={value}>

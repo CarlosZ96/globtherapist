@@ -16,6 +16,7 @@ const Calendar = ({
   const {
     days, loading, monthName, monthOffset, changeMonth,
   } = useMonthData();
+  const { citaGlobal } = useAuth();
   const { currentUser } = useAuth();
   const [showPros, setShowPros] = useState(false);
 
@@ -29,6 +30,12 @@ const Calendar = ({
     console.log(`Normalizing text: "${text}" -> "${normalized}"`);
     return normalized;
   };
+
+  useEffect(() => {
+    if (citaGlobal) {
+      console.log('Cita global actualizada:', citaGlobal);
+    }
+  }, [citaGlobal]);
 
   const normalizedTherapyType = normalizeText(therapyType);
   console.log('Therapy type passed to Calendar (normalized):', normalizedTherapyType);
