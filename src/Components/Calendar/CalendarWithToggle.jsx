@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
+import Swal from 'sweetalert2';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../AuthContext';
@@ -23,6 +24,8 @@ const Calendar = ({
   const [showPros, setShowPros] = useState(false);
   const [showLunchDialog, setShowLunchDialog] = useState(false);
   const [selectedLunchHour, setSelectedLunchHour] = useState(null);
+  const [currentSlotIndex, setCurrentSlotIndex] = useState(0);
+  const [showLunchButton, setShowLunchButton] = useState(true);
 
   const normalizeText = (text) => {
     if (!text) return '';
@@ -141,7 +144,11 @@ const Calendar = ({
 
   const handleConfirmLunch = async () => {
     if (!selectedLunchHour) {
-      alert('Por favor, selecciona una hora para el lunch.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Selección incompleta',
+        text: 'Por favor, selecciona una hora para el lunch.',
+      });
       return;
     }
 
@@ -168,14 +175,26 @@ const Calendar = ({
         // Actualizar el documento en Firestore
         await updateDoc(proRef, { horarios: updatedHorarios });
         console.log('Hora de lunch eliminada de todos los días:', selectedLunchHour);
-      }
 
-      // Cerrar el diálogo y limpiar la selección
-      setShowLunchDialog(false);
-      setSelectedLunchHour(null);
+        // Mostrar mensaje de éxito con Swal
+        Swal.fire({
+          icon: 'success',
+          title: '¡Éxito!',
+          text: `Hora de lunch "${selectedLunchHour}" eliminada correctamente.`,
+          confirmButtonText: 'OK',
+        }).then(() => {
+          setShowLunchButton(false); // Ocultar el botón "Lunch"
+          setShowLunchDialog(false); // Cerrar el diálogo de selección de hora
+          setSelectedLunchHour(null); // Limpiar la selección
+        });
+      }
     } catch (error) {
       console.error('Error al eliminar la hora de lunch:', error);
-      alert('Hubo un error al eliminar la hora de lunch. Por favor, inténtalo de nuevo.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al eliminar la hora de lunch. Por favor, inténtalo de nuevo.',
+      });
     }
   };
 
@@ -196,6 +215,16 @@ const Calendar = ({
   for (let i = startTime; i < endTime; i += 1) {
     timeSlots.push(`${formatTime(i)}-${formatTime(i + 1)}`);
   }
+
+  const currentSlots = timeSlots.slice(currentSlotIndex, currentSlotIndex + 3);
+
+  const handleNextSlots = () => {
+    setCurrentSlotIndex((prev) => Math.min(prev + 3, timeSlots.length - 3));
+  };
+
+  const handlePreviousSlots = () => {
+    setCurrentSlotIndex((prev) => Math.max(prev - 3, 0));
+  };
 
   return (
     <div className="DynamiCanlendar-cont">
@@ -304,7 +333,12 @@ const Calendar = ({
               <button type="button" className="Edit-Hours" onClick={handleEditClick}>
                 <h3>Editar</h3>
               </button>
-              <button type="button" className="Lunch-btn" onClick={handleLunchClick}>
+              <button
+                type="button"
+                className="Lunch-btn"
+                onClick={handleLunchClick}
+                style={{ display: showLunchButton ? 'block' : 'none' }} // Ocultar el botón "Lunch"
+              >
                 <h3>Lunch</h3>
               </button>
             </>
@@ -315,16 +349,34 @@ const Calendar = ({
         <div className="Lunch-dialog">
           <h3>Selecciona una hora para el lunch:</h3>
           <div className="Time-slots">
-            {timeSlots.map((slot) => (
-              <button
-                key={slot}
-                type="button"
-                className={`Time-slot ${selectedLunchHour === slot ? 'active' : ''}`} // Clase "active" condicional
-                onClick={() => handleLunchHourSelect(slot)} // Selecciona la hora
-              >
-                {slot}
-              </button>
-            ))}
+            <button
+              type="button"
+              className="Time-slots-nav"
+              onClick={handlePreviousSlots}
+              disabled={currentSlotIndex === 0}
+            >
+              -
+            </button>
+            <div className="Time-slots-container">
+              {currentSlots.map((slot) => (
+                <button
+                  key={slot}
+                  type="button"
+                  className={`Time-slot ${selectedLunchHour === slot ? 'active' : ''}`}
+                  onClick={() => handleLunchHourSelect(slot)}
+                >
+                  {slot}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="Time-slots-nav"
+              onClick={handleNextSlots}
+              disabled={currentSlotIndex >= timeSlots.length - 3}
+            >
+              +
+            </button>
           </div>
           <button type="button" onClick={handleConfirmLunch}>
             Confirmar Lunch
