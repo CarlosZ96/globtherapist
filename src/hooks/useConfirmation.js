@@ -36,6 +36,7 @@ const useConfirmation = (
   const handleConfirmHours = async () => {
     console.log('handleConfirmHours invoked');
     console.log('selectedDay:', selectedDay);
+
     if (!selectedDay.length) {
       Swal.fire({
         icon: 'warning',
@@ -53,9 +54,10 @@ const useConfirmation = (
           .replace(/[\u0300-\u036f]/g, '')
           .replace(/\s+/g, '')
         : null;
+
       console.log('Normalized therapyType:', normalizedTherapyType);
 
-      const timeSlots = generateTimeSlots(startTime, endTime);
+      const Timeslots = generateTimeSlots(startTime, endTime);
 
       const newCita = {
         uid: uuidv4(),
@@ -67,12 +69,48 @@ const useConfirmation = (
         therapyType: normalizedTherapyType,
         status: 'pending',
         proName: '',
-        timeSlots,
+        Timeslots,
       };
 
       setCitaGlobal(newCita);
-
       console.log('Nueva cita global:', newCita);
+
+      if (collectionName === 'pros') {
+        const proRef = doc(db, collectionName, currentUser.uid);
+        const proSnap = await getDoc(proRef);
+
+        if (!proSnap.exists()) {
+          console.log(`El profesional no existe en la colección ${collectionName}.`);
+          return;
+        }
+
+        const proData = proSnap.data();
+        const existingHorarios = proData.horarios || {};
+
+        // Construimos el objeto `updatedHorarios` con el nuevo formato
+        const updatedHorarios = { ...existingHorarios };
+
+        selectedDay.forEach((day) => {
+          const monthName = new Date(2023, new Date().getMonth() + day.monthOffset)
+            .toLocaleString('es-ES', { month: 'long' })
+            .toLowerCase();
+
+          if (!updatedHorarios[monthName]) {
+            updatedHorarios[monthName] = [];
+          }
+
+          // Creamos primero el objeto con `timeSlots`
+          const horarioObj = {
+            Timeslots, // Primero se guarda timeSlots
+            date: day.date, // Luego se guarda date
+          };
+
+          updatedHorarios[monthName].push(horarioObj);
+        });
+
+        await updateDoc(proRef, { horarios: updatedHorarios });
+        console.log('Horarios actualizados en Firestore:', updatedHorarios);
+      }
 
       Swal.fire({
         icon: 'success',
@@ -92,7 +130,7 @@ const useConfirmation = (
 
   const handleEditHours = async () => {
     console.log('handleEditHours invoked, setting isConfirmed to false');
-    setIsConfirmed(false); // Permite la edición al desconfirmar
+    setIsConfirmed(false);
   };
 
   const handleUpdateHours = async () => {

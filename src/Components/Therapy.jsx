@@ -206,6 +206,7 @@ const Therapy = () => {
   };
 
   const handleSubmit = async (event) => {
+    event.preventDefault();
     if (!validateForm()) {
       console.error('El formulario no es válido.');
       return;
@@ -268,8 +269,6 @@ const Therapy = () => {
 
       await updateDoc(userRef, { Citas: updatedCitas });
       console.log('Cita guardada en Firestore para el usuario:', userCita);
-
-      // Crear la cita para el profesional
       const proCita = {
         date: citaGlobal.date,
         month: citaGlobal.month,
@@ -280,13 +279,11 @@ const Therapy = () => {
         userEmail: currentUser.email,
         userName: formData.name,
         userPhone: formData.phone,
-        uid: citaGlobal.uid, // Mismo UID que la cita del usuario
+        uid: citaGlobal.uid,
       };
 
-      // Guardar la cita en el array MisCitas del profesional
       const proMisCitasRef = doc(db, 'pros', selectedPro);
       const proMisCitasSnap = await getDoc(proMisCitasRef);
-
       if (!proMisCitasSnap.exists()) {
         console.error('El profesional no existe en Firestore.');
         return;
@@ -298,15 +295,11 @@ const Therapy = () => {
 
       await updateDoc(proMisCitasRef, { MisCitas: updatedMisCitas });
       console.log('Cita guardada en Firestore para el profesional:', proCita);
-
-      // Mostrar mensaje de éxito
       Swal.fire({
         icon: 'success',
         title: '¡Éxito!',
         text: 'La cita ha sido agendada correctamente.',
       });
-
-      // Reiniciar todos los campos y estados
       setFormData({
         name: '',
         phone: '',
