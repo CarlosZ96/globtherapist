@@ -244,6 +244,28 @@ const Therapy = () => {
       const proDocRef = doc(db, 'pros', selectedPro);
       const proDoc = await getDoc(proDocRef);
       const proName = proDoc.data()?.Nombre || 'Profesional no encontrado';
+
+      // Eliminar el rango de horas seleccionado del array Timeslots
+      const proData = proDoc.data();
+      const horarios = proData.horarios || {};
+      const monthHorarios = horarios[citaGlobal.month] || [];
+
+      const updatedMonthHorarios = monthHorarios.map((day) => {
+        if (day.date === citaGlobal.date) {
+          const updatedTimeslots = day.Timeslots.filter((timeslot) => {
+            const [startTime] = timeslot.split('-');
+            return normalizeTime(startTime) !== normalizeTime(citaGlobal.time);
+          });
+          return { ...day, Timeslots: updatedTimeslots };
+        }
+        return day;
+      });
+
+      await updateDoc(proDocRef, {
+        horarios: {
+          ...horarios, [citaGlobal.month]: updatedMonthHorarios,
+        },
+      });
       const userCita = {
         date: citaGlobal.date,
         month: citaGlobal.month,
@@ -269,6 +291,7 @@ const Therapy = () => {
 
       await updateDoc(userRef, { Citas: updatedCitas });
       console.log('Cita guardada en Firestore para el usuario:', userCita);
+
       const proCita = {
         date: citaGlobal.date,
         month: citaGlobal.month,
@@ -289,17 +312,22 @@ const Therapy = () => {
         return;
       }
 
-      const proData = proMisCitasSnap.data();
-      const prevMisCitas = proData.MisCitas || [];
+      const proMisCitasData = proMisCitasSnap.data();
+      const prevMisCitas = proMisCitasData.MisCitas || [];
       const updatedMisCitas = [...prevMisCitas, proCita];
 
       await updateDoc(proMisCitasRef, { MisCitas: updatedMisCitas });
       console.log('Cita guardada en Firestore para el profesional:', proCita);
+
       Swal.fire({
         icon: 'success',
         title: '¡Éxito!',
         text: 'La cita ha sido agendada correctamente.',
+      }).then(() => {
+        // Recargar la página después de que el usuario pulse "OK"
+        window.location.reload();
       });
+
       setFormData({
         name: '',
         phone: '',
