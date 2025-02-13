@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 import { useAuth } from '../../AuthContext';
 import useMonthData from '../../hooks/useMonthData';
 import useDateTime from '../../hooks/useDateTime';
@@ -19,6 +21,8 @@ const Calendar = ({
   const { citaGlobal } = useAuth();
   const { currentUser } = useAuth();
   const [showPros, setShowPros] = useState(false);
+  const [showLunchDialog, setShowLunchDialog] = useState(false);
+  const [selectedLunchHour, setSelectedLunchHour] = useState(null);
 
   const normalizeText = (text) => {
     if (!text) return '';
@@ -127,6 +131,54 @@ const Calendar = ({
     setSelectedProId(null);
   };
 
+  const handleLunchClick = () => {
+    setShowLunchDialog(true);
+  };
+
+  const handleLunchHourSelect = (hour) => {
+    setSelectedLunchHour(hour);
+  };
+
+  const handleConfirmLunch = async () => {
+    if (!selectedLunchHour) {
+      alert('Por favor, selecciona una hora para el lunch.');
+      return;
+    }
+
+    try {
+      // Obtener la referencia del documento del profesional logueado
+      const proRef = doc(db, 'pros', currentUser.uid);
+      const proSnap = await getDoc(proRef);
+
+      if (proSnap.exists()) {
+        const proData = proSnap.data();
+        const updatedHorarios = { ...proData.horarios };
+
+        // Recorrer todos los meses y días para eliminar la hora seleccionada
+        Object.keys(updatedHorarios).forEach((month) => {
+          updatedHorarios[month] = updatedHorarios[month].map((day) => {
+            // Filtrar la hora seleccionada de los Timeslots
+            return {
+              ...day,
+              Timeslots: day.Timeslots.filter((slot) => slot !== selectedLunchHour),
+            };
+          });
+        });
+
+        // Actualizar el documento en Firestore
+        await updateDoc(proRef, { horarios: updatedHorarios });
+        console.log('Hora de lunch eliminada de todos los días:', selectedLunchHour);
+      }
+
+      // Cerrar el diálogo y limpiar la selección
+      setShowLunchDialog(false);
+      setSelectedLunchHour(null);
+    } catch (error) {
+      console.error('Error al eliminar la hora de lunch:', error);
+      alert('Hubo un error al eliminar la hora de lunch. Por favor, inténtalo de nuevo.');
+    }
+  };
+
   useEffect(() => {
     console.log('Calendar component rendered');
     console.log('therapyType:', therapyType);
@@ -138,6 +190,11 @@ const Calendar = ({
 
   if (loading) {
     return <div>Loading...</div>;
+  }
+
+  const timeSlots = [];
+  for (let i = startTime; i < endTime; i += 1) {
+    timeSlots.push(`${formatTime(i)}-${formatTime(i + 1)}`);
   }
 
   return (
@@ -203,11 +260,6 @@ const Calendar = ({
       <hr className="date-blue-line" />
       <div className="Hours-cont">
         <div className="Hours-selector-cont">
-          {collectionName === 'pros' && (
-            <div className="Hours-lunch-btn">
-              <button type="button">lunch</button>
-            </div>
-          )}
           {collectionName === 'pros' ? (
             <div className="Hours-selector">
               <div className="Time-selector">
@@ -248,12 +300,40 @@ const Calendar = ({
             <h3>{collectionName === 'pros' ? 'Confirmar mis horarios' : 'Confirmar hora'}</h3>
           </button>
           {isConfirmed && (
-            <button type="button" className="Edit-Hours" onClick={handleEditClick}>
-              <h3>Editar</h3>
-            </button>
+            <>
+              <button type="button" className="Edit-Hours" onClick={handleEditClick}>
+                <h3>Editar</h3>
+              </button>
+              <button type="button" className="Lunch-btn" onClick={handleLunchClick}>
+                <h3>Lunch</h3>
+              </button>
+            </>
           )}
         </div>
       </div>
+      {showLunchDialog && (
+        <div className="Lunch-dialog">
+          <h3>Selecciona una hora para el lunch:</h3>
+          <div className="Time-slots">
+            {timeSlots.map((slot) => (
+              <button
+                key={slot}
+                type="button"
+                className={`Time-slot ${selectedLunchHour === slot ? 'active' : ''}`} // Clase "active" condicional
+                onClick={() => handleLunchHourSelect(slot)} // Selecciona la hora
+              >
+                {slot}
+              </button>
+            ))}
+          </div>
+          <button type="button" onClick={handleConfirmLunch}>
+            Confirmar Lunch
+          </button>
+          <button type="button" onClick={() => setShowLunchDialog(false)}>
+            Cancelar
+          </button>
+        </div>
+      )}
       <hr className="date-blue-line" />
       <div
         className="Pros-cont"
