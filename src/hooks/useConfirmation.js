@@ -99,13 +99,23 @@ const useConfirmation = (
             updatedHorarios[monthName] = [];
           }
 
-          // Creamos primero el objeto con `timeSlots`
-          const horarioObj = {
-            Timeslots, // Primero se guarda timeSlots
-            date: day.date, // Luego se guarda date
-          };
+          // Verificar si el día ya existe en los horarios
+          const existingDay = updatedHorarios[monthName].find((d) => d.date === day.date);
 
-          updatedHorarios[monthName].push(horarioObj);
+          if (existingDay) {
+            // Si el día ya existe, agregar los nuevos Timeslots si no están presentes
+            Timeslots.forEach((slot) => {
+              if (!existingDay.Timeslots.includes(slot)) {
+                existingDay.Timeslots.push(slot);
+              }
+            });
+          } else {
+            // Si el día no existe, agregarlo con los nuevos Timeslots
+            updatedHorarios[monthName].push({
+              date: day.date,
+              Timeslots,
+            });
+          }
         });
 
         await updateDoc(proRef, { horarios: updatedHorarios });

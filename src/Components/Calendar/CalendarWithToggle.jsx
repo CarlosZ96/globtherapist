@@ -153,18 +153,13 @@ const Calendar = ({
     }
 
     try {
-      // Obtener la referencia del documento del profesional logueado
       const proRef = doc(db, 'pros', currentUser.uid);
       const proSnap = await getDoc(proRef);
-
       if (proSnap.exists()) {
         const proData = proSnap.data();
         const updatedHorarios = { ...proData.horarios };
-
-        // Recorrer todos los meses y días para eliminar la hora seleccionada
         Object.keys(updatedHorarios).forEach((month) => {
           updatedHorarios[month] = updatedHorarios[month].map((day) => {
-            // Filtrar la hora seleccionada de los Timeslots
             return {
               ...day,
               Timeslots: day.Timeslots.filter((slot) => slot !== selectedLunchHour),
@@ -172,28 +167,31 @@ const Calendar = ({
           });
         });
 
-        // Actualizar el documento en Firestore
-        await updateDoc(proRef, { horarios: updatedHorarios });
-        console.log('Hora de lunch eliminada de todos los días:', selectedLunchHour);
+        await updateDoc(proRef, {
+          horarios: updatedHorarios,
+          lunch: selectedLunchHour,
+        });
 
-        // Mostrar mensaje de éxito con Swal
+        console.log('Hora de lunch eliminada de todos los días:', selectedLunchHour);
+        console.log('Hora de lunch guardada:', selectedLunchHour);
+
         Swal.fire({
           icon: 'success',
           title: '¡Éxito!',
-          text: `Hora de lunch "${selectedLunchHour}" eliminada correctamente.`,
+          text: `Hora de lunch "${selectedLunchHour}" confirmada y eliminada de los horarios.`,
           confirmButtonText: 'OK',
         }).then(() => {
-          setShowLunchButton(false); // Ocultar el botón "Lunch"
-          setShowLunchDialog(false); // Cerrar el diálogo de selección de hora
-          setSelectedLunchHour(null); // Limpiar la selección
+          setShowLunchButton(false);
+          setShowLunchDialog(false);
+          setSelectedLunchHour(null);
         });
       }
     } catch (error) {
-      console.error('Error al eliminar la hora de lunch:', error);
+      console.error('Error al confirmar la hora de lunch:', error);
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Hubo un error al eliminar la hora de lunch. Por favor, inténtalo de nuevo.',
+        text: 'Hubo un error al confirmar la hora de lunch. Por favor, inténtalo de nuevo.',
       });
     }
   };
