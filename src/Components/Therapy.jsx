@@ -63,7 +63,21 @@ const Therapy = () => {
       });
       return;
     }
+    try {
+      const proDocRef = doc(db, 'pros', proId);
+      const proDoc = await getDoc(proDocRef);
 
+      if (proDoc.exists()) {
+        const proData = proDoc.data();
+        setCitaGlobal((prev) => ({
+          ...prev,
+          proName: proData.Nombre || 'Profesional no encontrado',
+        }));
+        setShowAppointmentError(false);
+      }
+    } catch (error) {
+      console.error('Error al seleccionar el profesional:', error);
+    }
     if (!formData.therapyType) {
       Swal.fire({
         icon: 'warning',
@@ -474,6 +488,39 @@ const Therapy = () => {
           )}
         </div>
         <div className="DynamiCanlendar-btn-cont">
+          {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName && (
+            <div className="Date-info-cont">
+              <div className="Date-info-txt">
+                <h3>Tu cita quedó para el:</h3>
+              </div>
+              <div className="Date-info-description">
+                <p>
+                  {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName ? (
+                    <p>
+                      {citaGlobal.date}
+                      {' '}
+                      de
+                      {' '}
+                      {citaGlobal.month}
+                      {' '}
+                      del
+                      {new Date().getFullYear()}
+                      a las
+                      {' '}
+                      {citaGlobal.time}
+                      {' '}
+                      con el doctor
+                      {' '}
+                      {citaGlobal.proName}
+                      .
+                    </p>
+                  ) : (
+                    <p>No hay una cita seleccionada.</p>
+                  )}
+                </p>
+              </div>
+            </div>
+          )}
           <button type="submit" className="DynamiCanlendar-btn">
             <h4>Confirmar</h4>
           </button>

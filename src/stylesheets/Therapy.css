@@ -203,23 +203,62 @@
 }
 
 .DynamiCanlendar-btn-cont {
+    height: 20vh;
+    width: 98%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #818181;
+}
+
+.Date-info-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     width: 90%;
-    background-color: #ffd54f;
+    height: 70%;
+}
+
+.DynamiCanlendar-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    height: 30%;
+    background-color: #1c2e88;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+}
+
+.Date-info-txt {
+    width: 100%;
+    height: 30%;
+    text-align: center;
+}
+
+.Date-info-description{
+    width: 100%;
+    height: 50%;
+    text-align: center;
 }
 
 .error-text {
     color: red;
     font-size: 0.9rem;
     margin-top: 0.5rem;
-  }
+}
 
-  .error-border {
+.error-border {
     border: 2px solid red;
     border-radius: 5px;
     padding: 0.5rem;
-  }
+}
 
-  .therapy-error-cont {
+.therapy-error-cont {
     margin-top: 1rem;
     text-align: center;
-  }
+}

@@ -58,8 +58,8 @@ const Homepage = () => {
           </div>
         ) : (
           <div className="Log-Btn-Cont">
-            <div>
-              <h3>
+            <div className="Log-Btn-Cont-User">
+              <h3 className="User-Name">
                 {currentPro?.username || userData?.username || 'Usuario'}
                 {console.log(currentPro?.username || userData?.username)}
               </h3>
