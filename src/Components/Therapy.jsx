@@ -15,11 +15,21 @@ const Therapy = () => {
     currentUser, updateUserCitas, updateProMisCitas, pros, citaGlobal, setCitaGlobal,
   } = useAuth();
 
+  // Función para normalizar textos
   const normalizeText = (text) => {
     return text
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase();
+  };
+
+  // Función para sumar 40 minutos al startTime y calcular el endTime
+  const calculateEndTime = (start, minutesToAdd) => {
+    const [hours, minutes] = start.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes + minutesToAdd;
+    const endHours = Math.floor(totalMinutes / 60) % 24;
+    const endMinutes = totalMinutes % 60;
+    return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
   };
 
   const [selectedAppointments, setSelectedAppointments] = useState([]);
@@ -40,11 +50,11 @@ const Therapy = () => {
     description: '',
   });
 
+  // Función para normalizar la hora a formato "HH:mm"
   const normalizeTime = (time) => {
     const timeLower = time.toLowerCase();
     const [hour, minute] = timeLower.replace(/[^0-9:]/g, '').split(':');
     let normalizedHour = parseInt(hour, 10);
-
     if (timeLower.includes('pm') && normalizedHour !== 12) {
       normalizedHour += 12;
     }
@@ -52,6 +62,67 @@ const Therapy = () => {
       normalizedHour = 0;
     }
     return `${String(normalizedHour).padStart(2, '0')}:${minute}`;
+  };
+
+  // Validaciones del formulario
+  const [errors, setErrors] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    therapyType: '',
+  });
+
+  const fieldRefs = {
+    name: React.createRef(),
+    phone: React.createRef(),
+    email: React.createRef(),
+    therapyType: React.createRef(),
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = {
+      name: '',
+      phone: '',
+      email: '',
+      therapyType: '',
+    };
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'El nombre es obligatorio';
+      if (fieldRefs.name.current) {
+        fieldRefs.name.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      isValid = false;
+    }
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'El teléfono es obligatorio';
+      if (fieldRefs.phone.current) {
+        fieldRefs.phone.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      isValid = false;
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = 'El correo electrónico es obligatorio';
+      if (fieldRefs.email.current) {
+        fieldRefs.email.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      isValid = false;
+    }
+    if (!formData.therapyType) {
+      newErrors.therapyType = 'Debes elegir un tipo de terapia';
+      if (fieldRefs.therapyType.current) {
+        fieldRefs.therapyType.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      isValid = false;
+    }
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleTherapyTypeClick = (type) => {
+    console.log('Therapy type selected:', type);
+    setFormData({ ...formData, therapyType: type });
   };
 
   const handleProSelection = async (proId) => {
@@ -159,66 +230,6 @@ const Therapy = () => {
     }
   };
 
-  const [errors, setErrors] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    therapyType: '',
-  });
-
-  const fieldRefs = {
-    name: React.createRef(),
-    phone: React.createRef(),
-    email: React.createRef(),
-    therapyType: React.createRef(),
-  };
-
-  const validateForm = () => {
-    let isValid = true;
-    const newErrors = {
-      name: '',
-      phone: '',
-      email: '',
-      therapyType: '',
-    };
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'El nombre es obligatorio';
-      if (fieldRefs.name.current) {
-        fieldRefs.name.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      isValid = false;
-    }
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'El teléfono es obligatorio';
-      if (fieldRefs.phone.current) {
-        fieldRefs.phone.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      isValid = false;
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = 'El correo electrónico es obligatorio';
-      if (fieldRefs.email.current) {
-        fieldRefs.email.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      isValid = false;
-    }
-    if (!formData.therapyType) {
-      newErrors.therapyType = 'Debes elegir un tipo de terapia';
-      if (fieldRefs.therapyType.current) {
-        fieldRefs.therapyType.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      isValid = false;
-    }
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  const handleTherapyTypeClick = (type) => {
-    console.log('Therapy type selected:', type);
-    setFormData({ ...formData, therapyType: type });
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!validateForm()) {
@@ -267,8 +278,8 @@ const Therapy = () => {
       const updatedMonthHorarios = monthHorarios.map((day) => {
         if (day.date === citaGlobal.date) {
           const updatedTimeslots = day.Timeslots.filter((timeslot) => {
-            const [startTime] = timeslot.split('-');
-            return normalizeTime(startTime) !== normalizeTime(citaGlobal.time);
+            const [startTimeSlot] = timeslot.split('-');
+            return normalizeTime(startTimeSlot) !== normalizeTime(citaGlobal.time);
           });
           return { ...day, Timeslots: updatedTimeslots };
         }
@@ -280,15 +291,29 @@ const Therapy = () => {
           ...horarios, [citaGlobal.month]: updatedMonthHorarios,
         },
       });
+
+      // Conversión de datos para Agora:
+      // Se normaliza la hora de inicio,
+      // se calcula la hora de fin y se establece la duración de 40 minutos.
+      const normalizedSelectedTime = normalizeTime(citaGlobal.time);
+      const startTime = normalizedSelectedTime;
+      const endTime = calculateEndTime(normalizedSelectedTime, 40);
+      const duration = 40;
+
+      // Para el usuario: se agrega el id del profesional (proUid)
       const userCita = {
         date: citaGlobal.date,
         month: citaGlobal.month,
         time: citaGlobal.time,
+        startTime, // Hora de inicio en formato "HH:mm"
+        endTime, // Hora de fin calculada (startTime + 40 minutos)
+        duration, // Duración en minutos (40)
         therapyType: normalizeText(formData.therapyType),
         description: formData.description,
         status: 'pending',
         uid: citaGlobal.uid,
         proName,
+        proUid: selectedPro,
       };
 
       const userRef = doc(db, 'users', currentUser.uid);
@@ -306,10 +331,14 @@ const Therapy = () => {
       await updateDoc(userRef, { Citas: updatedCitas });
       console.log('Cita guardada en Firestore para el usuario:', userCita);
 
+      // Para el profesional: se agrega el id del usuario (userId)
       const proCita = {
         date: citaGlobal.date,
         month: citaGlobal.month,
         time: citaGlobal.time,
+        startTime,
+        endTime,
+        duration,
         therapyType: normalizeText(formData.therapyType),
         description: formData.description,
         status: 'pending',
@@ -317,6 +346,7 @@ const Therapy = () => {
         userName: formData.name,
         userPhone: formData.phone,
         uid: citaGlobal.uid,
+        userId: currentUser.uid,
       };
 
       const proMisCitasRef = doc(db, 'pros', selectedPro);
@@ -338,10 +368,10 @@ const Therapy = () => {
         title: '¡Éxito!',
         text: 'La cita ha sido agendada correctamente.',
       }).then(() => {
-        // Recargar la página después de que el usuario pulse "OK"
         window.location.reload();
       });
 
+      // Resetear estados y datos del formulario
       setFormData({
         name: '',
         phone: '',
@@ -494,30 +524,26 @@ const Therapy = () => {
                 <h3>Tu cita quedó para el:</h3>
               </div>
               <div className="Date-info-description">
-                <p>
-                  {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName ? (
-                    <p>
-                      {citaGlobal.date}
-                      {' '}
-                      de
-                      {' '}
-                      {citaGlobal.month}
-                      {' '}
-                      del
-                      {new Date().getFullYear()}
-                      a las
-                      {' '}
-                      {citaGlobal.time}
-                      {' '}
-                      con el doctor
-                      {' '}
-                      {citaGlobal.proName}
-                      .
-                    </p>
-                  ) : (
-                    <p>No hay una cita seleccionada.</p>
-                  )}
-                </p>
+                {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName ? (
+                  <p>
+                    {citaGlobal.date}
+                    {' '}
+                    de
+                    {citaGlobal.month}
+                    {' '}
+                    del
+                    {new Date().getFullYear()}
+                    {' '}
+                    a las
+                    {citaGlobal.time}
+                    {' '}
+                    con el doctor
+                    {citaGlobal.proName}
+                    .
+                  </p>
+                ) : (
+                  <p>No hay una cita seleccionada.</p>
+                )}
               </div>
             </div>
           )}
