@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { getDoc, doc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '../../firebase';
-// Se asume que estos componentes existen y reciben por props lo requerido
 import UserView from './UserView';
 import ProView from './ProView';
 
@@ -30,17 +29,14 @@ const GlobMeeting = ({ collection, cita }) => {
   const [isWithinOneDay, setIsWithinOneDay] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Verifica en qué colección se encuentra el usuario
   useEffect(() => {
     const checkUserCollection = async () => {
       if (!currentUser) return;
-      // Intenta primero con la colección pasada como parámetro
       const docRef = doc(db, collection, currentUser.uid);
       const snap = await getDoc(docRef);
       if (snap.exists()) {
         setUserCollection(collection);
       } else {
-        // Si no se encuentra, asume que el usuario está en la otra colección
         const otherCollection = collection === 'users' ? 'pros' : 'users';
         const otherRef = doc(db, otherCollection, currentUser.uid);
         const otherSnap = await getDoc(otherRef);
