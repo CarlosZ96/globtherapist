@@ -17,7 +17,6 @@ const Dates = () => {
 
       if (user) {
         try {
-          // Buscar en users collection
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           if (userDoc.exists()) {
             setCitas(userDoc.data().Citas || []);
@@ -25,8 +24,6 @@ const Dates = () => {
             setLoading(false);
             return;
           }
-
-          // Si no está en users, buscar en pros
           const proDoc = await getDoc(doc(db, 'pros', user.uid));
           if (proDoc.exists()) {
             setCitas(proDoc.data().MisCitas || []);
