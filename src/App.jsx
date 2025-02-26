@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import CalendarWithToggle from './Components/Calendar/CalendarWithToggle';
+import GlobMeeting from './Components/Meetings/GlobMeeting ';
 import './App.css';
 import Mainpage from './Components/Homepage';
 
@@ -9,7 +9,7 @@ function App() {
     <div className="App">
       <Routes>
         <Route path="/" element={<Mainpage />} />
-        <Route path="/ca" element={<CalendarWithToggle />} />
+        <Route path="/meeting" element={<GlobMeeting />} />
       </Routes>
     </div>
   );

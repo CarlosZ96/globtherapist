@@ -1,7 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 
 const UserInfo = ({ citas }) => {
+  const navigate = useNavigate();
+
   if (!citas || citas.length === 0) {
     return <div className="no-citas">No tienes citas programadas</div>;
   }
@@ -41,7 +44,13 @@ const UserInfo = ({ citas }) => {
               {cita.proName}
             </p>
           </div>
-          <button type="button" className="reunion-btn" disabled>
+          <button
+            type="button"
+            className="reunion-btn"
+            onClick={() => navigate('/meeting', {
+                state: { cita, collection: 'users' },
+              })}
+          >
             Ir a la reunión
           </button>
         </div>
@@ -49,6 +58,7 @@ const UserInfo = ({ citas }) => {
     </div>
   );
 };
+
 UserInfo.defaultProps = {
   citas: [],
 };

@@ -1,7 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 
 const MydatesPro = ({ citas }) => {
+  const navigate = useNavigate();
+
   if (!citas || citas.length === 0) {
     return <div className="no-citas">No hay citas programadas</div>;
   }
@@ -41,7 +44,7 @@ const MydatesPro = ({ citas }) => {
               {cita.userName}
             </p>
             <p className="cita-field">
-              <span className="cita-label">Descripcion:</span>
+              <span className="cita-label">Descripción:</span>
               {cita.description}
             </p>
             <p className="cita-field">
@@ -49,7 +52,13 @@ const MydatesPro = ({ citas }) => {
               {cita.userEmail}
             </p>
           </div>
-          <button type="button" className="reunion-btn" disabled>
+          <button
+            type="button"
+            className="reunion-btn"
+            onClick={() => navigate('/meeting', {
+                state: { cita, collection: 'pros' },
+              })}
+          >
             Ir a la reunión
           </button>
         </div>
@@ -57,6 +66,7 @@ const MydatesPro = ({ citas }) => {
     </div>
   );
 };
+
 MydatesPro.propTypes = {
   citas: PropTypes.arrayOf(
     PropTypes.shape({
@@ -66,7 +76,7 @@ MydatesPro.propTypes = {
       time: PropTypes.string.isRequired,
       status: PropTypes.string.isRequired,
       therapyType: PropTypes.string.isRequired,
-      UserName: PropTypes.string.isRequired,
+      userName: PropTypes.string.isRequired,
       userEmail: PropTypes.string.isRequired,
     }),
   ),
