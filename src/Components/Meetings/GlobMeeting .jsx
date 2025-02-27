@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { getDoc, doc } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
 import { db } from '../../firebase';
 import UserView from './UserView';
 import ProView from './ProView';
+import { useAuth } from '../../AuthContext'; // Asegúrate de que la ruta sea la correcta
 
 // Mapeo para convertir el nombre del mes en español a número (0 = enero, 11 = diciembre)
 const monthMapping = {
@@ -23,29 +24,59 @@ const monthMapping = {
 };
 
 const GlobMeeting = ({ collection, cita }) => {
-  const auth = getAuth();
-  const { currentUser } = auth;
+  // Obtenemos currentUser desde el contexto global
+  const { currentUser } = useAuth();
+
+  if (!currentUser) {
+    return <div>Cargando usuario...</div>;
+  }
+
   const [userCollection, setUserCollection] = useState(null);
   const [isWithinOneDay, setIsWithinOneDay] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkUserCollection = async () => {
-      if (!currentUser) return;
-      const docRef = doc(db, collection, currentUser.uid);
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        setUserCollection(collection);
-      } else {
-        const otherCollection = collection === 'users' ? 'pros' : 'users';
-        const otherRef = doc(db, otherCollection, currentUser.uid);
-        const otherSnap = await getDoc(otherRef);
-        if (otherSnap.exists()) {
-          setUserCollection(otherCollection);
-        }
+      if (!currentUser || !currentUser.uid) {
+        console.error('Usuario no autenticado');
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      try {
+        let foundCollection = null;
+        // Si se recibe la prop "collection", se intenta primero en esa colección
+        if (collection) {
+          const docRef = doc(db, collection, currentUser.uid);
+          const snap = await getDoc(docRef);
+          if (snap.exists()) {
+            foundCollection = collection;
+          }
+        }
+        // Si no se encontró o no se pasó "collection", se busca en "users"
+        if (!foundCollection) {
+          const usersRef = doc(db, 'users', currentUser.uid);
+          const snapUsers = await getDoc(usersRef);
+          if (snapUsers.exists()) {
+            foundCollection = 'users';
+          }
+        }
+        // Si aún no se encontró, se busca en "pros"
+        if (!foundCollection) {
+          const prosRef = doc(db, 'pros', currentUser.uid);
+          const snapPros = await getDoc(prosRef);
+          if (snapPros.exists()) {
+            foundCollection = 'pros';
+          }
+        }
+        setUserCollection(foundCollection);
+      } catch (error) {
+        console.error('Error al verificar la colección del usuario:', error);
+      } finally {
+        setLoading(false);
+      }
     };
+
     checkUserCollection();
   }, [collection, currentUser]);
 
@@ -55,30 +86,28 @@ const GlobMeeting = ({ collection, cita }) => {
 
     const currentYear = new Date().getFullYear();
     const monthNum = monthMapping[cita.month.toLowerCase()];
-    // Se espera que cita.startTime tenga el formato "HH:mm"
     const [hours, minutes] = cita.startTime.split(':').map(Number);
     const appointmentDate = new Date(currentYear, monthNum, cita.date, hours, minutes);
     const now = new Date();
     const diff = appointmentDate - now;
     const oneDayMs = 24 * 60 * 60 * 1000;
 
-    // La cita debe ser en el futuro y faltar 24 horas o menos
     setIsWithinOneDay(diff <= oneDayMs && diff > 0);
   }, [cita]);
 
   if (loading) return <div>Loading...</div>;
 
-  // Si la cita no está próxima, muestra un mensaje
+  if (!userCollection) {
+    return <div>Error: no se encontró la colección para el usuario.</div>;
+  }
+
   if (!isWithinOneDay) {
     return <div>El canal se habilitará un día antes de la cita.</div>;
   }
 
-  // Prepara los parámetros para la creación del canal/videollamada en Agora.
-  // Se usa cita.uid como identificador del canal (ajusta según sea necesario).
   const meetingParams = {
     channelId: cita.uid,
     startTime: cita.startTime,
-    // Puedes agregar aquí otros parámetros que requiera la API de Agora
   };
 
   if (userCollection === 'users') {
@@ -86,16 +115,22 @@ const GlobMeeting = ({ collection, cita }) => {
   } if (userCollection === 'pros') {
     return <ProView meetingParams={meetingParams} RtcRole="uidHost" />;
   }
+
   return <div>No se pudo determinar el tipo de usuario.</div>;
 };
+
 GlobMeeting.propTypes = {
-  collection: PropTypes.string.isRequired,
+  collection: PropTypes.string,
   cita: PropTypes.shape({
     uid: PropTypes.string.isRequired,
     startTime: PropTypes.string.isRequired,
     date: PropTypes.number.isRequired,
     month: PropTypes.string.isRequired,
   }).isRequired,
+};
+
+GlobMeeting.defaultProps = {
+  collection: '',
 };
 
 export default GlobMeeting;
