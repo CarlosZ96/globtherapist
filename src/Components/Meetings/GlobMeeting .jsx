@@ -1,5 +1,5 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable max-len */
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { getDoc, doc } from 'firebase/firestore';
@@ -13,7 +13,6 @@ const convertTimeTo24 = (timeStr) => {
   const t = timeStr.trim().toLowerCase();
   const isPM = t.includes('pm');
   const isAM = t.includes('am');
-  // Extraemos la parte numérica (ej: "10:00")
   const timePart = t.replace(/[^0-9:]/g, '');
   const [hStr, mStr] = timePart.split(':');
   let hours = parseInt(hStr, 10);
@@ -45,11 +44,10 @@ const monthMapping = {
 
 const GlobMeeting = ({ collection, cita }) => {
   const { currentUser, citaGlobal } = useAuth();
-
-  // Usamos la cita del contexto si existe; de lo contrario, usamos la prop cita
+  // Si hay citaGlobal en el contexto, se usa; de lo contrario se usa la prop cita.
   const meetingCita = (citaGlobal && citaGlobal.uid) ? citaGlobal : cita;
 
-  // Verifica que la cita disponga de los datos mínimos requeridos
+  // Verificación mínima de datos
   if (!meetingCita || !meetingCita.month || !meetingCita.startTime || !meetingCita.date) {
     return <div>Error: Información de cita incompleta.</div>;
   }
@@ -61,7 +59,9 @@ const GlobMeeting = ({ collection, cita }) => {
   const [userCollection, setUserCollection] = useState(null);
   const [isWithinOneDay, setIsWithinOneDay] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [agoraToken, setAgoraToken] = useState(null);
 
+  // Verifica en qué colección se encuentra el usuario
   useEffect(() => {
     const checkUserCollection = async () => {
       if (!currentUser || !currentUser.uid) {
@@ -117,22 +117,46 @@ const GlobMeeting = ({ collection, cita }) => {
     setIsWithinOneDay(diff <= oneDayMs && diff > 0);
   }, [meetingCita, nowBogota]);
 
+  // Cuando la cita esté dentro de 24 horas, llama a la función para obtener el token
+  useEffect(() => {
+    if (!isWithinOneDay || !meetingCita.uid || !userCollection) return;
+    // Determina el rol: para usuarios es "uidGuest" y para profesionales es "uidHost"
+    const roleParam = userCollection === 'users' ? 'uidGuest' : 'uidHost';
+    // Construye la URL de la función; se asume que la URL base está en REACT_APP_FUNCTIONS_BASE_URL
+    const tokenURL = `${process.env.REACT_APP_FUNCTIONS_BASE_URL}/createAgoraToken`;
+    // Aquí usamos meetingCita.uid como channelId;
+    //  el parámetro uid se envía como 0 (o puedes ajustar según convenga)
+    const url = `${tokenURL}?channelId=${meetingCita.uid}&role=${roleParam}&uid=0`;
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.token) {
+          setAgoraToken(data.token);
+        } else {
+          console.error('Error al obtener token:', data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error al llamar a createAgoraToken:', error);
+      });
+  }, [isWithinOneDay, meetingCita.uid, userCollection]);
+
   if (loading) return <div>Loading...</div>;
   if (!userCollection) {
     return <div>Error: no se encontró la colección para el usuario.</div>;
   }
 
-  // Recalcula la fecha de la cita
+  // Recalcula la fecha de la cita para mostrar
+  // información de espera si es que aún falta más de un día
   const currentYear = nowBogota.getFullYear();
   const monthNum = monthMapping[meetingCita.month.toLowerCase()];
   const [apptHours, apptMinutes] = convertTimeTo24(meetingCita.startTime);
   const appointmentDate = new Date(currentYear, monthNum, meetingCita.date, apptHours, apptMinutes);
   const diffMs = appointmentDate - nowBogota;
 
-  // Si la cita aún no está dentro de las 24 horas o es futura, mostramos el mensaje de espera
+  // Si la cita está en el futuro pero falta más de un día, muestra mensaje de espera
   if (!isWithinOneDay) {
     if (diffMs < 0) {
-      // La cita ya pasó
       const absDiffMs = Math.abs(diffMs);
       const diffDays = Math.floor(absDiffMs / (1000 * 60 * 60 * 24));
       const diffHours = Math.floor((absDiffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -161,7 +185,6 @@ const GlobMeeting = ({ collection, cita }) => {
         </div>
       );
     }
-    // Caso en el que la cita es futura pero falta más de un día
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -177,6 +200,7 @@ const GlobMeeting = ({ collection, cita }) => {
         día
         {diffDays !== 1 ? 's' : ''}
         ,
+        {' '}
         {diffHours}
         {' '}
         hora
@@ -193,11 +217,19 @@ const GlobMeeting = ({ collection, cita }) => {
     );
   }
 
+  // Mientras esperamos el token, mostramos un indicador de carga
+  if (!agoraToken) {
+    return <div>Generando token para la videollamada...</div>;
+  }
+
+  // Construye los parámetros de la reunión incluyendo el token obtenido
   const meetingParams = {
     channelId: meetingCita.uid,
     startTime: meetingCita.startTime,
+    token: agoraToken,
   };
 
+  // Renderiza el componente de vista según la colección del usuario
   if (userCollection === 'users') {
     return <UserView meetingParams={meetingParams} RtcRole="uidGuest" />;
   } if (userCollection === 'pros') {
