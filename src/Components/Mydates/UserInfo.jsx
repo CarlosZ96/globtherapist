@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../AuthContext';
 
 const UserInfo = ({ citas }) => {
   const navigate = useNavigate();
+  const { setCitaGlobal } = useAuth();
 
   if (!citas || citas.length === 0) {
     return <div className="no-citas">No tienes citas programadas</div>;
@@ -47,9 +49,31 @@ const UserInfo = ({ citas }) => {
           <button
             type="button"
             className="reunion-btn"
-            onClick={() => navigate('/meeting', {
-                state: { cita, collection: 'users' },
-              })}
+            onClick={() => {
+              // Actualizamos el contexto global con la información necesaria para GlobMeeting
+              setCitaGlobal({
+                uid: cita.uid,
+                startTime: cita.time, // Usamos la hora de la cita como startTime
+                date: Number(cita.date), // Aseguramos que sea numérico
+                month: cita.month,
+                therapyType: cita.therapyType,
+                description: cita.description,
+                status: cita.status,
+                proName: cita.proName,
+              });
+              // Navegamos a la ruta /meeting y enviamos los datos en el state (opcional)
+              navigate('/meeting', {
+                state: {
+                  cita: {
+                    uid: cita.uid,
+                    startTime: cita.time,
+                    date: Number(cita.date),
+                    month: cita.month,
+                  },
+                  collection: 'users',
+                },
+              });
+            }}
           >
             Ir a la reunión
           </button>
@@ -73,6 +97,7 @@ UserInfo.propTypes = {
       status: PropTypes.string.isRequired,
       therapyType: PropTypes.string.isRequired,
       proName: PropTypes.string.isRequired,
+      description: PropTypes.string,
     }),
   ),
 };
