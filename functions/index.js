@@ -11,7 +11,7 @@ const app = express();
 // Lista de orígenes permitidos
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://globtherapist.vercel.app'
+  'https://globtherapist.vercel.app',
 ];
 
 // Configuración de CORS
@@ -24,7 +24,7 @@ const corsOptions = {
     }
     return callback(new Error('Not allowed by CORS'));
   },
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
@@ -55,7 +55,7 @@ app.get('/', (req, res) => {
       channelId,
       numericUid,
       agoraRole,
-      privilegeExpireTime
+      privilegeExpireTime,
     );
     return res.status(200).json({ token });
   } catch (error) {
