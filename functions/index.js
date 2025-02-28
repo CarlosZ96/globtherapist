@@ -5,40 +5,54 @@ const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
 
 const app = express();
 
-// Configura CORS para permitir cualquier origen
-const corsHandler = cors({ origin: '*' });
+// Lista de orígenes permitidos
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://globtherapist.vercel.app',
+];
 
-// Define un endpoint GET en la raíz y envuélvelo con corsHandler
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.get('/', (req, res) => {
-  corsHandler(req, res, () => {
-    const { channelId, role, uid } = req.query;
-    const numericUid = Number(uid) || 0;
-    const expireTime = 3600; // Token válido por 1 hora
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    const privilegeExpireTime = currentTimestamp + expireTime;
+  res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
+  const { channelId, role, uid } = req.query;
+  const numericUid = Number(uid) || 0;
+  const expireTime = 3600; // Token válido por 1 hora
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const privilegeExpireTime = currentTimestamp + expireTime;
 
-    if (!channelId || !role) {
-      return res.status(400).json({ error: 'channelId y role son requeridos' });
-    }
+  if (!channelId || !role) {
+    return res.status(400).json({ error: 'channelId y role son requeridos' });
+  }
 
-    // Determina el rol para Agora: uidHost = PUBLISHER, de lo contrario SUBSCRIBER
-    const agoraRole = role === 'uidHost' ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
+  // Determina el rol para Agora: uidHost = PUBLISHER, de lo contrario SUBSCRIBER
+  const agoraRole = role === 'uidHost' ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
 
-    try {
-      const token = RtcTokenBuilder.buildTokenWithUid(
-        functions.config().agora.app_id,
-        functions.config().agora.app_certificate,
-        channelId,
-        numericUid,
-        agoraRole,
-        privilegeExpireTime,
-      );
-      return res.status(200).json({ token });
-    } catch (error) {
-      console.error('Error generating token:', error);
-      return res.status(500).json({ error: error.toString() });
-    }
-  });
+  try {
+    const token = RtcTokenBuilder.buildTokenWithUid(
+      process.env.AGORA_APP_ID,
+      process.env.AGORA_APP_CERTIFICATE,
+      channelId,
+      numericUid,
+      agoraRole,
+      privilegeExpireTime,
+    );
+    return res.status(200).json({ token });
+  } catch (error) {
+    console.error('Error generating token:', error);
+    return res.status(500).json({ error: error.toString() });
+  }
 });
 
 exports.createAgoraToken = functions.https.onRequest(app);
