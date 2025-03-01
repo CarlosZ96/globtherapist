@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import React, { useEffect, useRef, useState } from 'react';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 import PropTypes from 'prop-types';
@@ -33,16 +34,15 @@ const UserView = ({ meetingParams }) => {
         console.error('Error al unirse al canal:', error);
       }
     };
+
     initAgora();
 
-    const cleanup = () => {
+    return () => {
       if (micTrack) micTrack.close();
       if (cameraTrack) cameraTrack.close();
       if (client) client.leave();
     };
-    cleanup();
-  }, [meetingAccess, meetingParams, micTrack, cameraTrack, client]);
-
+  }, [meetingAccess, meetingParams]);
   // Función para encender/apagar la cámara
   const handleToggleCamera = async () => {
     if (!cameraOn) {
@@ -101,7 +101,10 @@ const UserView = ({ meetingParams }) => {
   return (
     <div className="UserView-cont" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <header style={{
-        padding: '1rem', backgroundColor: '#f0f0f0', display: 'flex', justifyContent: 'space-between',
+        padding: '1rem',
+        backgroundColor: '#f0f0f0',
+        display: 'flex',
+        justifyContent: 'space-between',
       }}
       >
         <h1>Globtherapist - Invitado</h1>
@@ -112,7 +115,11 @@ const UserView = ({ meetingParams }) => {
         <div
           className="UserView-request-container"
           style={{
-            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           {meetingAccess === 'pending' ? (
@@ -121,6 +128,7 @@ const UserView = ({ meetingParams }) => {
             <>
               <p>Solicita acceso a la reunión</p>
               <button type="button" onClick={requestAccess}>Solicitar Acceso</button>
+              {/* Botón de prueba para simular aprobación (como si el host aprobara) */}
               <button type="button" onClick={() => setMeetingAccess('approved')} style={{ marginTop: '1rem' }}>
                 Simular aprobación (prueba)
               </button>
@@ -132,7 +140,11 @@ const UserView = ({ meetingParams }) => {
           <div ref={localVideoRef} style={{ width: '100%', height: '100%' }} />
           {!cameraOn && (
             <div style={{
-              position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#fff',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              color: '#fff',
             }}
             >
               La cámara está apagada
