@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
+import Swal from 'sweetalert2';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 import { useAuth } from '../../AuthContext';
 import useMonthData from '../../hooks/useMonthData';
 import useDateTime from '../../hooks/useDateTime';
@@ -16,18 +19,34 @@ const Calendar = ({
   const {
     days, loading, monthName, monthOffset, changeMonth,
   } = useMonthData();
+  const { citaGlobal } = useAuth();
   const { currentUser } = useAuth();
+  const [showPros, setShowPros] = useState(false);
+  const [showLunchDialog, setShowLunchDialog] = useState(false);
+  const [selectedLunchHour, setSelectedLunchHour] = useState(null);
+  const [currentSlotIndex, setCurrentSlotIndex] = useState(0);
+  const [showLunchButton, setShowLunchButton] = useState(true);
 
   const normalizeText = (text) => {
     if (!text) return '';
-    return text
+    const normalized = text
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/\s+/g, '');
+    console.log(`Normalizing text: "${text}" -> "${normalized}"`);
+    return normalized;
   };
 
+  useEffect(() => {
+    if (citaGlobal) {
+      console.log('Cita global actualizada:', citaGlobal);
+    }
+  }, [citaGlobal]);
+
   const normalizedTherapyType = normalizeText(therapyType);
+  console.log('Therapy type passed to Calendar (normalized):', normalizedTherapyType);
+
   const {
     startTime,
     endTime,
@@ -52,11 +71,7 @@ const Calendar = ({
 
   const [selectedDay, setSelectedDay] = useState([]);
 
-  const {
-    isConfirmed,
-    handleConfirmHours,
-    handleEditHours,
-  } = useConfirmation(
+  const { isConfirmed, handleConfirmHours, handleEditHours } = useConfirmation(
     collectionName,
     currentUser,
     selectedDay,
@@ -69,42 +84,145 @@ const Calendar = ({
   );
 
   const handleDayClick = (day) => {
+    console.log('Day clicked:', day);
     if (collectionName === 'users') {
       setSelectedDay([{ date: day.date, monthOffset }]);
     } else {
       setSelectedDay((prev) => {
-        return prev.some((d) => d.date === day.date && d.monthOffset === monthOffset)
+        const exists = prev.some((d) => d.date === day.date && d.monthOffset === monthOffset);
+        console.log(`Day ${day.date} exists in selectedDay:`, exists);
+        return exists
           ? prev.filter((d) => !(d.date === day.date && d.monthOffset === monthOffset))
           : [...prev, { date: day.date, monthOffset }];
       });
     }
   };
 
+  const handleEditClick = () => {
+    console.log('Editing hours...');
+    handleEditHours();
+    setShowPros(false);
+  };
+
+  const handleShowPros = () => {
+    console.log('handleShowPros invoked');
+    console.log('isConfirmed:', isConfirmed);
+    console.log('currentUser:', currentUser);
+    console.log('Original therapyType:', therapyType);
+    console.log('Normalized therapyType:', normalizedTherapyType);
+    filterDates(currentUser, normalizedTherapyType);
+    setShowPros(true);
+  };
+
   const handleProClick = (proId) => {
-    setSelectedPro((prev) => (prev === proId ? null : proId));
+    console.log('Professional button clicked for proId:', proId);
+    setSelectedPro((prev) => {
+      const newValue = prev === proId ? null : proId;
+      console.log('Updated selectedPro:', newValue);
+      return newValue;
+    });
     onProSelection(proId);
   };
 
   const handleShowDetails = (proId) => {
+    console.log('Show details for proId:', proId);
     setSelectedProId(proId);
   };
 
   const handleCloseModal = () => {
+    console.log('Closing modal');
     setSelectedProId(null);
   };
 
+  const handleLunchClick = () => {
+    setShowLunchDialog(true);
+  };
+
+  const handleLunchHourSelect = (hour) => {
+    setSelectedLunchHour(hour);
+  };
+
+  const handleConfirmLunch = async () => {
+    if (!selectedLunchHour) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Selección incompleta',
+        text: 'Por favor, selecciona una hora para el lunch.',
+      });
+      return;
+    }
+
+    try {
+      const proRef = doc(db, 'pros', currentUser.uid);
+      const proSnap = await getDoc(proRef);
+      if (proSnap.exists()) {
+        const proData = proSnap.data();
+        const updatedHorarios = { ...proData.horarios };
+        Object.keys(updatedHorarios).forEach((month) => {
+          updatedHorarios[month] = updatedHorarios[month].map((day) => {
+            return {
+              ...day,
+              Timeslots: day.Timeslots.filter((slot) => slot !== selectedLunchHour),
+            };
+          });
+        });
+
+        await updateDoc(proRef, {
+          horarios: updatedHorarios,
+          lunch: selectedLunchHour,
+        });
+
+        console.log('Hora de lunch eliminada de todos los días:', selectedLunchHour);
+        console.log('Hora de lunch guardada:', selectedLunchHour);
+
+        Swal.fire({
+          icon: 'success',
+          title: '¡Éxito!',
+          text: `Hora de lunch "${selectedLunchHour}" confirmada y eliminada de los horarios.`,
+          confirmButtonText: 'OK',
+        }).then(() => {
+          setShowLunchButton(false);
+          setShowLunchDialog(false);
+          setSelectedLunchHour(null);
+        });
+      }
+    } catch (error) {
+      console.error('Error al confirmar la hora de lunch:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al confirmar la hora de lunch. Por favor, inténtalo de nuevo.',
+      });
+    }
+  };
+
   useEffect(() => {
-    console.log('Componente Calendar renderizado');
+    console.log('Calendar component rendered');
     console.log('therapyType:', therapyType);
-    console.log('therapyType normalizado:', normalizedTherapyType);
+    console.log('Normalized therapyType:', normalizedTherapyType);
     console.log('isConfirmed:', isConfirmed);
-    console.log('availablePros:', availablePros);
-    console.log('selectedDay:', selectedDay);
+    console.log('Available pros:', availablePros);
+    console.log('Selected day:', selectedDay);
   }, [therapyType, isConfirmed, availablePros, selectedDay]);
 
   if (loading) {
     return <div>Loading...</div>;
   }
+
+  const timeSlots = [];
+  for (let i = startTime; i < endTime; i += 1) {
+    timeSlots.push(`${formatTime(i)}-${formatTime(i + 1)}`);
+  }
+
+  const currentSlots = timeSlots.slice(currentSlotIndex, currentSlotIndex + 3);
+
+  const handleNextSlots = () => {
+    setCurrentSlotIndex((prev) => Math.min(prev + 3, timeSlots.length - 3));
+  };
+
+  const handlePreviousSlots = () => {
+    setCurrentSlotIndex((prev) => Math.max(prev - 3, 0));
+  };
 
   return (
     <div className="DynamiCanlendar-cont">
@@ -169,9 +287,6 @@ const Calendar = ({
       <hr className="date-blue-line" />
       <div className="Hours-cont">
         <div className="Hours-selector-cont">
-          <div className="Hours-lunch-btn">
-            <button type="button">lunch</button>
-          </div>
           {collectionName === 'pros' ? (
             <div className="Hours-selector">
               <div className="Time-selector">
@@ -212,12 +327,63 @@ const Calendar = ({
             <h3>{collectionName === 'pros' ? 'Confirmar mis horarios' : 'Confirmar hora'}</h3>
           </button>
           {isConfirmed && (
-            <button type="button" className="Edit-Hours" onClick={handleEditHours}>
-              <h3>Editar</h3>
-            </button>
+            <>
+              <button type="button" className="Edit-Hours" onClick={handleEditClick}>
+                <h3>Editar</h3>
+              </button>
+              <button
+                type="button"
+                className="Lunch-btn"
+                onClick={handleLunchClick}
+                style={{ display: showLunchButton ? 'block' : 'none' }} // Ocultar el botón "Lunch"
+              >
+                <h3>Lunch</h3>
+              </button>
+            </>
           )}
         </div>
       </div>
+      {showLunchDialog && (
+        <div className="Lunch-dialog">
+          <h3>Selecciona una hora para el lunch:</h3>
+          <div className="Time-slots">
+            <button
+              type="button"
+              className="Time-slots-nav"
+              onClick={handlePreviousSlots}
+              disabled={currentSlotIndex === 0}
+            >
+              -
+            </button>
+            <div className="Time-slots-container">
+              {currentSlots.map((slot) => (
+                <button
+                  key={slot}
+                  type="button"
+                  className={`Time-slot ${selectedLunchHour === slot ? 'active' : ''}`}
+                  onClick={() => handleLunchHourSelect(slot)}
+                >
+                  {slot}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="Time-slots-nav"
+              onClick={handleNextSlots}
+              disabled={currentSlotIndex >= timeSlots.length - 3}
+            >
+              +
+            </button>
+          </div>
+          <button type="button" onClick={handleConfirmLunch}>
+            Confirmar Lunch
+          </button>
+          <button type="button" onClick={() => setShowLunchDialog(false)}>
+            Cancelar
+          </button>
+        </div>
+      )}
       <hr className="date-blue-line" />
       <div
         className="Pros-cont"
@@ -227,39 +393,40 @@ const Calendar = ({
           <button
             type="button"
             disabled={!isConfirmed}
-            onClick={() => {
-              console.log('isConfirmed:', isConfirmed);
-              console.log('currentUser:', currentUser);
-              console.log('therapyType:', therapyType);
-              console.log('therapyType normalizado:', normalizedTherapyType);
-              filterDates(currentUser, normalizedTherapyType);
-            }}
+            onClick={handleShowPros}
           >
             <h3>Ver pros</h3>
           </button>
         </div>
         <div className="pro-img-def">
-          {availablePros.map((pro) => (
-            <div key={pro.id} className="pro-item">
-              <button
-                type="button"
-                className={`user-info-comt ${selectedPro === pro.id ? 'active' : 'inactive'}`}
-                onClick={() => handleProClick(pro.id)}
-              >
-                <div className="user-image-comt">
-                  <img src={User} alt="user" className="pro-img" />
+          {showPros && (
+            <div className="pro-img-def">
+              {availablePros.map((pro) => (
+                <div key={pro.id} className="pro-item">
+                  <button
+                    type="button"
+                    className={`user-info-comt ${selectedPro === pro.id ? 'active' : 'inactive'}`}
+                    onClick={() => handleProClick(pro.id)}
+                  >
+                    <div className="user-image-comt">
+                      <img src={User} alt="user" className="pro-img" />
+                    </div>
+                    <h3>{pro.name}</h3>
+                  </button>
+                  <button
+                    type="button"
+                    className="show-modal-btn"
+                    onClick={() => handleShowDetails(pro.id)}
+                  >
+                    Ver detalles
+                  </button>
                 </div>
-                <h3>{pro.name}</h3>
-              </button>
-              <button
-                type="button"
-                className="show-modal-btn"
-                onClick={() => handleShowDetails(pro.id)}
-              >
-                Ver detalles
-              </button>
+              ))}
+              {selectedProId && (
+                <ProModal proId={selectedProId} onClose={handleCloseModal} />
+              )}
             </div>
-          ))}
+          )}
           {selectedProId && (
             <ProModal proId={selectedProId} onClose={handleCloseModal} />
           )}

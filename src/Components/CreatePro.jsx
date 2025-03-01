@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { doc, setDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import Swal from 'sweetalert2';
 import { auth, db } from '../firebase';
 import '../stylesheets/windo.css';
 
@@ -102,10 +103,14 @@ const CreatePro = ({ toggleCreatePro }) => {
         email: formData.email,
         telefono: formData.phone,
         terapias: normalizedTherapies,
-        horarios: [],
+        horarios: {},
       });
 
-      alert('Cuenta Pro creada con éxito');
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Cuenta Pro creada con éxito.',
+      });
       setFormData({
         fullName: '',
         username: '',
@@ -119,7 +124,11 @@ const CreatePro = ({ toggleCreatePro }) => {
       toggleCreatePro();
     } catch (error) {
       console.error('Error creando Pro:', error);
-      alert('Hubo un error al crear la cuenta.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al crear la cuenta.',
+      });
     } finally {
       setLoading(false);
     }

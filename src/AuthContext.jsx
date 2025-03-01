@@ -19,6 +19,20 @@ export const AuthProvider = ({ children }) => {
   const [currentPro, setCurrentPro] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [citaGlobal, setCitaGlobal] = useState({
+    date: '',
+    month: '',
+    time: '',
+    therapyType: '',
+    description: '',
+    status: 'pending',
+    uid: '',
+    proName: '',
+  });
+
+  // Nuevo estado para controlar permisos de acceso a la reunión:
+  // Puede tener los valores: 'none' (sin solicitud), 'pending' (solicitado), 'approved' (aceptado)
+  const [meetingAccess, setMeetingAccess] = useState('none');
 
   const fetchUserData = async (user) => {
     try {
@@ -102,7 +116,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
-
   const logout = () => signOut(auth);
 
   const value = useMemo(() => ({
@@ -111,11 +124,17 @@ export const AuthProvider = ({ children }) => {
     currentPro,
     pros,
     isAdmin,
+    citaGlobal,
+    setCitaGlobal,
+    meetingAccess, // nuevo valor
+    setMeetingAccess, // función para actualizarlo
     login,
     logout,
     updateUserCitas,
     updateProMisCitas,
-  }), [currentUser, userData, currentPro, pros, isAdmin]);
+  }), [
+    currentUser, userData, currentPro, pros, isAdmin, citaGlobal, meetingAccess, updateUserCitas,
+  ]);
 
   return (
     <AuthContext.Provider value={value}>
@@ -127,3 +146,5 @@ export const AuthProvider = ({ children }) => {
 AuthProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
+
+export default AuthProvider;

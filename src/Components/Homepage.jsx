@@ -7,6 +7,7 @@ import ProSpace from './ProSpace';
 import Login from './windows/login';
 import Create from './windows/Create';
 import CreatePro from './CreatePro';
+import Dates from './Mydates/Dates';
 import { useAuth } from '../AuthContext';
 
 const Homepage = () => {
@@ -16,6 +17,12 @@ const Homepage = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showCreatePro, setShowCreatePro] = useState(false);
+  const [showDates, setShowDates] = useState(false); // Nuevo estado para controlar la modal
+
+  // Nuevo toggle para las citas
+  const toggleDates = () => {
+    setShowDates((prev) => !prev);
+  };
 
   const toggleLogin = () => {
     setShowLogin((prev) => !prev);
@@ -58,11 +65,16 @@ const Homepage = () => {
           </div>
         ) : (
           <div className="Log-Btn-Cont">
-            <div>
-              <h3>
-                {currentPro?.username || userData?.username || 'Usuario'}
-                {console.log(currentPro?.username || userData?.username)}
-              </h3>
+            <div className="Log-Btn-Cont-User">
+              <button
+                type="button"
+                className="Log-Btn"
+                onClick={toggleDates}
+              >
+                <h3 className="User-Name">
+                  {currentPro?.username || userData?.username || 'Usuario'}
+                </h3>
+              </button>
             </div>
             <button type="button" className="Log-Btn" onClick={logout}>
               <h3>Cerrar sesión</h3>
@@ -70,6 +82,21 @@ const Homepage = () => {
           </div>
         )}
       </header>
+      {showDates && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button
+              type="button"
+              className="close-button"
+              onClick={toggleDates}
+            >
+              &times;
+            </button>
+            <Dates />
+          </div>
+        </div>
+      )}
+
       {renderContent()}
       <div style={{ display: showLogin ? 'block' : 'none' }}>
         <Login toggleLogin={toggleLogin} />

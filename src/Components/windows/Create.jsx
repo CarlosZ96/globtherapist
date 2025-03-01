@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import Swal from 'sweetalert2';
 import '../../stylesheets/windo.css';
 import { auth, db } from '../../firebase';
 
@@ -56,6 +57,7 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
       return;
     }
     try {
+      // Crear usuario en Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
@@ -63,6 +65,7 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
       );
       const { user } = userCredential;
 
+      // Guardar datos del usuario en Firestore
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         username: formData.userName,
@@ -72,7 +75,22 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
         role: 'usuario',
       });
 
-      alert('Usuario creado con éxito');
+      await setDoc(doc(db, 'mail', user.uid), {
+        to: formData.email,
+        message: {
+          subject: '¡Bienvenido a GlobTherapist!',
+          text: `Hola ${formData.userName}, te damos la bienvenida a GlobTherapist. Gracias por registrarte.`,
+          html: `<p>Hola <strong>${formData.userName}</strong>,</p>
+                 <p>Bienvenido a nuestra GlobTherapist. Gracias por registrarte.</p>`,
+        },
+      });
+
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Usuario creado con éxito.',
+      });
+
       setFormData({
         email: '',
         phone: '',
@@ -83,7 +101,13 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
       toggleCreate();
     } catch (error) {
       console.error('Error creando el usuario:', error);
-      alert('Hubo un error al crear el usuario.');
+      console.error('Código de error:', error.code);
+      console.error('Mensaje de error:', error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al crear el usuario.',
+      });
     }
   };
 

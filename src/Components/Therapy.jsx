@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import { getAuth } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -11,17 +12,24 @@ const Therapy = () => {
   const auth = getAuth();
   const user = auth.currentUser;
   const {
-    currentUser,
-    updateUserCitas,
-    updateProMisCitas,
-    pros,
+    currentUser, updateUserCitas, updateProMisCitas, pros, citaGlobal, setCitaGlobal,
   } = useAuth();
 
+  // Función para normalizar textos
   const normalizeText = (text) => {
     return text
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase();
+  };
+
+  // Función para sumar 40 minutos al startTime y calcular el endTime
+  const calculateEndTime = (start, minutesToAdd) => {
+    const [hours, minutes] = start.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes + minutesToAdd;
+    const endHours = Math.floor(totalMinutes / 60) % 24;
+    const endMinutes = totalMinutes % 60;
+    return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
   };
 
   const [selectedAppointments, setSelectedAppointments] = useState([]);
@@ -42,11 +50,11 @@ const Therapy = () => {
     description: '',
   });
 
+  // Función para normalizar la hora a formato "HH:mm"
   const normalizeTime = (time) => {
     const timeLower = time.toLowerCase();
     const [hour, minute] = timeLower.replace(/[^0-9:]/g, '').split(':');
     let normalizedHour = parseInt(hour, 10);
-
     if (timeLower.includes('pm') && normalizedHour !== 12) {
       normalizedHour += 12;
     }
@@ -55,50 +63,8 @@ const Therapy = () => {
     }
     return `${String(normalizedHour).padStart(2, '0')}:${minute}`;
   };
-  const handleProSelection = async (proId) => {
-    if (!selectedAppointments.length || !formData.therapyType) {
-      alert('Por favor, selecciona un día y un tipo de terapia antes de ver los profesionales.');
-      return;
-    }
-    try {
-      const normalizedTherapyType = normalizeText(formData.therapyType);
-      const selectedAppointment = selectedAppointments[0];
-      const proDocRef = doc(db, 'pros', proId);
-      const proDoc = await getDoc(proDocRef);
 
-      if (!proDoc.exists()) {
-        console.error('Profesional no encontrado.');
-        return;
-      }
-      const proData = proDoc.data();
-      const { horarios, terapias } = proData;
-      const normalizedTerapias = terapias?.map((t) => normalizeText(t));
-      if (!normalizedTerapias?.includes(normalizedTherapyType)) {
-        alert('El profesional no ofrece este tipo de terapia.');
-        return;
-      }
-      const normalizedSelectedTime = normalizeTime(selectedAppointment.time);
-      const hasAvailability = horarios?.[selectedAppointment.month]?.some((day) => {
-        return (
-          day.date === selectedAppointment.date
-          && day.Timeslots.some((timeslot) => {
-            const [startTime] = timeslot.split('-');
-            const normalizedStartTime = normalizeTime(startTime);
-            return normalizedStartTime === normalizedSelectedTime;
-          })
-        );
-      });
-
-      if (hasAvailability) {
-        setSelectedPro(proId);
-        alert('Profesional disponible para la cita seleccionada.');
-      } else {
-        alert('El profesional no tiene disponibilidad en la fecha y hora seleccionadas.');
-      }
-    } catch (error) {
-      console.error('Error al verificar disponibilidad del profesional:', error);
-    }
-  };
+  // Validaciones del formulario
   const [errors, setErrors] = useState({
     name: '',
     phone: '',
@@ -155,12 +121,117 @@ const Therapy = () => {
   };
 
   const handleTherapyTypeClick = (type) => {
+    console.log('Therapy type selected:', type);
     setFormData({ ...formData, therapyType: type });
+  };
+
+  const handleProSelection = async (proId) => {
+    if (!citaGlobal) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Cita no seleccionada',
+        text: 'Por favor, selecciona una cita antes de ver los profesionales.',
+      });
+      return;
+    }
+    try {
+      const proDocRef = doc(db, 'pros', proId);
+      const proDoc = await getDoc(proDocRef);
+
+      if (proDoc.exists()) {
+        const proData = proDoc.data();
+        setCitaGlobal((prev) => ({
+          ...prev,
+          proName: proData.Nombre || 'Profesional no encontrado',
+        }));
+        setShowAppointmentError(false);
+      }
+    } catch (error) {
+      console.error('Error al seleccionar el profesional:', error);
+    }
+    if (!formData.therapyType) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Selección incompleta',
+        text: 'Por favor, selecciona un tipo de terapia antes de ver los profesionales.',
+      });
+      return;
+    }
+
+    try {
+      const normalizedTherapyType = normalizeText(formData.therapyType);
+      console.log('Normalized therapyType from formData:', normalizedTherapyType);
+
+      const proDocRef = doc(db, 'pros', proId);
+      const proDoc = await getDoc(proDocRef);
+
+      if (!proDoc.exists()) {
+        console.error('Profesional no encontrado.');
+        return;
+      }
+
+      const proData = proDoc.data();
+      console.log('Professional data:', proData);
+      const { horarios, terapias } = proData;
+      const normalizedTerapias = terapias?.map((t) => {
+        const normT = normalizeText(t);
+        console.log(`Therapy "${t}" normalized as:`, normT);
+        return normT;
+      });
+      console.log('Normalized therapies for professional:', normalizedTerapias);
+
+      if (!normalizedTerapias?.includes(normalizedTherapyType)) {
+        console.error('Therapy type mismatch:', { normalizedTherapyType, normalizedTerapias });
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'El profesional no ofrece este tipo de terapia.',
+        });
+        return;
+      }
+
+      const normalizedSelectedTime = normalizeTime(citaGlobal.time);
+      console.log('Normalized selected time:', normalizedSelectedTime);
+      console.log('Horarios from professional:', horarios);
+
+      const hasAvailability = horarios?.[citaGlobal.month]?.some((day) => {
+        console.log('Checking day:', day);
+        if (day.date !== citaGlobal.date) {
+          console.log(`Day ${day.date} does not match selected appointment date ${citaGlobal.date}`);
+          return false;
+        }
+        const timeSlotMatch = day.Timeslots.some((timeslot) => {
+          const [startTime] = timeslot.split('-');
+          const normalizedStartTime = normalizeTime(startTime);
+          console.log(`Comparing timeslot: normalizedStartTime=${normalizedStartTime} vs normalizedSelectedTime=${normalizedSelectedTime}`);
+          return normalizedStartTime === normalizedSelectedTime;
+        });
+        console.log('Result for day', day.date, ':', timeSlotMatch);
+        return timeSlotMatch;
+      });
+      console.log('Availability check result:', hasAvailability);
+
+      if (hasAvailability) {
+        setSelectedPro(proId);
+        Swal.fire({
+          icon: 'success',
+          title: 'Disponible',
+          text: 'Profesional disponible para la cita seleccionada.',
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'No disponible',
+          text: 'El profesional no tiene disponibilidad en la fecha y hora seleccionadas.',
+        });
+      }
+    } catch (error) {
+      console.error('Error al verificar disponibilidad del profesional:', error);
+    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     if (!validateForm()) {
       console.error('El formulario no es válido.');
       return;
@@ -168,30 +239,83 @@ const Therapy = () => {
 
     if (!currentUser) {
       console.error('Usuario no autenticado.');
-      alert('Debes iniciar sesión para agendar una cita.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Debes iniciar sesión para agendar una cita.',
+      });
       return;
     }
 
-    if (selectedAppointments.length === 0) {
-      setShowAppointmentError(true);
+    if (!citaGlobal) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Cita no seleccionada',
+        text: 'Por favor, selecciona una cita antes de confirmar.',
+      });
       return;
     }
 
     if (!selectedPro) {
-      alert('Por favor, selecciona un profesional.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Selección incompleta',
+        text: 'Por favor, selecciona un profesional.',
+      });
       return;
     }
 
     try {
-      const normalizedTherapyType = normalizeText(formData.therapyType);
-      const updatedCitas = selectedAppointments.map((app) => ({
-        date: app.date,
-        time: app.time,
-        month: app.month.toLowerCase(),
-        therapyType: normalizedTherapyType,
+      const proDocRef = doc(db, 'pros', selectedPro);
+      const proDoc = await getDoc(proDocRef);
+      const proName = proDoc.data()?.Nombre || 'Profesional no encontrado';
+
+      // Eliminar el rango de horas seleccionado del array Timeslots
+      const proData = proDoc.data();
+      const horarios = proData.horarios || {};
+      const monthHorarios = horarios[citaGlobal.month] || [];
+
+      const updatedMonthHorarios = monthHorarios.map((day) => {
+        if (day.date === citaGlobal.date) {
+          const updatedTimeslots = day.Timeslots.filter((timeslot) => {
+            const [startTimeSlot] = timeslot.split('-');
+            return normalizeTime(startTimeSlot) !== normalizeTime(citaGlobal.time);
+          });
+          return { ...day, Timeslots: updatedTimeslots };
+        }
+        return day;
+      });
+
+      await updateDoc(proDocRef, {
+        horarios: {
+          ...horarios, [citaGlobal.month]: updatedMonthHorarios,
+        },
+      });
+
+      // Conversión de datos para Agora:
+      // Se normaliza la hora de inicio,
+      // se calcula la hora de fin y se establece la duración de 40 minutos.
+      const normalizedSelectedTime = normalizeTime(citaGlobal.time);
+      const startTime = normalizedSelectedTime;
+      const endTime = calculateEndTime(normalizedSelectedTime, 40);
+      const duration = 40;
+
+      // Para el usuario: se agrega el id del profesional (proUid)
+      const userCita = {
+        date: citaGlobal.date,
+        month: citaGlobal.month,
+        time: citaGlobal.time,
+        startTime, // Hora de inicio en formato "HH:mm"
+        endTime, // Hora de fin calculada (startTime + 40 minutos)
+        duration, // Duración en minutos (40)
+        therapyType: normalizeText(formData.therapyType),
         description: formData.description,
-        status: 'confirmed',
-      }));
+        status: 'pending',
+        uid: citaGlobal.uid,
+        proName,
+        proUid: selectedPro,
+      };
+
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnap = await getDoc(userRef);
 
@@ -202,33 +326,52 @@ const Therapy = () => {
 
       const userData = userSnap.data();
       const prevCitas = userData.Citas || [];
-      const newCitas = [...prevCitas, ...updatedCitas];
+      const updatedCitas = [...prevCitas, userCita];
 
-      await updateDoc(userRef, { Citas: newCitas });
-      console.log('Citas guardadas en Firestore:', newCitas);
-      const pro = pros.find((p) => p.id === selectedPro);
-      if (!pro) {
-        console.error('Profesional no encontrado.');
-        alert('El profesional seleccionado no existe.');
+      await updateDoc(userRef, { Citas: updatedCitas });
+      console.log('Cita guardada en Firestore para el usuario:', userCita);
+
+      // Para el profesional: se agrega el id del usuario (userId)
+      const proCita = {
+        date: citaGlobal.date,
+        month: citaGlobal.month,
+        time: citaGlobal.time,
+        startTime,
+        endTime,
+        duration,
+        therapyType: normalizeText(formData.therapyType),
+        description: formData.description,
+        status: 'pending',
+        userEmail: currentUser.email,
+        userName: formData.name,
+        userPhone: formData.phone,
+        uid: citaGlobal.uid,
+        userId: currentUser.uid,
+      };
+
+      const proMisCitasRef = doc(db, 'pros', selectedPro);
+      const proMisCitasSnap = await getDoc(proMisCitasRef);
+      if (!proMisCitasSnap.exists()) {
+        console.error('El profesional no existe en Firestore.');
         return;
       }
 
-      const newMisCitas = selectedAppointments.map((app) => ({
-        date: app.date,
-        time: app.time,
-        month: app.month.toLowerCase(),
-        therapyType: normalizedTherapyType,
-        description: formData.description,
-        userName: formData.name,
-        userEmail: formData.email,
-        userPhone: formData.phone,
-        status: 'pending',
-      }));
+      const proMisCitasData = proMisCitasSnap.data();
+      const prevMisCitas = proMisCitasData.MisCitas || [];
+      const updatedMisCitas = [...prevMisCitas, proCita];
 
-      await updateProMisCitas(pro.id, newMisCitas);
+      await updateDoc(proMisCitasRef, { MisCitas: updatedMisCitas });
+      console.log('Cita guardada en Firestore para el profesional:', proCita);
 
-      alert('¡Formulario enviado exitosamente!');
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'La cita ha sido agendada correctamente.',
+      }).then(() => {
+        window.location.reload();
+      });
 
+      // Resetear estados y datos del formulario
       setFormData({
         name: '',
         phone: '',
@@ -236,12 +379,26 @@ const Therapy = () => {
         therapyType: '',
         description: '',
       });
-      setSelectedAppointments([]);
       setSelectedPro(null);
+      setCitaGlobal({
+        date: '',
+        month: '',
+        time: '',
+        therapyType: '',
+        description: '',
+        status: 'pending',
+        uid: '',
+        proName: '',
+      });
+      setSelectedAppointments([]);
       setShowAppointmentError(false);
     } catch (error) {
-      console.error('Error al actualizar los datos en Firestore:', error);
-      alert('Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo.');
+      console.error('Error al agendar la cita:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al agendar la cita. Por favor, inténtalo de nuevo.',
+      });
     }
   };
 
@@ -361,6 +518,35 @@ const Therapy = () => {
           )}
         </div>
         <div className="DynamiCanlendar-btn-cont">
+          {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName && (
+            <div className="Date-info-cont">
+              <div className="Date-info-txt">
+                <h3>Tu cita quedó para el:</h3>
+              </div>
+              <div className="Date-info-description">
+                {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName ? (
+                  <p>
+                    {citaGlobal.date}
+                    {' '}
+                    de
+                    {citaGlobal.month}
+                    {' '}
+                    del
+                    {new Date().getFullYear()}
+                    {' '}
+                    a las
+                    {citaGlobal.time}
+                    {' '}
+                    con el doctor
+                    {citaGlobal.proName}
+                    .
+                  </p>
+                ) : (
+                  <p>No hay una cita seleccionada.</p>
+                )}
+              </div>
+            </div>
+          )}
           <button type="submit" className="DynamiCanlendar-btn">
             <h4>Confirmar</h4>
           </button>

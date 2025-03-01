@@ -1,8 +1,10 @@
 /* eslint-disable no-plusplus */
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import Swal from 'sweetalert2';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useAuth } from '../AuthContext';
 
 const useConfirmation = (
   collectionName,
@@ -15,22 +17,36 @@ const useConfirmation = (
   onDateSelection,
   formatTime,
 ) => {
+  const { setCitaGlobal } = useAuth();
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const [currentAppointmentId, setCurrentAppointmentId] = useState(null);
+  const [currentAppointmentId] = useState(null);
+
+  const removePendingCitas = (citas) => {
+    return citas.filter((cita) => cita.status !== 'pending');
+  };
+
+  const generateTimeSlots = (start, end) => {
+    const timeSlots = [];
+    for (let i = start; i < end; i++) {
+      timeSlots.push(`${formatTime(i)}-${formatTime(i + 1)}`);
+    }
+    return timeSlots;
+  };
 
   const handleConfirmHours = async () => {
+    console.log('handleConfirmHours invoked');
+    console.log('selectedDay:', selectedDay);
+
     if (!selectedDay.length) {
-      alert('Por favor, selecciona al menos un día.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Selección incompleta',
+        text: 'Por favor, selecciona al menos un día.',
+      });
       return;
     }
 
     try {
-      const userRef = doc(db, collectionName, currentUser.uid);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) {
-        console.error('El usuario no existe en Firestore.');
-        return;
-      }
       const normalizedTherapyType = collectionName === 'users'
         ? therapyType
           .toLowerCase()
@@ -38,77 +54,97 @@ const useConfirmation = (
           .replace(/[\u0300-\u036f]/g, '')
           .replace(/\s+/g, '')
         : null;
-      const appointments = selectedDay.map((day) => {
-        const monthIndex = new Date().getMonth() + day.monthOffset;
-        const monthName = new Date(2023, monthIndex).toLocaleString('es-ES', { month: 'long' }).toLowerCase();
-        return {
-          date: day.date,
-          month: monthName,
-          time: collectionName === 'users' ? formatTime(selectedTime) : formatTime(startTime),
-          therapyType: normalizedTherapyType,
-        };
-      });
-      if (typeof onDateSelection === 'function') {
-        onDateSelection(appointments);
-      }
+
+      console.log('Normalized therapyType:', normalizedTherapyType);
+
+      const Timeslots = generateTimeSlots(startTime, endTime);
+
+      const newCita = {
+        uid: uuidv4(),
+        date: selectedDay[0].date,
+        month: new Date(2023, new Date().getMonth() + selectedDay[0].monthOffset)
+          .toLocaleString('es-ES', { month: 'long' })
+          .toLowerCase(),
+        time: formatTime(selectedTime),
+        therapyType: normalizedTherapyType,
+        status: 'pending',
+        proName: '',
+        Timeslots,
+      };
+
+      setCitaGlobal(newCita);
+      console.log('Nueva cita global:', newCita);
+
       if (collectionName === 'pros') {
-        const userData = userSnap.data();
-        const existingHorarios = userData.horarios || {};
+        const proRef = doc(db, collectionName, currentUser.uid);
+        const proSnap = await getDoc(proRef);
+
+        if (!proSnap.exists()) {
+          console.log(`El profesional no existe en la colección ${collectionName}.`);
+          return;
+        }
+
+        const proData = proSnap.data();
+        const existingHorarios = proData.horarios || {};
+
+        // Construimos el objeto `updatedHorarios` con el nuevo formato
+        const updatedHorarios = { ...existingHorarios };
+
         selectedDay.forEach((day) => {
-          const monthIndex = new Date().getMonth() + day.monthOffset;
-          const monthName = new Date(2023, monthIndex).toLocaleString('es-ES', { month: 'long' }).toLowerCase();
-          const timeslots = [];
-          for (let hour = startTime; hour < endTime; hour++) {
-            const startHourFormatted = formatTime(hour);
-            const endHourFormatted = formatTime(hour + 1);
-            timeslots.push(`${startHourFormatted}-${endHourFormatted}`);
+          const monthName = new Date(2023, new Date().getMonth() + day.monthOffset)
+            .toLocaleString('es-ES', { month: 'long' })
+            .toLowerCase();
+
+          if (!updatedHorarios[monthName]) {
+            updatedHorarios[monthName] = [];
           }
-          const newDay = {
-            date: day.date,
-            Timeslots: timeslots,
-          };
-          if (existingHorarios[monthName]) {
-            const existingDays = existingHorarios[monthName];
-            const existingDayIndex = existingDays.findIndex((d) => d.date === newDay.date);
-            if (existingDayIndex !== -1) {
-              existingDays[existingDayIndex].Timeslots = [
-                ...existingDays[existingDayIndex].Timeslots,
-                ...newDay.Timeslots,
-              ];
-            } else {
-              existingHorarios[monthName].push(newDay);
-            }
+
+          // Verificar si el día ya existe en los horarios
+          const existingDay = updatedHorarios[monthName].find((d) => d.date === day.date);
+
+          if (existingDay) {
+            // Si el día ya existe, agregar los nuevos Timeslots si no están presentes
+            Timeslots.forEach((slot) => {
+              if (!existingDay.Timeslots.includes(slot)) {
+                existingDay.Timeslots.push(slot);
+              }
+            });
           } else {
-            existingHorarios[monthName] = [newDay];
+            // Si el día no existe, agregarlo con los nuevos Timeslots
+            updatedHorarios[monthName].push({
+              date: day.date,
+              Timeslots,
+            });
           }
         });
-        await updateDoc(userRef, { horarios: existingHorarios });
-        console.log('Horarios guardados en Firestore:', existingHorarios);
-      } else if (collectionName === 'users') {
-        const userData = userSnap.data();
-        const existingCitas = userData.Citas || [];
-        const newCita = {
-          uid: uuidv4(),
-          date: selectedDay[0].date,
-          month: new Date(2023, new Date().getMonth() + selectedDay[0].monthOffset)
-            .toLocaleString('es-ES', { month: 'long' })
-            .toLowerCase(),
-          time: formatTime(selectedTime),
-          therapyType: normalizedTherapyType,
-          status: 'pending',
-        };
-        const updatedCitas = [...existingCitas, newCita];
-        await updateDoc(userRef, { Citas: updatedCitas });
-        console.log('Cita guardada en Firestore:', newCita);
-        setCurrentAppointmentId(newCita.uid);
+
+        await updateDoc(proRef, { horarios: updatedHorarios });
+        console.log('Horarios actualizados en Firestore:', updatedHorarios);
       }
-      alert('Horarios confirmados correctamente.');
+
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Horarios confirmados correctamente.',
+      });
       setIsConfirmed(true);
     } catch (error) {
       console.error('Error al confirmar horarios:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al confirmar los horarios.',
+      });
     }
   };
+
   const handleEditHours = async () => {
+    console.log('handleEditHours invoked, setting isConfirmed to false');
+    setIsConfirmed(false);
+  };
+
+  const handleUpdateHours = async () => {
+    console.log('handleUpdateHours invoked');
     try {
       const userRef = doc(db, collectionName, currentUser.uid);
       const userSnap = await getDoc(userRef);
@@ -119,21 +155,27 @@ const useConfirmation = (
       }
 
       const userData = userSnap.data();
-      const existingCitas = userData.Citas || [];
+      let existingCitas = userData.Citas || [];
+      console.log('Existing citas before filtering for update:', existingCitas);
+      existingCitas = removePendingCitas(existingCitas);
+      console.log('Existing citas after filtering pending for update:', existingCitas);
 
-      // Buscar la cita actual por su uid
       const citaIndex = existingCitas.findIndex((cita) => cita.uid === currentAppointmentId);
+      console.log('Index of current appointment:', citaIndex);
 
       if (citaIndex === -1) {
         console.error('Cita no encontrada.');
         return;
       }
 
-      // Actualizar la cita existente
       const updatedCita = {
         ...existingCitas[citaIndex],
-        time: formatTime(selectedTime), // Actualizar la hora
-        status: 'edited', // Cambiar el estado a "edited"
+        date: selectedDay[0].date,
+        month: new Date(2023, new Date().getMonth() + selectedDay[0].monthOffset)
+          .toLocaleString('es-ES', { month: 'long' })
+          .toLowerCase(),
+        time: formatTime(selectedTime),
+        status: 'edited',
       };
 
       const updatedCitas = [
@@ -142,13 +184,23 @@ const useConfirmation = (
         ...existingCitas.slice(citaIndex + 1),
       ];
 
+      console.log('Updated cita to be saved:', updatedCita);
       await updateDoc(userRef, { Citas: updatedCitas });
       console.log('Cita actualizada en Firestore:', updatedCita);
 
-      alert('Cita actualizada correctamente.');
-      setIsConfirmed(false);
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Cita actualizada correctamente.',
+      });
+      setIsConfirmed(true);
     } catch (error) {
       console.error('Error al actualizar la cita:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al actualizar la cita.',
+      });
     }
   };
 
@@ -156,6 +208,7 @@ const useConfirmation = (
     isConfirmed,
     handleConfirmHours,
     handleEditHours,
+    handleUpdateHours,
   };
 };
 
