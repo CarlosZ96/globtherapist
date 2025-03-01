@@ -12,14 +12,15 @@ const HostNotification = () => {
   if (meetingAccess !== 'pending') return null;
 
   return (
-    <div style={{
-      position: 'absolute',
-      top: 10,
-      right: 10,
-      backgroundColor: '#ffc',
-      padding: '0.5rem',
-      borderRadius: '0.5rem',
-    }}
+    <div
+      style={{
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        backgroundColor: '#ffc',
+        padding: '0.5rem',
+        borderRadius: '0.5rem',
+      }}
     >
       <span
         role="button"
@@ -37,8 +38,12 @@ const HostNotification = () => {
       {showDetails && (
         <div>
           <p>El usuario X solicita acceso a la reunión</p>
-          <button type="button" onClick={() => setMeetingAccess('approved')}>Aceptar</button>
-          <button type="button" onClick={() => setMeetingAccess('none')}>Rechazar</button>
+          <button type="button" onClick={() => setMeetingAccess('approved')}>
+            Aceptar
+          </button>
+          <button type="button" onClick={() => setMeetingAccess('none')}>
+            Rechazar
+          </button>
         </div>
       )}
     </div>
@@ -49,6 +54,8 @@ const ProView = ({ meetingParams, RtcRole }) => {
   const { currentPro } = useAuth();
   const navigate = useNavigate();
   const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null); // Contenedor para la pista remota (invitado)
+
   const [client, setClient] = useState(null);
   const [micTrack, setMicTrack] = useState(null);
   const [cameraTrack, setCameraTrack] = useState(null);
@@ -67,13 +74,16 @@ const ProView = ({ meetingParams, RtcRole }) => {
         return;
       }
       try {
-        await agoraClient.join(
-          appId,
-          meetingParams.channelId,
-          meetingParams.token,
-          0,
-        );
+        await agoraClient.join(appId, meetingParams.channelId, meetingParams.token, 0);
         console.log('Se unió al canal sin tracks');
+        // Escucha cuando un usuario remoto publica su pista
+        agoraClient.on('user-published', async (user, mediaType) => {
+          await agoraClient.subscribe(user, mediaType);
+          console.log('Subscripción a usuario remoto', user.uid);
+          if (mediaType === 'video' && remoteVideoRef.current) {
+            user.videoTrack.play(remoteVideoRef.current);
+          }
+        });
       } catch (error) {
         console.error('Error al unirse al canal:', error);
       }
@@ -138,24 +148,31 @@ const ProView = ({ meetingParams, RtcRole }) => {
   };
 
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', height: '100vh', position: 'relative',
-    }}
-    >
-      <header style={{
+    <div
+      style={{
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0.5rem 1rem',
-        backgroundColor: '#f0f0f0',
+        flexDirection: 'column',
+        height: '100vh',
+        position: 'relative',
       }}
+    >
+      <header
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '0.5rem 1rem',
+          backgroundColor: '#f0f0f0',
+        }}
       >
         <h1 style={{ margin: 0 }}>Globtherapist</h1>
         <div>
           <button type="button" style={{ marginRight: '1rem' }}>
             {currentPro && currentPro.Nombre ? `${currentPro.Nombre} (${roleLabel})` : 'Profesional'}
           </button>
-          <button type="button" onClick={() => navigate('/')}>Salir</button>
+          <button type="button" onClick={() => navigate('/')}>
+            Salir
+          </button>
         </div>
       </header>
 
@@ -165,17 +182,31 @@ const ProView = ({ meetingParams, RtcRole }) => {
       <div style={{ flex: 1, backgroundColor: '#000', position: 'relative' }}>
         <div ref={localVideoRef} style={{ width: '100%', height: '100%' }} />
         {!cameraOn && (
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            color: '#fff',
-          }}
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              color: '#fff',
+            }}
           >
             La cámara está apagada
           </div>
         )}
+        {/* Contenedor pequeño para mostrar la cámara del invitado */}
+        <div
+          ref={remoteVideoRef}
+          style={{
+            position: 'absolute',
+            top: '1rem',
+            left: '1rem',
+            width: '200px',
+            height: '150px',
+            border: '2px solid #fff',
+            zIndex: 10,
+          }}
+        />
       </div>
 
       <div style={{ padding: '1rem', backgroundColor: '#f8f8f8' }}>
