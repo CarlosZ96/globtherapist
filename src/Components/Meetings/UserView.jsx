@@ -9,6 +9,7 @@ const UserView = ({ meetingParams }) => {
   const { meetingAccess, setMeetingAccess } = useAuth();
   const navigate = useNavigate();
   const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null); // Contenedor para la cámara del host
 
   const [client, setClient] = useState(null);
   const [micTrack, setMicTrack] = useState(null);
@@ -30,6 +31,14 @@ const UserView = ({ meetingParams }) => {
       try {
         await agoraClient.join(appId, meetingParams.channelId, meetingParams.token, 0);
         console.log('Usuario invitado se unió al canal');
+        // Escuchar cuando el host publica su video
+        agoraClient.on('user-published', async (user, mediaType) => {
+          await agoraClient.subscribe(user, mediaType);
+          console.log('Subscripción a usuario remoto', user.uid);
+          if (mediaType === 'video' && remoteVideoRef.current) {
+            user.videoTrack.play(remoteVideoRef.current);
+          }
+        });
       } catch (error) {
         console.error('Error al unirse al canal:', error);
       }
@@ -43,6 +52,7 @@ const UserView = ({ meetingParams }) => {
       if (client) client.leave();
     };
   }, [meetingAccess, meetingParams]);
+
   // Función para encender/apagar la cámara
   const handleToggleCamera = async () => {
     if (!cameraOn) {
@@ -129,7 +139,11 @@ const UserView = ({ meetingParams }) => {
               <p>Solicita acceso a la reunión</p>
               <button type="button" onClick={requestAccess}>Solicitar Acceso</button>
               {/* Botón de prueba para simular aprobación (como si el host aprobara) */}
-              <button type="button" onClick={() => setMeetingAccess('approved')} style={{ marginTop: '1rem' }}>
+              <button
+                type="button"
+                onClick={() => setMeetingAccess('approved')}
+                style={{ marginTop: '1rem' }}
+              >
                 Simular aprobación (prueba)
               </button>
             </>
@@ -150,6 +164,19 @@ const UserView = ({ meetingParams }) => {
               La cámara está apagada
             </div>
           )}
+          {/* Contenedor para video remoto del host */}
+          <div style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            width: '200px',
+            height: '150px',
+            border: '2px solid #fff',
+            zIndex: 10,
+          }}
+          >
+            <div ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
+          </div>
           <div style={{
             position: 'absolute',
             bottom: '1rem',
