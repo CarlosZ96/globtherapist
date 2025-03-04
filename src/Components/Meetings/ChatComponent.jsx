@@ -1,152 +1,167 @@
+/* eslint-disable new-cap */
+/* eslint-disable consistent-return */
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useEffect, useState, useRef } from 'react';
 import AC from 'agora-chat';
 
 const ChatComponent = () => {
-  const appKey = process.env.REACT_APP_AGORA_CHAT_APP_KEY; // Tu App Key para Chat
+  const appKey = process.env.REACT_APP_AGORA_CHAT_APP_KEY;
+  const functionsBaseUrl = process.env.REACT_APP_FUNCTIONS_BASE_URL;
   const [userId, setUserId] = useState('');
-  const [accessToken, setAccessToken] = useState('');
+  const [token, setToken] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [peerId, setPeerId] = useState('');
   const [message, setMessage] = useState('');
   const [logs, setLogs] = useState([]);
   const chatClient = useRef(null);
 
-  // Función para agregar mensajes al log
   const addLog = (log) => {
     setLogs((prevLogs) => [...prevLogs, log]);
   };
 
-  // Inicia sesión en Agora Chat
+  // Función para iniciar sesión en Agora Chat obteniendo el token desde Firebase Functions
   const handleLogin = () => {
-    if (userId && accessToken) {
-      chatClient.current.open({
-        user: userId,
-        // Para versiones 1.2.2 y posteriores se utiliza accessToken en lugar de agoraToken
-        accessToken,
-      });
-    } else {
-      addLog('Por favor ingresa UserID y Token.');
+    if (userId.trim() === '') {
+      addLog('Por favor, ingresa tu UserID');
+      return;
     }
+    // Llama al endpoint para obtener el token de chat
+    fetch(`${functionsBaseUrl}/createAgoraToken/createAgoraChatToken?userId=${userId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.token) {
+          setToken(data.token);
+          addLog('Token de chat obtenido correctamente');
+          // Abre la conexión utilizando el token real
+          chatClient.current.open({
+            user: userId,
+            accessToken: data.token,
+          });
+        } else {
+          addLog(`Error al obtener token: ${JSON.stringify(data)}`);
+        }
+      })
+      .catch((error) => {
+        addLog(`Error al llamar al endpoint de token: ${error.message}`);
+      });
   };
 
-  // Cierra la sesión
+  // Función para cerrar sesión
   const handleLogout = () => {
     if (chatClient.current) {
       chatClient.current.close();
-      setIsLoggedIn(false);
-      addLog('Logout exitoso.');
     }
+    setIsLoggedIn(false);
     setUserId('');
-    setAccessToken('');
     setPeerId('');
+    addLog('Logout exitoso');
   };
 
-  // Envía un mensaje peer-to-peer
+  // Función para enviar un mensaje peer-to-peer
   const handleSendMessage = async () => {
-    if (message.trim() && peerId.trim()) {
-      try {
-        const option = {
-          chatType: 'singleChat', // Chat uno a uno
-          type: 'txt', // Tipo de mensaje: texto
-          to: peerId, // Destinatario
-          msg: message, // Contenido del mensaje
-        };
-        const msgObj = AC.message.create(option);
-        await chatClient.current.send(msgObj);
-        addLog(`Mensaje enviado a ${peerId}: ${message}`);
-        setMessage('');
-      } catch (error) {
-        addLog(`Error al enviar mensaje: ${error.message}`);
-      }
-    } else {
-      addLog('Por favor ingresa contenido y PeerID.');
+    if (message.trim() === '') {
+      addLog('Por favor ingresa contenido en el mensaje');
+      return;
+    }
+    try {
+      const option = {
+        chatType: 'singleChat',
+        type: 'txt',
+        to: peerId,
+        msg: message,
+      };
+      const msgObj = AC.message.create(option);
+      await chatClient.current.send(msgObj);
+      addLog(`Mensaje enviado a ${peerId}: ${message}`);
+      setMessage('');
+    } catch (error) {
+      addLog(`Error al enviar mensaje: ${error.message}`);
     }
   };
 
   useEffect(() => {
-    // Inicializa la conexión con Agora Chat
     if (!appKey) {
-      console.error('No se encontró REACT_APP_AGORA_CHAT_APP_KEY');
+      addLog('No se encontró REACT_APP_AGORA_CHAT_APP_KEY');
       return;
     }
-    chatClient.current = new AC.Connection({ appKey });
+    // Usar "AC.connection" (en minúscula) para crear la conexión
+    chatClient.current = new AC.connection({ appKey });
     chatClient.current.addEventHandler('connection&message', {
       onConnected: () => {
         setIsLoggedIn(true);
-        addLog(`Usuario ${userId} conectado correctamente.`);
+        addLog(`Usuario ${userId} conectado exitosamente`);
       },
       onDisconnected: () => {
         setIsLoggedIn(false);
-        addLog('Desconectado.');
+        addLog('Desconectado');
       },
-      onTextMessage: (message) => {
-        addLog(`${message.from}: ${message.msg}`);
+      onTextMessage: (msg) => {
+        addLog(`${msg.from}: ${msg.msg}`);
       },
       onTokenWillExpire: () => {
-        addLog('El token está a punto de expirar.');
+        addLog('El token está a punto de expirar');
       },
       onTokenExpired: () => {
-        addLog('El token ha expirado.');
+        addLog('El token ha expirado');
       },
       onError: (error) => {
         addLog(`Error: ${error.message}`);
       },
     });
+
+    return () => {
+      if (chatClient.current) {
+        chatClient.current.close();
+      }
+    };
   }, [appKey, userId]);
 
   return (
-    <div style={{
-      width: '300px',
-      padding: '1rem',
-      border: '1px solid #ccc',
-      borderRadius: '0.5rem',
-      backgroundColor: '#fff',
-      position: 'absolute',
-      bottom: '1rem',
-      right: '1rem',
-      zIndex: 100,
-    }}
+    <div
+      style={{
+        width: '500px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        border: '1px solid #ccc',
+        padding: '10px',
+        marginTop: '1rem',
+      }}
     >
-      <h3>Chat Agora</h3>
+      <h2>Agora Chat</h2>
       {!isLoggedIn ? (
         <>
           <div>
             <label>UserID: </label>
             <input
-              id="userId"
               type="text"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
               placeholder="Ingresa tu UserID"
             />
           </div>
-          <div>
-            <label>Token: </label>
-            <input
-              type="text"
-              value={accessToken}
-              onChange={(e) => setAccessToken(e.target.value)}
-              placeholder="Ingresa el Token"
-            />
-          </div>
-          <button type="button" onClick={handleLogin}>Login</button>
+          <button type="button" onClick={handleLogin}>Login Chat</button>
         </>
       ) : (
         <>
-          <div style={{ marginBottom: '0.5rem' }}>
-            <p>
-              Bienvenido,
-              {userId}
-            </p>
-            <button type="button" onClick={handleLogout}>Logout</button>
-          </div>
+          <h3>
+            Bienvenido,
+            {' '}
+            {userId}
+          </h3>
+          <p>
+            Token generado:
+            {' '}
+            {token}
+          </p>
+          <button type="button" onClick={handleLogout}>Logout Chat</button>
           <div>
-            <label>PeerID: </label>
+            <label>Peer UserID: </label>
             <input
               type="text"
               value={peerId}
               onChange={(e) => setPeerId(e.target.value)}
-              placeholder="Destinatario"
+              placeholder="Ingresa UserID del receptor"
             />
           </div>
           <div>
@@ -155,25 +170,24 @@ const ChatComponent = () => {
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Mensaje"
+              placeholder="Escribe tu mensaje"
             />
             <button type="button" onClick={handleSendMessage}>Enviar</button>
           </div>
         </>
       )}
-      <div style={{
-        marginTop: '1rem',
-        maxHeight: '150px',
-        overflowY: 'auto',
-        border: '1px solid #eee',
-        padding: '0.5rem',
-        fontSize: '0.85rem',
-        backgroundColor: '#f9f9f9',
-      }}
+      <h3>Logs de Operación</h3>
+      <div
+        style={{
+          height: '150px',
+          overflowY: 'auto',
+          border: '1px solid #ccc',
+          padding: '5px',
+          textAlign: 'left',
+        }}
       >
-        <h4>Logs</h4>
-        {logs.map((log, index) => (
-          <div key={index}>{log}</div>
+        {logs.map((log) => (
+          <div key={log + Math.random().toString(36).substr(2, 9)}>{log}</div>
         ))}
       </div>
     </div>

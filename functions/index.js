@@ -1,10 +1,17 @@
-// Cargar las variables de entorno desde el archivo .env (sólo en desarrollo)
-require('dotenv').config();
+/* eslint-disable global-require */
+// index.js (Firebase Functions para tokens de Agora RTC y Agora Chat)
+
+// Cargar dotenv solo en desarrollo
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
-const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
+const {
+  RtcTokenBuilder, RtcRole, RtmTokenBuilder, RtmRole,
+} = require('agora-access-token');
 
 const app = express();
 
@@ -14,10 +21,8 @@ const allowedOrigins = [
   'https://globtherapist.vercel.app',
 ];
 
-// Configuración de CORS
 const corsOptions = {
   origin(origin, callback) {
-    // Permitir solicitudes sin origen (por ejemplo, herramientas de testing)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
@@ -30,13 +35,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
+// Endpoint para generar token de videollamada (RTC)
 app.get('/', (req, res) => {
-  // Forzar el header CORS en la respuesta
   res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
-
   const { channelId, role, uid } = req.query;
   const numericUid = Number(uid) || 0;
-  const expireTime = 3600; // Token válido por 1 hora
+  const expireTime = 3600; // 1 hora
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const privilegeExpireTime = currentTimestamp + expireTime;
 
@@ -44,8 +48,6 @@ app.get('/', (req, res) => {
     return res.status(400).json({ error: 'channelId y role son requeridos' });
   }
 
-  // Determina el rol para Agora:
-  // Si role es 'uidHost' se asigna PUBLISHER, de lo contrario SUBSCRIBER
   const agoraRole = role === 'uidHost' ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
 
   try {
@@ -60,6 +62,31 @@ app.get('/', (req, res) => {
     return res.status(200).json({ token });
   } catch (error) {
     console.error('Error generating token:', error);
+    return res.status(500).json({ error: error.toString() });
+  }
+});
+
+// Endpoint para generar token de Agora Chat (RTM)
+app.get('/createAgoraChatToken', (req, res) => {
+  res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
+  const { userId } = req.query;
+  if (!userId) {
+    return res.status(400).json({ error: 'userId es requerido' });
+  }
+  const expireTime = 3600; // 1 hora
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const privilegeExpireTime = currentTimestamp + expireTime;
+  try {
+    const token = RtmTokenBuilder.buildToken(
+      process.env.AGORA_APP_ID,
+      process.env.AGORA_APP_CERTIFICATE,
+      userId,
+      RtmRole.USER,
+      privilegeExpireTime,
+    );
+    return res.status(200).json({ token });
+  } catch (error) {
+    console.error('Error generating chat token:', error);
     return res.status(500).json({ error: error.toString() });
   }
 });

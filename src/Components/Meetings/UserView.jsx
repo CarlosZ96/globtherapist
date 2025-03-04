@@ -4,6 +4,7 @@ import AgoraRTC from 'agora-rtc-sdk-ng';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
+import ChatComponent from './ChatComponent';
 
 const UserView = ({ meetingParams }) => {
   const { meetingAccess, setMeetingAccess } = useAuth();
@@ -196,6 +197,7 @@ const UserView = ({ meetingParams }) => {
           </div>
         </div>
       )}
+      <ChatComponent />
     </div>
   );
 };
