@@ -70,8 +70,8 @@ app.get('/', (req, res) => {
 // Endpoint para generar token de Agora Chat (RTM)
 // Nota: Usamos ChatTokenBuilder para generar el token de chat
 app.get('/createAgoraChatToken', (req, res) => {
-  console.log('[DEBUG] AGORA_CHAT_APP_ID:', process.env.AGORA_CHAT_APP_ID);
-  console.log('[DEBUG] AGORA_CHAT_APP_CERTIFICATE:', `${process.env.AGORA_CHAT_APP_CERTIFICATE?.substring(0, 5)}...`); // Muestra solo los primeros 5 caracteres del certificado
+  console.log('[DEBUG] AGORA_CHAT_APP_ID:', process.env.agora.chat_app_id);
+  console.log('[DEBUG] AGORA_CHAT_APP_CERTIFICATE:', `${process.env.agora.chat_app_id?.substring(0, 5)}...`); // Muestra solo los primeros 5 caracteres del certificado
   console.log('[DEBUG] userId recibido:', req.query.userId);
 
   res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
@@ -82,12 +82,12 @@ app.get('/createAgoraChatToken', (req, res) => {
 
   try {
     const token = ChatTokenBuilder.buildUserToken(
-      process.env.AGORA_CHAT_APP_ID, // App ID de Chat (AppKey)
-      process.env.AGORA_CHAT_APP_CERTIFICATE, // App Certificate (OrgName)
+      process.env.agora.chat_app_id,
+      process.env.agora.chat_app_certificate,
       userId,
       3600,
     );
-    console.log('[DEBUG] Token generado:', `${token?.substring(0, 10)}...`); // Muestra solo los primeros 10 caracteres del token
+    console.log('[DEBUG] Token generado:', `${token?.substring(0, 10)}...`);
     return res.status(200).json({ token });
   } catch (error) {
     console.error('[ERROR] Detalle del error:', error);

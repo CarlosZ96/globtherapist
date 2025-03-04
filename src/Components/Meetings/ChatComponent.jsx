@@ -1,6 +1,5 @@
-/* eslint-disable new-cap */
 /* eslint-disable consistent-return */
-/* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable new-cap */
 import React, { useEffect, useState, useRef } from 'react';
 import AC from 'agora-chat';
 
@@ -8,187 +7,211 @@ const ChatComponent = () => {
   const appKey = process.env.REACT_APP_AGORA_CHAT_APP_KEY;
   const functionsBaseUrl = process.env.REACT_APP_FUNCTIONS_BASE_URL;
   const [userId, setUserId] = useState('');
-  const [token, setToken] = useState('');
+  const [setToken] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [peerId, setPeerId] = useState('');
   const [message, setMessage] = useState('');
   const [logs, setLogs] = useState([]);
   const chatClient = useRef(null);
 
-  const addLog = (log) => {
-    setLogs((prevLogs) => [...prevLogs, log]);
+  const addLog = (log) => setLogs((prev) => [...prev, log]);
+
+  const styles = {
+    container: {
+      width: '500px',
+      margin: '20px auto',
+      padding: '20px',
+      border: '1px solid #ccc',
+      borderRadius: '8px',
+    },
+    loginContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '10px',
+    },
+    chatContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '15px',
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    messageSection: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '10px',
+    },
+    messageInput: {
+      display: 'flex',
+      gap: '10px',
+    },
+    input: {
+      padding: '8px',
+      border: '1px solid #ddd',
+      borderRadius: '4px',
+      flex: 1,
+    },
+    button: {
+      padding: '8px 15px',
+      backgroundColor: '#007bff',
+      color: 'white',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+    },
+    logs: {
+      marginTop: '20px',
+      height: '200px',
+      overflowY: 'auto',
+      border: '1px solid #eee',
+      padding: '10px',
+      borderRadius: '4px',
+    },
+    logEntry: {
+      padding: '5px',
+      borderBottom: '1px solid #eee',
+    },
   };
 
-  // Función para iniciar sesión en Agora Chat obteniendo el token desde Firebase Functions
   const handleLogin = () => {
-    if (userId.trim() === '') {
-      addLog('Por favor, ingresa tu UserID');
+    if (!userId.trim()) {
+      addLog('Ingresa un UserID válido');
       return;
     }
-    console.log('Enviando userId:', userId);
-    // Llama al endpoint para obtener el token de chat
-    fetch(`${functionsBaseUrl}/createAgoraToken/createAgoraChatToken?userId=${userId}`)
-      .then((response) => response.json())
+
+    fetch(`${functionsBaseUrl}/createAgoraChatToken?userId=${encodeURIComponent(userId)}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
         if (data.token) {
           setToken(data.token);
-          addLog('Token de chat obtenido correctamente');
-          // Abre la conexión utilizando el token real
-          chatClient.current.open({
-            user: userId,
-            accessToken: data.token,
-          });
+          chatClient.current.open({ user: userId, accessToken: data.token });
+          addLog('Token obtenido!');
         } else {
-          addLog(`Error al obtener token: ${JSON.stringify(data)}`);
+          addLog(`Error en respuesta: ${JSON.stringify(data)}`);
         }
       })
-      .catch((error) => {
-        addLog(`Error al llamar al endpoint de token: ${error.message}`);
-      });
+      .catch((err) => addLog(`Error: ${err.message}`));
   };
 
-  // Función para cerrar sesión
   const handleLogout = () => {
-    if (chatClient.current) {
-      chatClient.current.close();
-    }
+    chatClient.current?.close();
     setIsLoggedIn(false);
     setUserId('');
     setPeerId('');
-    addLog('Logout exitoso');
+    addLog('Sesión cerrada');
   };
 
-  // Función para enviar un mensaje peer-to-peer
   const handleSendMessage = async () => {
-    if (message.trim() === '') {
-      addLog('Por favor ingresa contenido en el mensaje');
-      return;
-    }
+    if (!message.trim() || !peerId.trim()) return;
+
     try {
-      const option = {
+      const msg = AC.message.create({
         chatType: 'singleChat',
         type: 'txt',
         to: peerId,
         msg: message,
-      };
-      const msgObj = AC.message.create(option);
-      await chatClient.current.send(msgObj);
-      addLog(`Mensaje enviado a ${peerId}: ${message}`);
+      });
+      await chatClient.current.send(msg);
+      addLog(`Mensaje a ${peerId}: ${message}`);
       setMessage('');
     } catch (error) {
-      addLog(`Error al enviar mensaje: ${error.message}`);
+      addLog(`Error enviando mensaje: ${error.message}`);
     }
   };
 
   useEffect(() => {
     if (!appKey) {
-      addLog('No se encontró agora.chat_app_id');
+      addLog('ERROR: AppKey no configurado');
       return;
     }
-    // Usar "AC.connection" (en minúscula) para crear la conexión
+
     chatClient.current = new AC.connection({ appKey });
-    chatClient.current.addEventHandler('connection&message', {
+
+    const handler = {
       onConnected: () => {
         setIsLoggedIn(true);
-        addLog(`Usuario ${userId} conectado exitosamente`);
+        addLog('Conectado!');
       },
       onDisconnected: () => {
         setIsLoggedIn(false);
         addLog('Desconectado');
       },
-      onTextMessage: (msg) => {
-        addLog(`${msg.from}: ${msg.msg}`);
-      },
-      onTokenWillExpire: () => {
-        addLog('El token está a punto de expirar');
-      },
-      onTokenExpired: () => {
-        addLog('El token ha expirado');
-      },
-      onError: (error) => {
-        addLog(`Error: ${error.message}`);
-      },
-    });
+      onTextMessage: (msg) => addLog(`${msg.from}: ${msg.msg}`),
+      onTokenWillExpire: () => addLog('Token por expirar'),
+      onTokenExpired: () => addLog('Token expirado'),
+      onError: (err) => addLog(`ERROR: ${err.message}`),
+    };
+
+    chatClient.current.addEventHandler('connection&message', handler);
 
     return () => {
-      if (chatClient.current) {
-        chatClient.current.close();
-      }
+      chatClient.current?.removeEventHandler('connection&message');
+      chatClient.current?.close();
     };
-  }, [appKey, userId]);
+  }, [appKey]);
 
   return (
-    <div
-      style={{
-        width: '500px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
-        border: '1px solid #ccc',
-        padding: '10px',
-        marginTop: '1rem',
-      }}
-    >
+    <div style={styles.container}>
       <h2>Agora Chat</h2>
+
       {!isLoggedIn ? (
-        <>
-          <div>
-            <label>UserID: </label>
-            <input
-              type="text"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              placeholder="Ingresa tu UserID"
-            />
-          </div>
-          <button type="button" onClick={handleLogin}>Login Chat</button>
-        </>
+        <div style={styles.loginContainer}>
+          <input
+            type="text"
+            value={userId}
+            onChange={(e) => setUserId(e.target.value)}
+            placeholder="Tu UserID"
+            style={styles.input}
+          />
+          <button type="button" onClick={handleLogin} style={styles.button}>
+            Conectar
+          </button>
+        </div>
       ) : (
-        <>
-          <h3>
-            Bienvenido,
-            {' '}
-            {userId}
-          </h3>
-          <p>
-            Token generado:
-            {' '}
-            {token}
-          </p>
-          <button type="button" onClick={handleLogout}>Logout Chat</button>
-          <div>
-            <label>Peer UserID: </label>
+        <div style={styles.chatContainer}>
+          <div style={styles.header}>
+            <h3>
+              Usuario:
+              {userId}
+            </h3>
+            <button type="button" onClick={handleLogout} style={styles.button}>
+              Salir
+            </button>
+          </div>
+
+          <div style={styles.messageSection}>
             <input
               type="text"
               value={peerId}
               onChange={(e) => setPeerId(e.target.value)}
-              placeholder="Ingresa UserID del receptor"
+              placeholder="ID del receptor"
+              style={styles.input}
             />
+            <div style={styles.messageInput}>
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Escribe un mensaje"
+                style={styles.input}
+              />
+              <button type="button" onClick={handleSendMessage} style={styles.button}>
+                Enviar
+              </button>
+            </div>
           </div>
-          <div>
-            <label>Mensaje: </label>
-            <input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Escribe tu mensaje"
-            />
-            <button type="button" onClick={handleSendMessage}>Enviar</button>
-          </div>
-        </>
+        </div>
       )}
-      <h3>Logs de Operación</h3>
-      <div
-        style={{
-          height: '150px',
-          overflowY: 'auto',
-          border: '1px solid #ccc',
-          padding: '5px',
-          textAlign: 'left',
-        }}
-      >
+
+      <div style={styles.logs}>
         {logs.map((log) => (
-          <div key={log + Math.random().toString(36).substr(2, 9)}>{log}</div>
+          <div key={log + Math.random()} style={styles.logEntry}>{log}</div>
         ))}
       </div>
     </div>
