@@ -1,7 +1,6 @@
 /* eslint-disable global-require */
 // index.js (Firebase Functions para tokens de Agora RTC y Agora Chat)
 
-// Cargar dotenv solo en desarrollo
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
@@ -10,12 +9,14 @@ const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
 const {
-  RtcTokenBuilder, RtcRole, RtmTokenBuilder, RtmRole,
+  RtcTokenBuilder, RtcRole, // para RTC
 } = require('agora-access-token');
+
+// Para Agora Chat, usa el paquete agora-token
+const { ChatTokenBuilder } = require('agora-token');
 
 const app = express();
 
-// Lista de orígenes permitidos
 const allowedOrigins = [
   'http://localhost:3000',
   'https://globtherapist.vercel.app',
@@ -61,12 +62,13 @@ app.get('/', (req, res) => {
     );
     return res.status(200).json({ token });
   } catch (error) {
-    console.error('Error generating token:', error);
+    console.error('Error generating RTC token:', error);
     return res.status(500).json({ error: error.toString() });
   }
 });
 
 // Endpoint para generar token de Agora Chat (RTM)
+// Nota: Usamos ChatTokenBuilder para generar el token de chat
 app.get('/createAgoraChatToken', (req, res) => {
   res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
   const { userId } = req.query;
@@ -74,15 +76,13 @@ app.get('/createAgoraChatToken', (req, res) => {
     return res.status(400).json({ error: 'userId es requerido' });
   }
   const expireTime = 3600; // 1 hora
-  const currentTimestamp = Math.floor(Date.now() / 1000);
-  const privilegeExpireTime = currentTimestamp + expireTime;
   try {
-    const token = RtmTokenBuilder.buildToken(
-      process.env.AGORA_APP_ID,
-      process.env.AGORA_APP_CERTIFICATE,
+    // Genera el token de chat usando ChatTokenBuilder.buildAppToken
+    const token = ChatTokenBuilder.buildAppToken(
+      process.env.AGORA_CHAT_APP_ID,
+      process.env.AGORA_CHAT_APP_CERTIFICATE,
       userId,
-      RtmRole.USER,
-      privilegeExpireTime,
+      expireTime,
     );
     return res.status(200).json({ token });
   } catch (error) {
