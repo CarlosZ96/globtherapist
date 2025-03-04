@@ -25,6 +25,7 @@ const ChatComponent = () => {
       addLog('Por favor, ingresa tu UserID');
       return;
     }
+    console.log('Enviando userId:', userId);
     // Llama al endpoint para obtener el token de chat
     fetch(`${functionsBaseUrl}/createAgoraToken/createAgoraChatToken?userId=${userId}`)
       .then((response) => response.json())
@@ -81,7 +82,7 @@ const ChatComponent = () => {
 
   useEffect(() => {
     if (!appKey) {
-      addLog('No se encontró REACT_APP_AGORA_CHAT_APP_KEY');
+      addLog('No se encontró agora.chat_app_id');
       return;
     }
     // Usar "AC.connection" (en minúscula) para crear la conexión
