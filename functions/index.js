@@ -12,7 +12,7 @@ const {
   RtcTokenBuilder, RtcRole, // para RTC
 } = require('agora-access-token');
 
-// Para Agora Chat, usa el paquete agora-token
+// Para Agora Chat usamos el paquete agora-token
 const { ChatTokenBuilder } = require('agora-token');
 
 const app = express();
@@ -68,10 +68,15 @@ app.get('/', (req, res) => {
 });
 
 // Endpoint para generar token de Agora Chat (RTM)
-// Nota: Usamos ChatTokenBuilder para generar el token de chat
+// Nota: Usamos ChatTokenBuilder.buildAppToken para generar el token de chat,
+// siguiendo la documentación que indica
+// que se debe pasar el userId junto con el tiempo de expiración.
 app.get('/createAgoraChatToken', (req, res) => {
-  console.log('[DEBUG] AGORA_CHAT_APP_ID:', process.env.agora.chat_app_id);
-  console.log('[DEBUG] AGORA_CHAT_APP_CERTIFICATE:', `${process.env.agora.chat_app_id?.substring(0, 5)}...`); // Muestra solo los primeros 5 caracteres del certificado
+  console.log('[DEBUG] AGORA_CHAT_APP_ID:', process.env.REACT_APP_AGORA_CHAT_APP_KEY);
+  console.log(
+    '[DEBUG] AGORA_CHAT_APP_CERTIFICATE:',
+    `${process.env.agora.chat_app_certificate?.substring(0, 5)}...`,
+  );
   console.log('[DEBUG] userId recibido:', req.query.userId);
 
   res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
@@ -81,9 +86,9 @@ app.get('/createAgoraChatToken', (req, res) => {
   }
 
   try {
-    const token = ChatTokenBuilder.buildUserToken(
-      process.env.agora.chat_app_id,
-      process.env.agora.chat_app_certificate,
+    const token = ChatTokenBuilder.buildAppToken(
+      process.env.REACT_APP_AGORA_CHAT_APP_KEY,
+      process.env.AGORA_APP_CERTIFICATE,
       userId,
       3600,
     );

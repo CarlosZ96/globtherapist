@@ -46,6 +46,7 @@ const ChatComponent = () => {
     },
     messageInput: {
       display: 'flex',
+      flexDirection: 'row',
       gap: '10px',
     },
     input: {
@@ -76,6 +77,25 @@ const ChatComponent = () => {
     },
   };
 
+  // Función para refrescar el token cuando esté por expirar o ya expiró
+  const refreshToken = () => {
+    fetch(`${functionsBaseUrl}/createAgoraToken?userId=${encodeURIComponent(userId)}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (data.token) {
+          setToken(data.token);
+          chatClient.current.renewToken(data.token);
+          addLog('Token renovado exitosamente!');
+        } else {
+          addLog(`Error al renovar token: ${JSON.stringify(data)}`);
+        }
+      })
+      .catch((err) => addLog(`Error al renovar token: ${err.message}`));
+  };
+
   const handleLogin = () => {
     if (!userId.trim()) {
       addLog('Ingresa un UserID válido');
@@ -91,7 +111,7 @@ const ChatComponent = () => {
         if (data.token) {
           setToken(data.token);
           chatClient.current.open({ user: userId, accessToken: data.token });
-          addLog('Token obtenido!');
+          addLog('Token obtenido y conexión iniciada!');
         } else {
           addLog(`Error en respuesta: ${JSON.stringify(data)}`);
         }
@@ -143,8 +163,14 @@ const ChatComponent = () => {
         addLog('Desconectado');
       },
       onTextMessage: (msg) => addLog(`${msg.from}: ${msg.msg}`),
-      onTokenWillExpire: () => addLog('Token por expirar'),
-      onTokenExpired: () => addLog('Token expirado'),
+      onTokenWillExpire: () => {
+        addLog('Token por expirar, renovando token...');
+        refreshToken();
+      },
+      onTokenExpired: () => {
+        addLog('Token expirado, renovando token...');
+        refreshToken();
+      },
       onError: (err) => addLog(`ERROR: ${err.message}`),
     };
 
@@ -154,7 +180,7 @@ const ChatComponent = () => {
       chatClient.current?.removeEventHandler('connection&message');
       chatClient.current?.close();
     };
-  }, [appKey]);
+  }, [appKey, userId, functionsBaseUrl]);
 
   return (
     <div style={styles.container}>
@@ -210,8 +236,8 @@ const ChatComponent = () => {
       )}
 
       <div style={styles.logs}>
-        {logs.map((log) => (
-          <div key={log + Math.random()} style={styles.logEntry}>{log}</div>
+        {logs.map((log, index) => (
+          <div key={index.toString() + log} style={styles.logEntry}>{log}</div>
         ))}
       </div>
     </div>
