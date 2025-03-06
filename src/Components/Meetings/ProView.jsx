@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
+import ChatComponent from './ChatComponent';
 
 // Componente de notificación para el host
 const HostNotification = () => {
@@ -176,7 +177,6 @@ const ProView = ({ meetingParams, RtcRole }) => {
         </div>
       </header>
 
-      {/* Notificación para el host */}
       <HostNotification />
 
       <div style={{ flex: 1, backgroundColor: '#000', position: 'relative' }}>
@@ -217,6 +217,10 @@ const ProView = ({ meetingParams, RtcRole }) => {
           {micOn ? 'Apagar micrófono' : 'Encender micrófono'}
         </button>
       </div>
+      <ChatComponent
+        clientId={currentPro.id}
+        channelId={meetingParams.channelId}
+      />
     </div>
   );
 };

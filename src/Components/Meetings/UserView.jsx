@@ -4,13 +4,14 @@ import AgoraRTC from 'agora-rtc-sdk-ng';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
+import ChatComponent from './ChatComponent';
 
 const UserView = ({ meetingParams }) => {
   const { meetingAccess, setMeetingAccess } = useAuth();
   const navigate = useNavigate();
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null); // Contenedor para la cámara del host
-
+  const { currentUser } = useAuth();
   const [client, setClient] = useState(null);
   const [micTrack, setMicTrack] = useState(null);
   const [cameraTrack, setCameraTrack] = useState(null);
@@ -164,7 +165,6 @@ const UserView = ({ meetingParams }) => {
               La cámara está apagada
             </div>
           )}
-          {/* Contenedor para video remoto del host */}
           <div style={{
             position: 'absolute',
             top: '1rem',
@@ -196,6 +196,10 @@ const UserView = ({ meetingParams }) => {
           </div>
         </div>
       )}
+      <ChatComponent
+        clientId={currentUser.uid}
+        channelId={meetingParams.channelId}
+      />
     </div>
   );
 };
