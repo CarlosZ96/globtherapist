@@ -28,6 +28,7 @@ const ChatComponent = ({ clientId, channelId }) => {
         // Inicializa el cliente RTM con modo "rtm"
         rtmClient.current = AgoraRTM.createInstance(APP_ID, {
           enableLogUpload: false,
+          logFilter: AgoraRTM.LOG_FILTER_OFF,
         });
 
         // Autenticación con token (usando tu función getRtmToken)
@@ -45,7 +46,9 @@ const ChatComponent = ({ clientId, channelId }) => {
 
         setIsConnected(true);
       } catch (error) {
-        console.error('Error RTM:', error);
+        if (!error.message.includes('webcollector-rtm.agora.io')) {
+          console.error('Error RTM:', error);
+        }
       }
     };
 

@@ -1,4 +1,3 @@
-// chatToken.js
 const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
@@ -6,7 +5,6 @@ const { RtmTokenBuilder, RtmRole } = require('agora-access-token');
 
 const app = express();
 
-// Misma configuración CORS que en index.js
 const allowedOrigins = [
   'http://localhost:3000',
   'https://globtherapist.vercel.app',
