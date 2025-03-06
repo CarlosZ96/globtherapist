@@ -25,23 +25,27 @@ const ChatComponent = ({ clientId, channelId }) => {
   useEffect(() => {
     const initRTM = async () => {
       try {
-        rtmClient.current = AgoraRTM.createInstance(APP_ID);
+        // Inicializa el cliente RTM con modo "rtm"
+        rtmClient.current = AgoraRTM.createInstance(APP_ID, {
+          enableLogUpload: false,
+        });
 
-        // Autenticación con token
+        // Autenticación con token (usando tu función getRtmToken)
         const token = await getRtmToken(clientId);
         await rtmClient.current.login({ uid: clientId, token });
 
-        // Unirse al canal de video
+        // Únete al canal (mismo que la videollamada)
         channel.current = rtmClient.current.createChannel(channelId);
         await channel.current.join();
-        setIsConnected(true);
 
-        // Escuchar mensajes
-        channel.current.on('ChannelMessage', (message, senderId) => {
-          setMessages((prev) => [...prev, { senderId, text: message.text }]);
+        // Escucha mensajes
+        channel.current.on('ChannelMessage', (msg, memberId) => {
+          setMessages((prev) => [...prev, { senderId: memberId, text: msg.text }]);
         });
+
+        setIsConnected(true);
       } catch (error) {
-        console.error('Error en RTM:', error);
+        console.error('Error RTM:', error);
       }
     };
 
@@ -81,9 +85,9 @@ const ChatComponent = ({ clientId, channelId }) => {
           <div
             key={`${msg.senderId}-${msg.text}-${Date.now()}`}
             style={{
-            textAlign: msg.senderId === clientId ? 'right' : 'left',
-            margin: '0.5rem 0',
-          }}
+              textAlign: msg.senderId === clientId ? 'right' : 'left',
+              margin: '0.5rem 0',
+            }}
           >
             <strong>
               {msg.senderId}
@@ -102,6 +106,7 @@ const ChatComponent = ({ clientId, channelId }) => {
         style={{ width: '70%', marginRight: '0.5rem' }}
       />
       <button
+        type="button"
         onClick={sendMessage}
         disabled={!isConnected}
       >
