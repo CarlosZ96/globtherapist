@@ -1,5 +1,5 @@
 /* eslint-disable global-require */
-// index.js (Firebase Functions para tokens de Agora RTC y Agora Chat)
+// index.js (Firebase Functions para tokens de Agora RTC)
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
@@ -8,12 +8,8 @@ if (process.env.NODE_ENV !== 'production') {
 const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
-const {
-  RtcTokenBuilder, RtcRole, // para RTC
-} = require('agora-access-token');
-
-// Para Agora Chat usamos el paquete agora-token
-const { ChatTokenBuilder } = require('agora-token');
+const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
+const chatToken = require('./chatToken');
 
 const app = express();
 
@@ -40,14 +36,15 @@ app.options('*', cors(corsOptions));
 app.get('/', (req, res) => {
   res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
   const { channelId, role, uid } = req.query;
-  const numericUid = Number(uid) || 0;
-  const expireTime = 3600; // 1 hora
-  const currentTimestamp = Math.floor(Date.now() / 1000);
-  const privilegeExpireTime = currentTimestamp + expireTime;
 
   if (!channelId || !role) {
     return res.status(400).json({ error: 'channelId y role son requeridos' });
   }
+
+  const numericUid = Number(uid) || 0;
+  const expireTime = 3600; // 1 hora de expiración
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const privilegeExpireTime = currentTimestamp + expireTime;
 
   const agoraRole = role === 'uidHost' ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
 
@@ -67,37 +64,5 @@ app.get('/', (req, res) => {
   }
 });
 
-// Endpoint para generar token de Agora Chat (RTM)
-// Nota: Usamos ChatTokenBuilder.buildAppToken para generar el token de chat,
-// siguiendo la documentación que indica
-// que se debe pasar el userId junto con el tiempo de expiración.
-app.get('/createAgoraChatToken', (req, res) => {
-  console.log('[DEBUG] AGORA_CHAT_APP_ID:', process.env.REACT_APP_AGORA_CHAT_APP_KEY);
-  console.log(
-    '[DEBUG] AGORA_CHAT_APP_CERTIFICATE:',
-    `${process.env.agora.chat_app_certificate?.substring(0, 5)}...`,
-  );
-  console.log('[DEBUG] userId recibido:', req.query.userId);
-
-  res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
-  const { userId } = req.query;
-  if (!userId || userId.trim() === '') {
-    return res.status(400).json({ error: 'userId es requerido y no puede estar vacío' });
-  }
-
-  try {
-    const token = ChatTokenBuilder.buildAppToken(
-      process.env.REACT_APP_AGORA_CHAT_APP_KEY,
-      process.env.AGORA_APP_CERTIFICATE,
-      userId,
-      3600,
-    );
-    console.log('[DEBUG] Token generado:', `${token?.substring(0, 10)}...`);
-    return res.status(200).json({ token });
-  } catch (error) {
-    console.error('[ERROR] Detalle del error:', error);
-    return res.status(500).json({ error: error.toString() });
-  }
-});
-
 exports.createAgoraToken = functions.https.onRequest(app);
+exports.createAgoraChatToken = chatToken.createAgoraChatToken;

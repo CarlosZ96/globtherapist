@@ -10,7 +10,10 @@
         "firebase-debug.log",
         "firebase-debug.*.log",
         "*.local"
-      ]
+      ],
+      "environmentVariables": {
+        "REACT_APP_AGORA_CHAT_APP_KEY": "411303755#1502723"
+      }
     }
   ]
 }

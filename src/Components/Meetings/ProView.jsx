@@ -217,7 +217,10 @@ const ProView = ({ meetingParams, RtcRole }) => {
           {micOn ? 'Apagar micrófono' : 'Encender micrófono'}
         </button>
       </div>
-      <ChatComponent />
+      <ChatComponent
+        clientId={currentPro.id}
+        channelId={meetingParams.channelId}
+      />
     </div>
   );
 };

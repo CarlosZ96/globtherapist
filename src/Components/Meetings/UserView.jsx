@@ -11,7 +11,7 @@ const UserView = ({ meetingParams }) => {
   const navigate = useNavigate();
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null); // Contenedor para la cámara del host
-
+  const { currentUser } = useAuth();
   const [client, setClient] = useState(null);
   const [micTrack, setMicTrack] = useState(null);
   const [cameraTrack, setCameraTrack] = useState(null);
@@ -165,7 +165,6 @@ const UserView = ({ meetingParams }) => {
               La cámara está apagada
             </div>
           )}
-          {/* Contenedor para video remoto del host */}
           <div style={{
             position: 'absolute',
             top: '1rem',
@@ -197,7 +196,10 @@ const UserView = ({ meetingParams }) => {
           </div>
         </div>
       )}
-      <ChatComponent />
+      <ChatComponent
+        clientId={currentUser.uid}
+        channelId={meetingParams.channelId}
+      />
     </div>
   );
 };
