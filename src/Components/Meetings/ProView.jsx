@@ -194,7 +194,6 @@ const ProView = ({ meetingParams, RtcRole }) => {
             La cámara está apagada
           </div>
         )}
-        {/* Contenedor pequeño para mostrar la cámara del invitado */}
         <div
           ref={remoteVideoRef}
           style={{
@@ -218,7 +217,7 @@ const ProView = ({ meetingParams, RtcRole }) => {
         </button>
       </div>
       <ChatComponent
-        clientId={currentPro.id}
+        clientId={currentPro.uid}
         channelId={meetingParams.channelId}
       />
     </div>

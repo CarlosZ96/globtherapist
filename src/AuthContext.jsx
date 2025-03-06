@@ -126,12 +126,32 @@ export const AuthProvider = ({ children }) => {
     isAdmin,
     citaGlobal,
     setCitaGlobal,
-    meetingAccess, // nuevo valor
-    setMeetingAccess, // función para actualizarlo
+    meetingAccess,
+    setMeetingAccess,
     login,
     logout,
     updateUserCitas,
     updateProMisCitas,
+    getUsername: async (uid) => {
+      try {
+        // Busca primero en 'users'
+        const userDoc = await getDoc(doc(db, 'users', uid));
+        if (userDoc.exists()) {
+          return userDoc.data().username || 'Usuario'; // Campo "nombre" en users
+        }
+
+        // Si no existe en 'users', busca en 'pros'
+        const proDoc = await getDoc(doc(db, 'pros', uid));
+        if (proDoc.exists()) {
+          return proDoc.data().username || 'Profesional'; // Campo "username" en pros
+        }
+
+        return 'Usuario'; // Si no existe en ninguna colección
+      } catch (error) {
+        console.error('Error obteniendo nombre:', error);
+        return 'Usuario';
+      }
+    },
   }), [
     currentUser, userData, currentPro, pros, isAdmin, citaGlobal, meetingAccess, updateUserCitas,
   ]);

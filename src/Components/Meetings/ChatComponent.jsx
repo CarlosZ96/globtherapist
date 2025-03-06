@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import AgoraRTM from 'agora-rtm-sdk';
 import PropTypes from 'prop-types';
+import { useAuth } from '../../AuthContext';
 
 const ChatComponent = ({ clientId, channelId }) => {
   const APP_ID = process.env.REACT_APP_AGORA_APP_ID;
@@ -11,7 +12,28 @@ const ChatComponent = ({ clientId, channelId }) => {
   const [isConnected, setIsConnected] = useState(false);
   const rtmClient = useRef(null);
   const channel = useRef(null);
+  const { getUsername } = useAuth(); // Función que obtiene el nombre desde Firebase
+  const [usernames, setUsernames] = useState({});
 
+  const fetchUsername = async (uid) => {
+    if (!usernames[uid]) {
+      const name = await getUsername(uid); // Implementa esta función en AuthContext
+      setUsernames((prev) => ({ ...prev, [uid]: name }));
+    }
+  };
+
+  useEffect(() => {
+    if (clientId) {
+      fetchUsername(clientId); // Precarga el nombre del usuario actual (quien envía mensajes)
+    }
+  }, [clientId]); // Se ejecuta cuando clientId cambia
+
+  // Inicializar RTM (useEffect existente)
+  useEffect(() => {
+    const initRTM = async () => { /* ... */ };
+    if (clientId && channelId) initRTM();
+    return () => { /* ... */ };
+  }, [clientId, channelId]);
   // Obtener token RTM desde Firebase
   const getRtmToken = async (uid) => {
     const response = await fetch(
@@ -40,7 +62,9 @@ const ChatComponent = ({ clientId, channelId }) => {
         await channel.current.join();
 
         // Escucha mensajes
-        channel.current.on('ChannelMessage', (msg, memberId) => {
+        channel.current.on('ChannelMessage', async (msg, memberId) => {
+          const username = await getUsername(memberId); // Obtén el nombre primero
+          setUsernames((prev) => ({ ...prev, [memberId]: username }));
           setMessages((prev) => [...prev, { senderId: memberId, text: msg.text }]);
         });
 
@@ -87,16 +111,12 @@ const ChatComponent = ({ clientId, channelId }) => {
         {messages.map((msg) => (
           <div
             key={`${msg.senderId}-${msg.text}-${Date.now()}`}
-            style={{
-              textAlign: msg.senderId === clientId ? 'right' : 'left',
-              margin: '0.5rem 0',
-            }}
+            style={{ /* ... */ }}
           >
             <strong>
-              {msg.senderId}
-              :
+              {usernames[msg.senderId] || 'Cargando...'}
+              {' '}
             </strong>
-            {' '}
             {msg.text}
           </div>
         ))}
