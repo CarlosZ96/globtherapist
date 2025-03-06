@@ -1,25 +1,46 @@
+// chatToken.js
 const functions = require('firebase-functions');
-const { RtmTokenBuilder, RtmRole } = require('agora-access-token'); // Cambia a RTM
+const express = require('express');
+const cors = require('cors');
+const { RtmTokenBuilder, RtmRole } = require('agora-access-token');
 
-exports.createAgoraChatToken = functions.https.onRequest((req, res) => {
+const app = express();
+
+// Misma configuración CORS que en index.js
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://globtherapist.vercel.app',
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+app.get('/', (req, res) => {
+  res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
   const { userId, channelId } = req.query;
 
-  // Validaciones
   if (!userId || !channelId) {
     return res.status(400).json({ error: 'userId y channelId son requeridos' });
   }
 
   try {
-    const appId = process.env.AGORA_APP_ID; // Asegúrate de que coincida con tu proyecto
-    const appCertificate = process.env.AGORA_APP_CERTIFICATE;
-    const expireTime = 3600; // 1 hora
-
     const token = RtmTokenBuilder.buildToken(
-      appId,
-      appCertificate,
+      process.env.AGORA_APP_ID, // ¡Usa el mismo nombre de variable que en index.js!
+      process.env.AGORA_APP_CERTIFICATE,
       userId,
-      RtmRole.Rtm_User, // Rol básico para mensajería
-      expireTime,
+      RtmRole.Rtm_User,
+      3600,
     );
 
     return res.status(200).json({ token });
@@ -28,3 +49,5 @@ exports.createAgoraChatToken = functions.https.onRequest((req, res) => {
     return res.status(500).json({ error: error.message });
   }
 });
+
+exports.createAgoraChatToken = functions.https.onRequest(app);
