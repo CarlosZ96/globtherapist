@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState } from 'react';
 import '../stylesheets/homepage.css';
 import '../stylesheets/windo.css';
@@ -5,6 +6,7 @@ import Globody from './Globody';
 import Admin from './admin';
 import ProSpace from './ProSpace';
 import Login from './windows/login';
+import close from '../img/Closegt.png';
 import Create from './windows/Create';
 import CreatePro from './CreatePro';
 import Dates from './Mydates/Dates';
@@ -68,7 +70,7 @@ const Homepage = () => {
             <div className="Log-Btn-Cont-User">
               <button
                 type="button"
-                className="Log-Btn"
+                className="Log-Btn-user"
                 onClick={toggleDates}
               >
                 <h3 className="User-Name">
@@ -77,7 +79,7 @@ const Homepage = () => {
               </button>
             </div>
             <button type="button" className="Log-Btn" onClick={logout}>
-              <h3>Cerrar sesión</h3>
+              <img src={close} alt="" />
             </button>
           </div>
         )}

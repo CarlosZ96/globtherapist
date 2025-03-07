@@ -14,6 +14,12 @@
     margin: 0;
 }
 
+.Home-txt h1 {
+    font-family: Itim, serif;
+    font-size: 4vw;
+    margin-left: 1%;
+}
+
 .Home-Roof {
     display: flex;
     margin: 0;
@@ -27,40 +33,85 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
-    width: 62%;
+    justify-content: flex-end;
+    width: 78%;
 }
 
 .Home-windows h2 {
+    font-family: Itim, serif;
+    font-size: 2vw;
+    font-weight: lighter;
+    margin-left: 1%;
     width: 46%;
     color: #fff;
     margin: 0;
+    cursor: pointer;
 }
+
+.Log-Btn-Cont-User {
+    width: 70%;
+    height: 60%;
+    border-radius: 10px 0 0 10px;
+}
+
+.Log-Btn-Cont-User:hover {
+    background-color: #fff;
+}
+
+.Log-Btn-Cont-User:hover + .Log-Btn {
+    border: 2px #fff solid;
+}
+
+.Log-Btn-user {
+    width: 100%;
+    height: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px 0 0 10px;
+}
+
+.Log-Btn-user h3 {
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.Log-Btn-user:hover h3 {
+    color: #01268d;
+}
+
+.Home-windows h2:hover {
+    text-decoration: underline;
+}
+
 
 .Log-Btn-Cont {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    width: 28vw;
+    width: 12%;
     border-radius: 5px;
 }
 
-.Log-Btn-Cont h3 {
-    color: #fff;
-    font-size: 13px;
+.Log-Btn {
+    width: 30%;
+    height: 60%;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
 
-.Log-Btn {
-    width: 40%;
-    height: 60%;
+.Log-Btn:hover {
     background: none;
     border: 2px #fff solid;
 }
 
-.Log-Btn-Cont :hover {
-    background-color: #fff;
-    color: #01268d;
+
+.Log-Btn img {
+    height: 20%;
 }
+
 
 .Log-Btn h3 {
     margin: 0;
