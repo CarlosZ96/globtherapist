@@ -67,7 +67,16 @@ const ProView = ({ meetingParams, RtcRole }) => {
 
   useEffect(() => {
     const initAgora = async () => {
-      const agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+      const agoraClient = AgoraRTC.createClient({
+        mode: 'rtc',
+        codec: 'vp8',
+        // Habilita configuración avanzada de audio
+        audio: {
+          encoderConfig: 'high_quality',
+          playback: true,
+          recording: true,
+        },
+      });
       setClient(agoraClient);
       const appId = process.env.REACT_APP_AGORA_APP_ID;
       if (!appId) {
@@ -80,9 +89,14 @@ const ProView = ({ meetingParams, RtcRole }) => {
         // Escucha cuando un usuario remoto publica su pista
         agoraClient.on('user-published', async (user, mediaType) => {
           await agoraClient.subscribe(user, mediaType);
-          console.log('Subscripción a usuario remoto', user.uid);
+          console.log('Subscripción a usuario remoto', mediaType, user.uid);
+
           if (mediaType === 'video' && remoteVideoRef.current) {
             user.videoTrack.play(remoteVideoRef.current);
+          }
+
+          if (mediaType === 'audio') {
+            user.audioTrack.play(); // Reproduce audio automáticamente
           }
         });
       } catch (error) {
@@ -106,7 +120,7 @@ const ProView = ({ meetingParams, RtcRole }) => {
         const track = await AgoraRTC.createCameraVideoTrack();
         setCameraTrack(track);
         if (client) {
-          await client.publish([track]);
+          await client.publish(track);
         }
         if (localVideoRef.current) {
           track.play(localVideoRef.current);
@@ -132,7 +146,7 @@ const ProView = ({ meetingParams, RtcRole }) => {
         const track = await AgoraRTC.createMicrophoneAudioTrack();
         setMicTrack(track);
         if (client) {
-          await client.publish([track]);
+          await client.publish(track);
         }
         setMicOn(true);
       } catch (error) {

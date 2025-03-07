@@ -121,7 +121,7 @@ const GlobMeeting = ({ collection, cita }) => {
   useEffect(() => {
     if (!isWithinOneDay || !meetingCita.uid || !userCollection) return;
     // Determina el rol: para usuarios es "uidGuest" y para profesionales es "uidHost"
-    const roleParam = userCollection === 'users' ? 'uidGuest' : 'uidHost';
+    const roleParam = 'uidHost';
     // Construye la URL de la función; se asume que la URL base está en REACT_APP_FUNCTIONS_BASE_URL
     const tokenURL = `${process.env.REACT_APP_FUNCTIONS_BASE_URL}/createAgoraToken`;
     // Aquí usamos meetingCita.uid como channelId;
