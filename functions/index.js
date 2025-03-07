@@ -42,11 +42,11 @@ app.get('/', (req, res) => {
   }
 
   const numericUid = Number(uid) || 0;
-  const expireTime = 3600; // 1 hora de expiración
+  const expireTime = 3600;
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const privilegeExpireTime = currentTimestamp + expireTime;
 
-  const agoraRole = role === 'uidHost' ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
+  const agoraRole = RtcRole.PUBLISHER;
 
   try {
     const token = RtcTokenBuilder.buildTokenWithUid(
