@@ -19,54 +19,66 @@ const Homepage = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showCreatePro, setShowCreatePro] = useState(false);
-  const [showDates, setShowDates] = useState(false); // Nuevo estado para controlar la modal
+  const [showDates, setShowDates] = useState(false);
 
-  // Nuevo toggle para las citas
-  const toggleDates = () => {
-    setShowDates((prev) => !prev);
+  const toggleDates = () => setShowDates((prev) => !prev);
+  const toggleLogin = () => setShowLogin((prev) => !prev);
+  const toggleCreate = () => setShowCreate((prev) => !prev);
+  const toggleCreatePro = () => setShowCreatePro((prev) => !prev);
+
+  // Estilos para cuando NO hay usuario logueado
+  const noUserStyles = {
+    homeWindows: { width: '70%' },
+    logBtnCont: { width: '20%' },
+    logBtn: { width: '50%' },
   };
 
-  const toggleLogin = () => {
-    setShowLogin((prev) => !prev);
-  };
-
-  const toggleCreate = () => {
-    setShowCreate((prev) => !prev);
-  };
-
-  const toggleCreatePro = () => {
-    setShowCreatePro((prev) => !prev);
+  // Estilos para cuando HAY usuario logueado
+  const userStyles = {
+    homeWindows: { width: '78%' },
+    logBtnCont: { width: '12%' },
   };
 
   const renderContent = () => {
-    if (currentPro) {
-      return <ProSpace />;
-    }
-    if (userData?.role === 'admin') {
-      return <Admin />;
-    }
+    if (currentPro) return <ProSpace />;
+    if (userData?.role === 'admin') return <Admin />;
     return <Globody />;
   };
 
   return (
     <div className="Home-Page">
       <header className="Home-Roof">
-        <div className="Home-txt"><h1>GTH</h1></div>
-        <div className="Home-windows">
+        <div className="Home-txt">
+          <h1>GTH</h1>
+        </div>
+        <div
+          className="Home-windows"
+          style={currentUser ? userStyles.homeWindows : noUserStyles.homeWindows}
+        >
           <h2>Especialistas</h2>
           <h2>¿Quiénes somos?</h2>
         </div>
         {!currentUser ? (
-          <div className="Log-Btn-Cont">
-            <button type="button" className="Log-Btn" onClick={toggleLogin}>
+          <div className="Log-Btn-Cont" style={noUserStyles.logBtnCont}>
+            <button
+              type="button"
+              className="Log-Btn"
+              style={noUserStyles.logBtn}
+              onClick={toggleLogin}
+            >
               <h3>Loguearse</h3>
             </button>
-            <button type="button" className="Log-Btn" onClick={toggleCreate}>
+            <button
+              type="button"
+              className="Log-Btn"
+              style={noUserStyles.logBtn}
+              onClick={toggleCreate}
+            >
               <h3>Crear Cuenta</h3>
             </button>
           </div>
         ) : (
-          <div className="Log-Btn-Cont">
+          <div className="Log-Btn-Cont" style={userStyles.logBtnCont}>
             <div className="Log-Btn-Cont-User">
               <button
                 type="button"
@@ -84,14 +96,11 @@ const Homepage = () => {
           </div>
         )}
       </header>
+
       {showDates && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <button
-              type="button"
-              className="close-button"
-              onClick={toggleDates}
-            >
+            <button type="button" className="close-button" onClick={toggleDates}>
               &times;
             </button>
             <Dates />
@@ -100,6 +109,7 @@ const Homepage = () => {
       )}
 
       {renderContent()}
+
       <div style={{ display: showLogin ? 'block' : 'none' }}>
         <Login toggleLogin={toggleLogin} />
       </div>

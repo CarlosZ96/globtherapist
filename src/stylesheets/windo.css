@@ -1,11 +1,28 @@
 .Log-cont {
     position: absolute;
     left: 65%;
-    top: 7%;
+    top: 8%;
     width: 33vw;
     height: 36vh;
     border: 3px #01268d solid;
     background-color: #fff;
+}
+
+.Login-body {
+    height: 100%;
+}
+
+.Login-title-cont {
+    display: flex;
+    background-color: #01268d;
+    color: #fff;
+    width: 100%;
+    height: 15%;
+}
+
+.Login-title-cont h1 {
+    width: 90%;
+    text-align: center;
 }
 
 .Create-cont {
@@ -35,9 +52,9 @@
 }
 
 .close-button {
-    width: 14%;
+    width: 10%;
     font-size: 3.5vw;
-    color: #01268d;
+    color: #fff;
     font-family: Itim, serif;
     font-weight: 300;
     font-style: normal;
@@ -52,7 +69,7 @@
     font-style: normal;
 }
 
-.Create-input-cont {
+.Log-input-cont {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -60,7 +77,7 @@
     width: 100%;
 }
 
-.Create-input-cont h3 {
+.Log-input-cont h3 {
     font-size: 3vw;
     color: #2B3A67;
     font-family: Itim, serif;

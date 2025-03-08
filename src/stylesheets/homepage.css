@@ -58,7 +58,7 @@
     background-color: #fff;
 }
 
-.Log-Btn-Cont-User:hover + .Log-Btn {
+.Log-Btn-Cont-User:hover+.Log-Btn {
     border: 2px #fff solid;
 }
 
@@ -121,55 +121,59 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    color: #fff;
 }
 
 .Home-body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100vw;
-    max-height: 92vh;
+    max-height: calc(100vh - 8vh);
     height: max-content;
     overflow-y: auto;
     background-color: #fff;
 }
 
+.Home-body>* {
+    flex-shrink: 0;
+    margin: 2vh 0 2vh 0;
+}
+
 .GlobThera {
     width: 90vw;
-    height: 40vh;
+    height: 36vh;
     background-color: #2b3e9d;
     border-radius: 5px;
-    margin-top: 3%;
-    margin-bottom: 3%;
 }
 
 .Glob-title {
     width: 100%;
-    height: 20%;
+    height: 28%;
     margin: 0;
     color: #ffffffb4;
-    font-size: 8vw;
+    font-size: 9.5vw;
     font-family: Itim, serif;
     font-weight: 400;
     font-style: normal;
+    text-align: center;
 }
 
 .GlobThera-body {
     display: flex;
     width: 100%;
-    height: 89%;
+    height: 70%;
 }
 
 .Glob-img-cont {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 50%;
-    height: 90%;
+    width: 30%;
+    height: 100%;
 }
 
 .Glob-img {
-    max-width: 40%;
+    max-width: 86%;
 }
 
 .Glob-txt-btn-conts {
@@ -177,8 +181,8 @@
     flex-flow: column wrap;
     place-content: center space-around;
     align-items: center;
-    width: 50%;
-    height: 89%;
+    width: 70%;
+    height: 100%;
     color: #fff;
     font-size: 3vw;
 }
@@ -188,10 +192,15 @@
     flex-flow: column wrap;
     place-content: center end;
     height: 49%;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    align-content: center;
+    justify-content: center;
 }
 
 .Glob-btn-cont {
     width: 90%;
+    height: 22%;
     display: flex;
     flex-direction: column;
     align-items: end;
@@ -199,7 +208,7 @@
 
 .Glob-btn {
     height: 100%;
-    width: 60%;
+    width: 56%;
     background-color: #ffffffb4;
     color: #2b3e9d;
     border: none;
@@ -207,6 +216,7 @@
     font-family: Itim, serif;
     font-weight: 400;
     font-style: normal;
+    font-size: 2.4vw;
 }
 
 .Glob-txt-cont p {
@@ -220,8 +230,6 @@
     place-items: center center;
     gap: 1% 0;
     width: 90vw;
-    height: 54vh;
-    margin-bottom: 8%;
 }
 
 .Theras-cont>.Therapy:nth-child(1) {
@@ -305,4 +313,13 @@
 
 .Therapy:last-child .Theras-btn p {
     color: #01268d;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 80%;
+    background-color: #2b3e9d;
+    position: absolute;
 }
