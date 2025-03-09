@@ -12,6 +12,7 @@
 .inactive-cont {
     width: 60%;
     height: 80%;
+    border: none;
 }
 
 .Therapy-title-cont {
@@ -164,7 +165,29 @@
     background-color: #2B3A67;
 }
 
-.Therapies-cont .Therapy-tittle-cont:last-child .Therapy-tittle {
+.inactive-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    height: 60%;
+}
+
+
+.inactive-txt {
+    font-size: 6vw;
+    font-family: Itim, serif;
+    font-weight: 400;
+    font-style: normal;
+    color: #12193fa6;
+}
+
+.inactive-cont {
+    background-color: #4F63C2;
+}
+
+.Therapies-cont .Therapy-tittle-cont:last-child {
     color: #fff;
 }
 
@@ -172,6 +195,12 @@
     height: 30vh;
     width: 100%;
     background-color: #fff;
+}
+
+.Therapy-txt-field::placeholder {
+    font-size:2.4vw;
+    padding-top: 2%;
+    padding-left: 3%;
 }
 
 .Therapy-info {
