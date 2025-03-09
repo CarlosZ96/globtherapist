@@ -1,0 +1,86 @@
+.Dates-info-mcont {
+    height: 60vh;
+}
+
+.user-citas-container {
+    width: 100%;
+    height: 100%;
+}
+
+.user-win-name-cont {
+    width: 100%;
+    height: 6vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-win-name-cont h1 {
+    font-size: 4vw;
+    color: #fff;
+    font-weight: lighter;
+    font-family: Itim, serif;
+    width: max-content;
+}
+
+.citas-cont {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 90%;
+    row-gap: 10px;
+}
+
+.cita-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 96%;
+}
+
+.cita-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 17%;
+    width: 96%;
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+.cita-field-date {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 80%;
+    width: 12%;
+    background-color: #041B5E;
+    border-radius: 5px;
+}
+
+.cita-field-date p {
+    color: #fff;
+    font-size: 3vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.cita-pro-cont {
+    width: 70%;
+    margin-left: 5%;
+}
+
+.cita-time-cont {
+    width: 10%;
+}
+
+.reunion-btn {
+    height: 80%;
+    width: 6%;
+}

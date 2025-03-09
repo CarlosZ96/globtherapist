@@ -52,12 +52,17 @@
 }
 
 .close-button {
+    position: absolute;
+    left: 88%;
+    top: 2%;
     width: 10%;
+    background: none;
     font-size: 3.5vw;
     color: #fff;
     font-family: Itim, serif;
     font-weight: 300;
     font-style: normal;
+    border: none;
 }
 
 .close-buttons {

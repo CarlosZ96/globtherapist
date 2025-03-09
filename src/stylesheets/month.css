@@ -11,17 +11,18 @@
     justify-content: center;
     width: 98vw;
     height: max-content;
-    background-color: #2b3e9d;
+    background-color: #fff;
 }
 
 .calendar-month-cont {
     display: flex;
-    width: 92%;
+    width: 88%;
     height: 5vh;
     justify-content: center;
     align-items: center;
     background-color: #2b3a67;
-    margin: 1% 0;
+    margin: 2% 0;
+    padding: 1% 2%;
 }
 
 .calendar-week-cont {
@@ -47,10 +48,10 @@
 
 .calendar-month-btn {
     height: 80%;
-    width: 4%;
+    width: 6%;
     border: none;
     border-radius: 50%;
-    font-size: 2vw;
+    font-size: 3vw;
     color: #2b3a67;
     font-family: Itim, serif;
     font-weight: 300;
@@ -74,6 +75,7 @@
     width: 90%;
     height: 50vh;
     background-color: #fff;
+    margin-top: 1%;
 }
 
 .Calendar-cont {
@@ -88,10 +90,11 @@
 }
 
 .date-blue-line {
-    height: 3px;
+    height: 8px;
     background-color: #2b3e9d;
     width: 90%;
     margin: 0;
+    border-radius: 3px;
 }
 
 .Choose-Day-btns-cont {
@@ -152,6 +155,7 @@
     width: 90%;
     height: 20vh;
     background-color: #fff;
+    margin-bottom: 2%;
 }
 
 .Hours-cont h3 {
@@ -199,7 +203,8 @@
     align-items: center;
     border: none;
     border-radius: 5px;
-    height: 60%;
+    height: 100%;
+    width: 100%;
     background-color: #2b3a67;
 }
 
@@ -214,11 +219,10 @@
 .calendar-day {
     width: 50%;
     height: 60%;
-    padding: 10px;
-    background-color: transparent;
     border-radius: 5px;
+    font-size: 3.5vw;
+    font-family: Itim, serif;
     text-align: center;
-    color: transparent;
     cursor: pointer;
 }
 
@@ -290,10 +294,6 @@
     align-items: center;
 }
 
-.calendar-day {
-    font-size: 2vw;
-}
-
 .calendar-day:hover {
     outline: 3px solid #2b3e9d;
     outline-offset: 5px;
@@ -303,12 +303,17 @@
 .inactive {
     background-color: #7C95A6;
     color: #fff;
-
+    border: none;
+    width: 90%;
+    height: 100%;
 }
 
 .active {
+    width: 90%;
+    height: 100%;
     background-color: #2b3e9d;
     color: #38DDE3;
+    border: none;
 }
 
 .Pros-cont {
@@ -361,7 +366,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 40%;
+    height: 60%;
+    width: 100%;
+    flex-direction: column;
 }
 
 .Time-selector {
@@ -374,13 +381,47 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 70%;
+    width: 60%;
 }
 
-.Hours-selector-cont{
+.Time-hour-txt {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    border: #000 solid 3px;
+    border-radius: 5px;
+    align-items: center;
+    justify-content: center;
+}
+
+.Time-hour-txt h3 {
+    display: flex;
+    font-size: 2.5vw;
+    font-family: Itim, serif;
+    font-style: normal;
+    text-align: center;
+    color: #000;
+    font-weight: 300;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.Hours-selector-cont {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
     height: 80%;
     width: 100%;
+}
+
+.Confirm-button {
+    display: flex;
+    height: 20%;
+    width: 30%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 }

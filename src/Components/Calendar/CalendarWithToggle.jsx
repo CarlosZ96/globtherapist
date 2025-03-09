@@ -308,10 +308,14 @@ const Calendar = ({
             </div>
           ) : (
             <div className="Hours-selector">
-              <h3>Selecciona horario:</h3>
+              <h3>¿A que hora?:</h3>
               <div className="Time-control">
                 <button type="button" onClick={() => decrementTime(setSelectedTime, selectedTime, 7)}>-</button>
-                <div>{formatTimeRange(selectedTime)}</div>
+                <div className="Time-hour-txt">
+                  <h3>
+                    {formatTimeRange(selectedTime)}
+                  </h3>
+                </div>
                 <button type="button" onClick={() => incrementTime(setSelectedTime, selectedTime, 22)}>+</button>
               </div>
             </div>

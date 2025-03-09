@@ -4,6 +4,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import MydatesPro from './MydatesPro';
 import UserInfo from './UserInfo';
+import '../../stylesheets/userInfo.css';
 
 const Dates = () => {
   const [userType, setUserType] = useState(null);
@@ -47,7 +48,7 @@ const Dates = () => {
   if (!userType) return <div>Usuario no encontrado</div>;
 
   return (
-    <div>
+    <div className="Dates-info-mcont">
       {userType === 'user' ? (
         <UserInfo citas={citas} />
       ) : (
