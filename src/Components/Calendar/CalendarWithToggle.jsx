@@ -402,7 +402,7 @@ const Calendar = ({
             <h3>Ver pros</h3>
           </button>
         </div>
-        <div className="pro-img-def">
+        <div className="pro-img-def-cont">
           {showPros && (
             <div className="pro-img-def">
               {availablePros.map((pro) => (

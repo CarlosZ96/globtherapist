@@ -327,7 +327,7 @@
     background-color: #fff;
 }
 
-.pro-img-def {
+.pro-img-def-cont {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     justify-content: center;
@@ -335,6 +335,10 @@
     height: 92%;
     width: 100%;
     background-color: #fff;
+}
+
+.pro-item {
+    height: 40%;
 }
 
 .user-image-comt {
@@ -348,7 +352,7 @@
 }
 
 .pro-img {
-    max-height: 80%;
+    max-height: 40px;
 }
 
 .user-info-comt {
