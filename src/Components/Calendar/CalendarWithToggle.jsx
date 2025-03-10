@@ -339,7 +339,7 @@ const Calendar = ({
                 type="button"
                 className="Lunch-btn"
                 onClick={handleLunchClick}
-                style={{ display: showLunchButton ? 'block' : 'none' }} // Ocultar el botón "Lunch"
+                style={{ display: showLunchButton ? 'block' : 'none' }}
               >
                 <h3>Lunch</h3>
               </button>

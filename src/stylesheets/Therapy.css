@@ -91,6 +91,7 @@
 .Ask-Therapy-fields-input {
     height: 48%;
     width: 100%;
+    font-size: 2vw;
 }
 
 .Ask-Therapy-field-cont {
@@ -199,7 +200,7 @@
 }
 
 .Therapy-txt-field::placeholder {
-    font-size:2.4vw;
+    font-size: 2.4vw;
     padding-top: 2%;
     padding-left: 3%;
 }
