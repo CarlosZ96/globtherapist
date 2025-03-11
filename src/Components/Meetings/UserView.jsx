@@ -5,6 +5,9 @@ import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import ChatComponent from './ChatComponent';
+import '../../stylesheets/videocall.css';
+import home from '../../img/home 1.png';
+import wait from '../../img/Iconjam.png';
 
 const UserView = ({ meetingParams }) => {
   const { meetingAccess, setMeetingAccess } = useAuth();
@@ -125,35 +128,26 @@ const UserView = ({ meetingParams }) => {
 
   return (
     <div className="UserView-cont" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <header style={{
-        padding: '1rem',
-        backgroundColor: '#f0f0f0',
-        display: 'flex',
-        justifyContent: 'space-between',
-      }}
+      <header
+        className="video-header"
       >
-        <h1>Globtherapist - Invitado</h1>
-        <button type="button" onClick={() => navigate('/')}>Salir</button>
+        <h1>GLOBTHERAPIST</h1>
+        <button type="button" onClick={() => navigate('/')}>
+          <img src={home} alt="" />
+          <h5>Home</h5>
+        </button>
       </header>
 
       {meetingAccess !== 'approved' ? (
         <div
           className="UserView-request-container"
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
         >
           {meetingAccess === 'pending' ? (
             <p>Esperando aprobación del host...</p>
           ) : (
-            <>
-              <p>Solicita acceso a la reunión</p>
-              <button type="button" onClick={requestAccess}>Solicitar Acceso</button>
-              {/* Botón de prueba para simular aprobación (como si el host aprobara) */}
+            <div className="waitng-room">
+              <img src={wait} alt="" />
+              <button type="button" onClick={requestAccess}>Esperando aprobación del pro...</button>
               <button
                 type="button"
                 onClick={() => setMeetingAccess('approved')}
@@ -161,7 +155,7 @@ const UserView = ({ meetingParams }) => {
               >
                 Simular aprobación (prueba)
               </button>
-            </>
+            </div>
           )}
         </div>
       ) : (

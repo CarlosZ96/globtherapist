@@ -1,0 +1,118 @@
+.video-header {
+    padding: 1rem;
+    background-color: #041B5E;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+    height: 10%;
+}
+
+.video-header h1 {
+    font-size: 5.5vw;
+    color: #ffffff88;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    text-align: center;
+    width: 94%;
+}
+
+.video-header button {
+    background: none;
+    border: none;
+}
+
+.video-header h5 {
+    font-size: 2vw;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.UserView-request-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 50%;
+    background-color: #2b3e9d;
+}
+
+.waitng-room {
+    height: 90%;
+    width: 92%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #4f63c2;
+}
+
+.waitng-room img {
+    max-height: 66%;
+}
+
+.chat-room-cont {
+    display: flex;
+    width: 100%;
+    height: 40%;
+    background-color: #2b3e9d;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-roon-txt-area {
+    height: 100%;
+    width: 92%;
+    background-color: #4f63c2;
+    padding: 0.8rem;
+}
+
+.chat-room-users-txt {
+    height: 82%;
+    overflow-y: auto;
+    background-color: #fff;
+    padding: 0.5rem 0 0 0.6rem;
+    margin-bottom: 0.6rem;
+}
+
+.user-msg-cont {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.user-msg-cont strong {
+    font-size: 2.8vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    margin-right: 0.4rem;
+}
+
+.chat-txt-field-cont {
+    display: flex;
+    height: 17%;
+    width: 100%;
+    background-color: #233cb5;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-txt-field {
+    width: 91%;
+    height: 74%;
+    margin-right: 0.5rem;
+}
+
+.chat-btn {
+    width: 5%;
+    height: 74%;
+    background: none;
+    border: none;
+}
+
+.chat-btn img {
+    max-height: 60%;
+}
