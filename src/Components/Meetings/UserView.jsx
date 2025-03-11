@@ -159,17 +159,10 @@ const UserView = ({ meetingParams }) => {
           )}
         </div>
       ) : (
-        <div className="UserView-video-container" style={{ flex: 1, backgroundColor: '#000', position: 'relative' }}>
-          <div ref={localVideoRef} style={{ width: '100%', height: '100%' }} />
+        <div className="UserView-video-container">
+          <div className="video-cont" ref={localVideoRef} />
           {!cameraOn && (
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              color: '#fff',
-            }}
-            >
+            <div className="cam-txt">
               La cámara está apagada
             </div>
           )}

@@ -30,6 +30,35 @@
     font-weight: lighter;
 }
 
+.UserView-video-container {
+    flex: 1 1;
+    display: flex;
+    width: 100%;
+    background-Color: #2b3e9d;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+}
+
+.video-cont {
+    width: 92%;
+    height: 80%;
+    border-radius: 20px;
+    background-color: #4F63C2;
+}
+
+.cam-txt{
+    position: absolute;
+    width: 60%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffffff91;
+    font-size: 5.4vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
 .UserView-request-container {
     flex: 1;
     display: flex;
