@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,6 +12,8 @@ import usePros from '../../hooks/usePros';
 import useConfirmation from '../../hooks/useConfirmation';
 import ProModal from '../Hdvwindow';
 import User from '../../img/user.png';
+import up from '../../img/up-arrow.png';
+import dwn from '../../img/dwn-arrow.png';
 import '../../stylesheets/month.css';
 
 const Calendar = ({
@@ -288,21 +291,33 @@ const Calendar = ({
       <div className="Hours-cont">
         <div className="Hours-selector-cont">
           {collectionName === 'pros' ? (
-            <div className="Hours-selector">
-              <div className="Time-selector">
+            <div className="Hours-selector-pro">
+              <div className="Time-selector-pro">
                 <h3>De:</h3>
-                <div className="Time-control">
-                  <button type="button" onClick={() => decrementTime(setStartTime, startTime, 8)}>-</button>
-                  <button type="button" onClick={() => incrementTime(setStartTime, startTime, endTime - 1)}>+</button>
-                  <div>{formatTime(startTime)}</div>
+                <div className="Time-control-pro">
+                  <div className="time-buttons-cont">
+                    <button className="time-button" type="button" onClick={() => incrementTime(setStartTime, startTime, endTime - 1)}>
+                      <img src={up} alt="" />
+                    </button>
+                    <button className="time-button" type="button" onClick={() => decrementTime(setStartTime, startTime, 8)}>
+                      <img src={dwn} alt="" />
+                    </button>
+                  </div>
+                  <div className="Time-hour-cont">{formatTime(startTime)}</div>
                 </div>
               </div>
-              <div className="Time-selector">
+              <div className="Time-selector-pro">
                 <h3>A:</h3>
-                <div className="Time-control">
-                  <button type="button" onClick={() => decrementTime(setEndTime, endTime, startTime + 1)}>-</button>
-                  <button type="button" onClick={() => incrementTime(setEndTime, endTime, 22)}>+</button>
-                  <div>{formatTime(endTime)}</div>
+                <div className="Time-control-pro">
+                  <div className="time-buttons-cont">
+                    <button className="time-button" type="button" onClick={() => incrementTime(setEndTime, endTime, 22)}>
+                      <img src={up} alt="" />
+                    </button>
+                    <button className="time-button" type="button" onClick={() => decrementTime(setEndTime, endTime, startTime + 1)}>
+                      <img src={dwn} alt="" />
+                    </button>
+                  </div>
+                  <div className="Time-hour-cont">{formatTime(endTime)}</div>
                 </div>
               </div>
             </div>

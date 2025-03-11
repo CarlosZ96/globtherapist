@@ -20,6 +20,7 @@ const UserView = ({ meetingParams }) => {
   const [cameraTrack, setCameraTrack] = useState(null);
   const [micOn, setMicOn] = useState(false);
   const [cameraOn, setCameraOn] = useState(false);
+  const [remoteCameraOn, setRemoteCameraOn] = useState(false);
 
   // Inicializar Agora solo si el acceso fue aprobado
   useEffect(() => {
@@ -28,7 +29,6 @@ const UserView = ({ meetingParams }) => {
       const agoraClient = AgoraRTC.createClient({
         mode: 'rtc',
         codec: 'vp8',
-        // Habilita configuración avanzada de audio
         audio: {
           encoderConfig: 'high_quality',
           playback: true,
@@ -44,17 +44,26 @@ const UserView = ({ meetingParams }) => {
       try {
         await agoraClient.join(appId, meetingParams.channelId, meetingParams.token, 0);
         console.log('Usuario invitado se unió al canal');
-        // Escuchar cuando el host publica su video
         agoraClient.on('user-published', async (user, mediaType) => {
           await agoraClient.subscribe(user, mediaType);
           console.log('Subscripción a usuario remoto', mediaType, user.uid);
 
           if (mediaType === 'video' && remoteVideoRef.current) {
             user.videoTrack.play(remoteVideoRef.current);
+            setRemoteCameraOn(true);
           }
 
           if (mediaType === 'audio') {
             user.audioTrack.play();
+          }
+        });
+
+        agoraClient.on('user-unpublished', (user, mediaType) => {
+          if (mediaType === 'video') {
+            setRemoteCameraOn(false);
+            if (remoteVideoRef.current) {
+              remoteVideoRef.current.innerHTML = '';
+            }
           }
         });
       } catch (error) {
@@ -71,7 +80,6 @@ const UserView = ({ meetingParams }) => {
     };
   }, [meetingAccess, meetingParams]);
 
-  // Función para encender/apagar la cámara
   const handleToggleCamera = async () => {
     if (!cameraOn) {
       try {
@@ -97,7 +105,6 @@ const UserView = ({ meetingParams }) => {
     }
   };
 
-  // Función para encender/apagar el micrófono
   const handleToggleMic = async () => {
     if (!micOn) {
       try {
@@ -120,7 +127,6 @@ const UserView = ({ meetingParams }) => {
     }
   };
 
-  // Función para solicitar acceso
   const requestAccess = () => {
     setMeetingAccess('pending');
     console.log('Solicitud de acceso enviada');
@@ -166,18 +172,11 @@ const UserView = ({ meetingParams }) => {
               La cámara está apagada
             </div>
           )}
-          <div style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            width: '200px',
-            height: '150px',
-            border: '2px solid #fff',
-            zIndex: 10,
-          }}
-          >
-            <div ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
-          </div>
+          {remoteCameraOn && (
+            <div className="video-pre-view-cont">
+              <div className="video-pre-view" ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
+            </div>
+          )}
           <div style={{
             position: 'absolute',
             bottom: '1rem',

@@ -406,6 +406,15 @@
     color: #fff;
 }
 
+.Hours-selector-pro {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 60%;
+    width: 100%;
+}
+
 .Hours-selector {
     display: flex;
     justify-content: center;
@@ -421,6 +430,15 @@
     align-items: center;
 }
 
+.Time-selector-pro {
+    display: flex;
+    height: 92%;
+    width: 30%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
 .Time-control {
     display: flex;
     justify-content: space-between;
@@ -434,6 +452,47 @@
     height: 80%;
     background: none;
     border: #000 solid 3px;
+}
+
+.Time-control-pro {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 76%;
+    width: 70%;
+    flex-direction: row;
+    margin: 0 1rem;
+}
+
+.time-buttons-cont {
+    width: 25%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: solid #000 3px;
+}
+
+.time-button {
+    height: 50%;
+    width: 100%;
+}
+
+.time-button img {
+    max-height: 66%;
+}
+
+.Time-hour-cont {
+    display: flex;
+    width: 75%;
+    height: 100%;
+    border-width: 3px 3px 3px 0;
+    border-style: solid;
+    border-color: #000;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .Time-hour-txt {

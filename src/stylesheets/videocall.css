@@ -47,7 +47,7 @@
     background-color: #4F63C2;
 }
 
-.cam-txt{
+.cam-txt {
     position: absolute;
     width: 60%;
     top: 50%;
@@ -57,6 +57,20 @@
     font-size: 5.4vw;
     font-family: Itim, serif;
     font-weight: lighter;
+}
+
+.video-pre-view-cont {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 200px;
+    height: 150px;
+    border: 2px solid #fff;
+    z-index: 10;
+}
+
+.video-pre-view {
+    background-color: #242527;
 }
 
 .UserView-request-container {
