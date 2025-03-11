@@ -409,7 +409,7 @@ const Calendar = ({
                 <div key={pro.id} className="pro-item">
                   <button
                     type="button"
-                    className={`user-info-comt ${selectedPro === pro.id ? 'active' : 'inactive'}`}
+                    className={`user-info-comt ${selectedPro === pro.id ? 'pro-active' : 'pro-inactive'}`}
                     onClick={() => handleProClick(pro.id)}
                   >
                     <div className="user-image-comt">
@@ -422,7 +422,7 @@ const Calendar = ({
                     className="show-modal-btn"
                     onClick={() => handleShowDetails(pro.id)}
                   >
-                    Ver detalles
+                    +
                   </button>
                 </div>
               ))}

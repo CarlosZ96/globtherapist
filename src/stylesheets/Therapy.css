@@ -197,12 +197,16 @@
     height: 30vh;
     width: 100%;
     background-color: #fff;
+    font-size: 2.4vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    color: #000;
 }
 
 .Therapy-txt-field::placeholder {
     font-size: 2.4vw;
     padding-top: 2%;
-    padding-left: 3%;
+    padding-left: 1%;
 }
 
 .Therapy-info {
@@ -240,12 +244,12 @@
 
 .DynamiCanlendar-btn-cont {
     height: 20vh;
-    width: 98%;
+    width: 109%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: #818181;
+    background-color: #fff;
 }
 
 .Date-info-cont {
@@ -268,6 +272,7 @@
     color: #fff;
     border: none;
     border-radius: 5px;
+    margin-bottom: 2%;
 }
 
 .Date-info-txt {

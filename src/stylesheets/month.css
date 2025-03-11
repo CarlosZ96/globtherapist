@@ -318,27 +318,55 @@
 
 .Pros-cont {
     width: 90%;
-    height: 22vh;
+    height: 30vh;
 }
 
 .Pros-btn-cont {
-    height: 8%;
+    display: flex;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 14%;
     width: 100%;
     background-color: #fff;
 }
 
+.Pros-btn-cont button {
+    height: 96%;
+    width: 40%;
+    cursor: pointer;
+    color: #2b3a67;
+    border: none;
+}
+
 .pro-img-def-cont {
+    height: 86%;
+    width: 100%;
+    background-color: #2b3e9d;
+}
+
+.pro-img-def {
+    height: 100%;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     justify-content: center;
     place-items: center center;
-    height: 92%;
-    width: 100%;
-    background-color: #fff;
 }
 
 .pro-item {
-    height: 40%;
+    display: flex;
+    height: 80%;
+    width: 80%;
+}
+
+.show-modal-btn {
+    width: 20%;
+    height: 26%;
+    color: #fff;
+    border: #fff solid 3px;
+    background: none;
+    border-radius: 50%;
+    font-size: 3vw;
 }
 
 .user-image-comt {
@@ -351,6 +379,16 @@
     border-radius: 5px;
 }
 
+.pro-active {
+    background-color: #0c2b86;
+    border: none;
+}
+
+.pro-inactive {
+    background-color: #2b3e9d;
+    border: none;
+}
+
 .pro-img {
     max-height: 40px;
 }
@@ -358,13 +396,14 @@
 .user-info-comt {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-around;
     height: 76%;
     width: 100%;
 }
 
 .user-info-comt h3 {
     height: 10%;
+    color: #fff;
 }
 
 .Hours-selector {
