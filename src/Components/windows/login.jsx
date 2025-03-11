@@ -45,7 +45,7 @@ const Login = ({ toggleLogin }) => {
               &times;
             </div>
           </div>
-          <div className="Login-input-cont">
+          <div className="Log-input-cont">
             <h3>Correo:</h3>
             <input
               type="email"
@@ -56,7 +56,7 @@ const Login = ({ toggleLogin }) => {
               required
             />
           </div>
-          <div className="Login-input-cont">
+          <div className="Log-input-cont">
             <h3>Contraseña:</h3>
             <input
               type="password"

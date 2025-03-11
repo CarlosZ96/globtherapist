@@ -134,7 +134,7 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
               &times;
             </div>
           </div>
-          <div className="Create-input-cont">
+          <div className="Log-input-cont">
             <h3>Correo:</h3>
             <input
               type="email"
@@ -145,7 +145,7 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
             />
             {errors.email && <p className="error-text">{errors.email}</p>}
           </div>
-          <div className="Create-input-cont">
+          <div className="Log-input-cont">
             <h3>Teléfono:</h3>
             <input
               type="number"
@@ -155,7 +155,7 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
               onChange={handleChange}
             />
           </div>
-          <div className="Create-input-cont">
+          <div className="Log-input-cont">
             <h3>Nombre de Usuario:</h3>
             <input
               type="text"
@@ -165,7 +165,7 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
               onChange={handleChange}
             />
           </div>
-          <div className="Create-input-cont">
+          <div className="Log-input-cont">
             <h3>Contraseña:</h3>
             <input
               type="password"
@@ -176,7 +176,7 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
             />
             {errors.password && <p className="error-text">{errors.password}</p>}
           </div>
-          <div className="Create-input-cont">
+          <div className="Log-input-cont">
             <h3>Confirmar Contraseña:</h3>
             <input
               type="password"

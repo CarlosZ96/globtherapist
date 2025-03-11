@@ -1,7 +1,10 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
+/* eslint-disable react/button-has-type */
 import React, { useEffect, useRef, useState } from 'react';
 import AgoraRTM from 'agora-rtm-sdk';
 import PropTypes from 'prop-types';
 import { useAuth } from '../../AuthContext';
+import sub from '../../img/submit.png';
 
 const ChatComponent = ({ clientId, channelId }) => {
   const APP_ID = process.env.REACT_APP_AGORA_APP_ID;
@@ -99,42 +102,37 @@ const ChatComponent = ({ clientId, channelId }) => {
   };
 
   return (
-    <div style={{
-      width: '300px',
-      border: '1px solid #ccc',
-      padding: '1rem',
-      margin: '1rem',
-      borderRadius: '8px',
-    }}
-    >
-      <div style={{ height: '200px', overflowY: 'auto', marginBottom: '1rem' }}>
-        {messages.map((msg) => (
-          <div
-            key={`${msg.senderId}-${msg.text}-${Date.now()}`}
-            style={{ /* ... */ }}
-          >
-            <strong>
-              {usernames[msg.senderId] || 'Cargando...'}
-              {' '}
-            </strong>
-            {msg.text}
-          </div>
-        ))}
+    <div className="chat-room-cont">
+      <div className="chat-roon-txt-area">
+        <div className="chat-room-users-txt">
+          {messages.map((msg) => (
+            <div
+              className="user-msg-cont"
+              key={`${msg.senderId}-${msg.text}-${Date.now()}`}
+            >
+              <strong>
+                {`${usernames[msg.senderId] || 'Cargando...'}:`}
+                {' '}
+              </strong>
+              <p>
+                {msg.text}
+              </p>
+            </div>
+          ))}
+        </div>
+        <div className="chat-txt-field-cont">
+          <input
+            className="chat-txt-field"
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Escribe un mensaje..."
+          />
+          <button className="chat-btn" onClick={sendMessage} disabled={!isConnected}>
+            <img src={sub} alt="Enviar mensaje" />
+          </button>
+        </div>
       </div>
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Escribe un mensaje..."
-        style={{ width: '70%', marginRight: '0.5rem' }}
-      />
-      <button
-        type="button"
-        onClick={sendMessage}
-        disabled={!isConnected}
-      >
-        Enviar
-      </button>
     </div>
   );
 };

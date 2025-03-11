@@ -1,84 +1,98 @@
-import React from 'react';
+/* eslint-disable react-hooks/rules-of-hooks */
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../AuthContext';
+import { auth, db } from '../../firebase';
+import '../../stylesheets/userInfo.css';
 
 const UserInfo = ({ citas }) => {
   const navigate = useNavigate();
   const { setCitaGlobal } = useAuth();
-
+  const [userData, setuserData] = useState(null);
   if (!citas || citas.length === 0) {
     return <div className="no-citas">No tienes citas programadas</div>;
   }
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const { uid } = user;
+        const userRef = doc(db, 'users', uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          setuserData(userSnap.data().username);
+        } else {
+          console.log('No se encontró el usuario en Firestore');
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   return (
     <div className="user-citas-container">
       <div className="user-win-name-cont">
-        <h1>Tus Citas</h1>
+        {userData ? (
+          <h1>
+            {userData}
+          </h1>
+        ) : <h1>Cargando usuario...</h1>}
       </div>
-
-      {citas.map((cita) => (
-        <div key={cita.id} className="cita-card">
-          <div className="cita-info">
-            <p className="cita-field">
-              <span className="cita-label">Fecha:</span>
-              {cita.date}
-              {' '}
-              de
-              {cita.month}
-            </p>
-            <p className="cita-field">
-              <span className="cita-label">Hora:</span>
-              {cita.time}
-            </p>
-            <p className="cita-field">
-              <span className="cita-label">Estado:</span>
-              <span className={`status-${cita.status}`}>
-                {cita.status === 'pending' ? 'Pendiente' : cita.status}
-              </span>
-            </p>
-            <p className="cita-field">
-              <span className="cita-label">Tipo de terapia:</span>
-              {cita.therapyType}
-            </p>
-            <p className="cita-field">
-              <span className="cita-label">Profesional:</span>
-              {cita.proName}
-            </p>
-          </div>
-          <button
-            type="button"
-            className="reunion-btn"
-            onClick={() => {
-              // Actualizamos el contexto global con la información necesaria para GlobMeeting
-              setCitaGlobal({
-                uid: cita.uid,
-                startTime: cita.time, // Usamos la hora de la cita como startTime
-                date: Number(cita.date), // Aseguramos que sea numérico
-                month: cita.month,
-                therapyType: cita.therapyType,
-                description: cita.description,
-                status: cita.status,
-                proName: cita.proName,
-              });
-              // Navegamos a la ruta /meeting y enviamos los datos en el state (opcional)
-              navigate('/meeting', {
-                state: {
-                  cita: {
-                    uid: cita.uid,
-                    startTime: cita.time,
-                    date: Number(cita.date),
-                    month: cita.month,
+      <div className="citas-cont">
+        {citas.map((cita) => (
+          <div key={cita.id} className="cita-card">
+            <div className="cita-info">
+              <div className="cita-field-date">
+                <p>{cita.month}</p>
+                <p>{cita.date}</p>
+              </div>
+              <div className="cita-pro-cont">
+                <p className="cita-pro-name">
+                  {cita.proName}
+                </p>
+              </div>
+              <div className="cita-time-cont">
+                <p className="cita-time">
+                  {cita.time}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="reunion-btn"
+              onClick={() => {
+                setCitaGlobal({
+                  uid: cita.uid,
+                  startTime: cita.time,
+                  date: Number(cita.date),
+                  month: cita.month,
+                  therapyType: cita.therapyType,
+                  description: cita.description,
+                  status: cita.status,
+                  proName: cita.proName,
+                });
+                navigate('/meeting', {
+                  state: {
+                    cita: {
+                      uid: cita.uid,
+                      startTime: cita.time,
+                      date: Number(cita.date),
+                      month: cita.month,
+                    },
+                    collection: 'users',
                   },
-                  collection: 'users',
-                },
-              });
-            }}
-          >
-            Ir a la reunión
-          </button>
-        </div>
-      ))}
+                });
+              }}
+            >
+              Ir
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

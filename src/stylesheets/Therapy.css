@@ -9,6 +9,12 @@
     padding: 0;
 }
 
+.inactive-cont {
+    width: 60%;
+    height: 80%;
+    border: none;
+}
+
 .Therapy-title-cont {
     display: flex;
     flex-direction: column;
@@ -85,6 +91,7 @@
 .Ask-Therapy-fields-input {
     height: 48%;
     width: 100%;
+    font-size: 2vw;
 }
 
 .Ask-Therapy-field-cont {
@@ -101,6 +108,7 @@
     align-items: center;
     justify-content: center;
     width: 80%;
+    margin-bottom: 3%;
 }
 
 .Ask-Therapy-txt {
@@ -133,6 +141,7 @@
     justify-content: center;
     width: 90%;
     height: 60%;
+    border: none;
 }
 
 .Therapy-tittle {
@@ -159,7 +168,29 @@
     background-color: #2B3A67;
 }
 
-.Therapies-cont .Therapy-tittle-cont:last-child .Therapy-tittle {
+.inactive-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    height: 60%;
+}
+
+
+.inactive-txt {
+    font-size: 6vw;
+    font-family: Itim, serif;
+    font-weight: 400;
+    font-style: normal;
+    color: #12193fa6;
+}
+
+.inactive-cont {
+    background-color: #4F63C2;
+}
+
+.Therapies-cont .Therapy-tittle-cont:last-child {
     color: #fff;
 }
 
@@ -167,6 +198,16 @@
     height: 30vh;
     width: 100%;
     background-color: #fff;
+    font-size: 2.4vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    color: #000;
+}
+
+.Therapy-txt-field::placeholder {
+    font-size: 2.4vw;
+    padding-top: 2%;
+    padding-left: 1%;
 }
 
 .Therapy-info {
@@ -204,12 +245,12 @@
 
 .DynamiCanlendar-btn-cont {
     height: 20vh;
-    width: 98%;
+    width: 109%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: #818181;
+    background-color: #fff;
 }
 
 .Date-info-cont {
@@ -232,6 +273,7 @@
     color: #fff;
     border: none;
     border-radius: 5px;
+    margin-bottom: 2%;
 }
 
 .Date-info-txt {
@@ -240,7 +282,7 @@
     text-align: center;
 }
 
-.Date-info-description{
+.Date-info-description {
     width: 100%;
     height: 50%;
     text-align: center;

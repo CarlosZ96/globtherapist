@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,6 +12,8 @@ import usePros from '../../hooks/usePros';
 import useConfirmation from '../../hooks/useConfirmation';
 import ProModal from '../Hdvwindow';
 import User from '../../img/user.png';
+import up from '../../img/up-arrow.png';
+import dwn from '../../img/dwn-arrow.png';
 import '../../stylesheets/month.css';
 
 const Calendar = ({
@@ -288,30 +291,46 @@ const Calendar = ({
       <div className="Hours-cont">
         <div className="Hours-selector-cont">
           {collectionName === 'pros' ? (
-            <div className="Hours-selector">
-              <div className="Time-selector">
+            <div className="Hours-selector-pro">
+              <div className="Time-selector-pro">
                 <h3>De:</h3>
-                <div className="Time-control">
-                  <button type="button" onClick={() => decrementTime(setStartTime, startTime, 8)}>-</button>
-                  <button type="button" onClick={() => incrementTime(setStartTime, startTime, endTime - 1)}>+</button>
-                  <div>{formatTime(startTime)}</div>
+                <div className="Time-control-pro">
+                  <div className="time-buttons-cont">
+                    <button className="time-button" type="button" onClick={() => incrementTime(setStartTime, startTime, endTime - 1)}>
+                      <img src={up} alt="" />
+                    </button>
+                    <button className="time-button" type="button" onClick={() => decrementTime(setStartTime, startTime, 8)}>
+                      <img src={dwn} alt="" />
+                    </button>
+                  </div>
+                  <div className="Time-hour-cont">{formatTime(startTime)}</div>
                 </div>
               </div>
-              <div className="Time-selector">
+              <div className="Time-selector-pro">
                 <h3>A:</h3>
-                <div className="Time-control">
-                  <button type="button" onClick={() => decrementTime(setEndTime, endTime, startTime + 1)}>-</button>
-                  <button type="button" onClick={() => incrementTime(setEndTime, endTime, 22)}>+</button>
-                  <div>{formatTime(endTime)}</div>
+                <div className="Time-control-pro">
+                  <div className="time-buttons-cont">
+                    <button className="time-button" type="button" onClick={() => incrementTime(setEndTime, endTime, 22)}>
+                      <img src={up} alt="" />
+                    </button>
+                    <button className="time-button" type="button" onClick={() => decrementTime(setEndTime, endTime, startTime + 1)}>
+                      <img src={dwn} alt="" />
+                    </button>
+                  </div>
+                  <div className="Time-hour-cont">{formatTime(endTime)}</div>
                 </div>
               </div>
             </div>
           ) : (
             <div className="Hours-selector">
-              <h3>Selecciona horario:</h3>
+              <h3>¿A que hora?:</h3>
               <div className="Time-control">
                 <button type="button" onClick={() => decrementTime(setSelectedTime, selectedTime, 7)}>-</button>
-                <div>{formatTimeRange(selectedTime)}</div>
+                <div className="Time-hour-txt">
+                  <h3>
+                    {formatTimeRange(selectedTime)}
+                  </h3>
+                </div>
                 <button type="button" onClick={() => incrementTime(setSelectedTime, selectedTime, 22)}>+</button>
               </div>
             </div>
@@ -335,7 +354,7 @@ const Calendar = ({
                 type="button"
                 className="Lunch-btn"
                 onClick={handleLunchClick}
-                style={{ display: showLunchButton ? 'block' : 'none' }} // Ocultar el botón "Lunch"
+                style={{ display: showLunchButton ? 'block' : 'none' }}
               >
                 <h3>Lunch</h3>
               </button>
@@ -398,14 +417,14 @@ const Calendar = ({
             <h3>Ver pros</h3>
           </button>
         </div>
-        <div className="pro-img-def">
+        <div className="pro-img-def-cont">
           {showPros && (
             <div className="pro-img-def">
               {availablePros.map((pro) => (
                 <div key={pro.id} className="pro-item">
                   <button
                     type="button"
-                    className={`user-info-comt ${selectedPro === pro.id ? 'active' : 'inactive'}`}
+                    className={`user-info-comt ${selectedPro === pro.id ? 'pro-active' : 'pro-inactive'}`}
                     onClick={() => handleProClick(pro.id)}
                   >
                     <div className="user-image-comt">
@@ -418,7 +437,7 @@ const Calendar = ({
                     className="show-modal-btn"
                     onClick={() => handleShowDetails(pro.id)}
                   >
-                    Ver detalles
+                    +
                   </button>
                 </div>
               ))}

@@ -5,6 +5,9 @@ import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import ChatComponent from './ChatComponent';
+import '../../stylesheets/videocall.css';
+import home from '../../img/home 1.png';
+import wait from '../../img/Iconjam.png';
 
 const UserView = ({ meetingParams }) => {
   const { meetingAccess, setMeetingAccess } = useAuth();
@@ -17,6 +20,7 @@ const UserView = ({ meetingParams }) => {
   const [cameraTrack, setCameraTrack] = useState(null);
   const [micOn, setMicOn] = useState(false);
   const [cameraOn, setCameraOn] = useState(false);
+  const [remoteCameraOn, setRemoteCameraOn] = useState(false);
 
   // Inicializar Agora solo si el acceso fue aprobado
   useEffect(() => {
@@ -25,7 +29,6 @@ const UserView = ({ meetingParams }) => {
       const agoraClient = AgoraRTC.createClient({
         mode: 'rtc',
         codec: 'vp8',
-        // Habilita configuración avanzada de audio
         audio: {
           encoderConfig: 'high_quality',
           playback: true,
@@ -41,17 +44,26 @@ const UserView = ({ meetingParams }) => {
       try {
         await agoraClient.join(appId, meetingParams.channelId, meetingParams.token, 0);
         console.log('Usuario invitado se unió al canal');
-        // Escuchar cuando el host publica su video
         agoraClient.on('user-published', async (user, mediaType) => {
           await agoraClient.subscribe(user, mediaType);
           console.log('Subscripción a usuario remoto', mediaType, user.uid);
 
           if (mediaType === 'video' && remoteVideoRef.current) {
             user.videoTrack.play(remoteVideoRef.current);
+            setRemoteCameraOn(true);
           }
 
           if (mediaType === 'audio') {
             user.audioTrack.play();
+          }
+        });
+
+        agoraClient.on('user-unpublished', (user, mediaType) => {
+          if (mediaType === 'video') {
+            setRemoteCameraOn(false);
+            if (remoteVideoRef.current) {
+              remoteVideoRef.current.innerHTML = '';
+            }
           }
         });
       } catch (error) {
@@ -68,7 +80,6 @@ const UserView = ({ meetingParams }) => {
     };
   }, [meetingAccess, meetingParams]);
 
-  // Función para encender/apagar la cámara
   const handleToggleCamera = async () => {
     if (!cameraOn) {
       try {
@@ -94,7 +105,6 @@ const UserView = ({ meetingParams }) => {
     }
   };
 
-  // Función para encender/apagar el micrófono
   const handleToggleMic = async () => {
     if (!micOn) {
       try {
@@ -117,7 +127,6 @@ const UserView = ({ meetingParams }) => {
     }
   };
 
-  // Función para solicitar acceso
   const requestAccess = () => {
     setMeetingAccess('pending');
     console.log('Solicitud de acceso enviada');
@@ -125,35 +134,26 @@ const UserView = ({ meetingParams }) => {
 
   return (
     <div className="UserView-cont" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <header style={{
-        padding: '1rem',
-        backgroundColor: '#f0f0f0',
-        display: 'flex',
-        justifyContent: 'space-between',
-      }}
+      <header
+        className="video-header"
       >
-        <h1>Globtherapist - Invitado</h1>
-        <button type="button" onClick={() => navigate('/')}>Salir</button>
+        <h1>GLOBTHERAPIST</h1>
+        <button type="button" onClick={() => navigate('/')}>
+          <img src={home} alt="" />
+          <h5>Home</h5>
+        </button>
       </header>
 
       {meetingAccess !== 'approved' ? (
         <div
           className="UserView-request-container"
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
         >
           {meetingAccess === 'pending' ? (
             <p>Esperando aprobación del host...</p>
           ) : (
-            <>
-              <p>Solicita acceso a la reunión</p>
-              <button type="button" onClick={requestAccess}>Solicitar Acceso</button>
-              {/* Botón de prueba para simular aprobación (como si el host aprobara) */}
+            <div className="waitng-room">
+              <img src={wait} alt="" />
+              <button type="button" onClick={requestAccess}>Esperando aprobación del pro...</button>
               <button
                 type="button"
                 onClick={() => setMeetingAccess('approved')}
@@ -161,36 +161,22 @@ const UserView = ({ meetingParams }) => {
               >
                 Simular aprobación (prueba)
               </button>
-            </>
+            </div>
           )}
         </div>
       ) : (
-        <div className="UserView-video-container" style={{ flex: 1, backgroundColor: '#000', position: 'relative' }}>
-          <div ref={localVideoRef} style={{ width: '100%', height: '100%' }} />
+        <div className="UserView-video-container">
+          <div className="video-cont" ref={localVideoRef} />
           {!cameraOn && (
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              color: '#fff',
-            }}
-            >
+            <div className="cam-txt">
               La cámara está apagada
             </div>
           )}
-          <div style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            width: '200px',
-            height: '150px',
-            border: '2px solid #fff',
-            zIndex: 10,
-          }}
-          >
-            <div ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
-          </div>
+          {remoteCameraOn && (
+            <div className="video-pre-view-cont">
+              <div className="video-pre-view" ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
+            </div>
+          )}
           <div style={{
             position: 'absolute',
             bottom: '1rem',

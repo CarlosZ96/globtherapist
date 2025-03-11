@@ -1,11 +1,33 @@
 .Log-cont {
     position: absolute;
     left: 65%;
-    top: 7%;
+    top: 8%;
     width: 33vw;
-    height: 36vh;
+    height: 30vh;
     border: 3px #01268d solid;
     background-color: #fff;
+}
+
+.Login-body {
+    height: 100%;
+}
+
+.Login-title-cont {
+    display: flex;
+    background-color: #01268d;
+    color: #fff;
+    width: 100%;
+    height: 15%;
+}
+
+.Login-title-cont h1 {
+    width: 90%;
+    text-align: center;
+    font-family: Itim, serif;
+    font-weight: 200;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .Create-cont {
@@ -22,25 +44,36 @@
 .Create-title-cont {
     display: flex;
     width: 100%;
+    height: 5vh;
     border-bottom: #01268d 2px solid;
+    flex-direction: row;
+    align-items: center;
+    background-color: #01268d;
 }
 
 .Create-title-cont h1 {
     width: 86%;
-    color: #2B3A67;
+    color: #fff;
     font-family: Itim, serif;
     font-weight: 300;
     font-style: normal;
     margin: 0;
+    text-align: center;
+    font-size: 4vw;
 }
 
 .close-button {
-    width: 14%;
-    font-size: 3.5vw;
-    color: #01268d;
+    position: absolute;
+    left: 88%;
+    top: -6px;
+    width: 10%;
+    background: none;
+    font-size: 4vw;
+    color: #fff;
     font-family: Itim, serif;
     font-weight: 300;
     font-style: normal;
+    border: none;
 }
 
 .close-buttons {
@@ -52,21 +85,54 @@
     font-style: normal;
 }
 
-.Create-input-cont {
+.Log-input-cont {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
     width: 100%;
+    height: 8vh;
 }
 
-.Create-input-cont h3 {
+.Log-input-cont h3 {
     font-size: 3vw;
     color: #2B3A67;
     font-family: Itim, serif;
     font-weight: 300;
     font-style: normal;
     margin: 1% 0 1% 3%;
+}
+
+.Login-input {
+    height: 3vh;
+    width: 90%;
+    margin: 1% 0 1% 3%;
+    border: #2B3A67 3px solid;
+    border-radius: 5px;
+    font-size: 2vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.Login-submit-cont {
+    height: 8vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.Login-submit-cont button {
+    width: 60%;
+    height: 5vh;
+    background-color: #041B5E;
+    border: none;
+    border-radius: 5px;
+    margin-top: 4%;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    font-size: 2.2vw;
 }
 
 .Create-input {
@@ -105,6 +171,8 @@
 
 .Create-pro-popup {
     width: 100%;
+    display: flex;
+    align-items: center;
 }
 
 .Create-pro-popup h4 {
