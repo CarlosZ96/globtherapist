@@ -233,7 +233,7 @@ const GlobMeeting = ({ collection, cita }) => {
   if (userCollection === 'users') {
     return <UserView meetingParams={meetingParams} RtcRole="uidGuest" />;
   } if (userCollection === 'pros') {
-    return <ProView meetingParams={meetingParams} RtcRole="uidHost" />;
+    return <ProView meetingParams={meetingParams} />;
   }
 
   return <div>No se pudo determinar el tipo de usuario.</div>;

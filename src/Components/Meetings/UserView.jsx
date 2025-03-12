@@ -13,7 +13,7 @@ const UserView = ({ meetingParams }) => {
   const { meetingAccess, setMeetingAccess } = useAuth();
   const navigate = useNavigate();
   const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null); // Contenedor para la cámara del host
+  const remoteVideoRef = useRef(null);
   const { currentUser } = useAuth();
   const [client, setClient] = useState(null);
   const [micTrack, setMicTrack] = useState(null);
@@ -22,7 +22,6 @@ const UserView = ({ meetingParams }) => {
   const [cameraOn, setCameraOn] = useState(false);
   const [remoteCameraOn, setRemoteCameraOn] = useState(false);
 
-  // Inicializar Agora solo si el acceso fue aprobado
   useEffect(() => {
     if (meetingAccess !== 'approved') return;
     const initAgora = async () => {
@@ -145,9 +144,7 @@ const UserView = ({ meetingParams }) => {
       </header>
 
       {meetingAccess !== 'approved' ? (
-        <div
-          className="UserView-request-container"
-        >
+        <div className="UserView-request-container">
           {meetingAccess === 'pending' ? (
             <p>Esperando aprobación del host...</p>
           ) : (
