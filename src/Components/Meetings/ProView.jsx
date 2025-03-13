@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import ChatComponent from './ChatComponent';
 import home from '../../img/home 1.png';
+import '../../stylesheets/videocall.css';
 
 const HostNotification = () => {
   const { meetingAccess, setMeetingAccess } = useAuth();
