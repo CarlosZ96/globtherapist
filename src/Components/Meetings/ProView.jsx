@@ -4,8 +4,8 @@ import AgoraRTC from 'agora-rtc-sdk-ng';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import ChatComponent from './ChatComponent';
+import home from '../../img/home 1.png';
 
-// Componente de notificación para el host
 const HostNotification = () => {
   const { meetingAccess, setMeetingAccess } = useAuth();
   const [showDetails, setShowDetails] = useState(false);
@@ -51,26 +51,24 @@ const HostNotification = () => {
   );
 };
 
-const ProView = ({ meetingParams, RtcRole }) => {
+const ProView = ({ meetingParams }) => {
   const { currentPro } = useAuth();
   const navigate = useNavigate();
   const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null); // Contenedor para la pista remota (invitado)
+  const remoteVideoRef = useRef(null);
 
   const [client, setClient] = useState(null);
   const [micTrack, setMicTrack] = useState(null);
   const [cameraTrack, setCameraTrack] = useState(null);
   const [micOn, setMicOn] = useState(false);
   const [cameraOn, setCameraOn] = useState(false);
-
-  const roleLabel = RtcRole === 'uidHost' ? 'Host' : 'Guest';
+  const [remoteCameraOn, setRemoteCameraOn] = useState(false);
 
   useEffect(() => {
     const initAgora = async () => {
       const agoraClient = AgoraRTC.createClient({
         mode: 'rtc',
         codec: 'vp8',
-        // Habilita configuración avanzada de audio
         audio: {
           encoderConfig: 'high_quality',
           playback: true,
@@ -86,17 +84,26 @@ const ProView = ({ meetingParams, RtcRole }) => {
       try {
         await agoraClient.join(appId, meetingParams.channelId, meetingParams.token, 0);
         console.log('Se unió al canal sin tracks');
-        // Escucha cuando un usuario remoto publica su pista
         agoraClient.on('user-published', async (user, mediaType) => {
           await agoraClient.subscribe(user, mediaType);
           console.log('Subscripción a usuario remoto', mediaType, user.uid);
 
           if (mediaType === 'video' && remoteVideoRef.current) {
             user.videoTrack.play(remoteVideoRef.current);
+            setRemoteCameraOn(true);
           }
 
           if (mediaType === 'audio') {
-            user.audioTrack.play(); // Reproduce audio automáticamente
+            user.audioTrack.play();
+          }
+        });
+
+        agoraClient.on('user-unpublished', (user, mediaType) => {
+          if (mediaType === 'video') {
+            setRemoteCameraOn(false);
+            if (remoteVideoRef.current) {
+              remoteVideoRef.current.innerHTML = '';
+            }
           }
         });
       } catch (error) {
@@ -113,7 +120,6 @@ const ProView = ({ meetingParams, RtcRole }) => {
     };
   }, [meetingParams]);
 
-  // Función para encender/apagar la cámara
   const handleToggleCamera = async () => {
     if (!cameraOn) {
       try {
@@ -139,7 +145,6 @@ const ProView = ({ meetingParams, RtcRole }) => {
     }
   };
 
-  // Función para encender/apagar el micrófono
   const handleToggleMic = async () => {
     if (!micOn) {
       try {
@@ -171,58 +176,45 @@ const ProView = ({ meetingParams, RtcRole }) => {
         position: 'relative',
       }}
     >
-      <header
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '0.5rem 1rem',
-          backgroundColor: '#f0f0f0',
-        }}
-      >
-        <h1 style={{ margin: 0 }}>Globtherapist</h1>
-        <div>
-          <button type="button" style={{ marginRight: '1rem' }}>
-            {currentPro && currentPro.Nombre ? `${currentPro.Nombre} (${roleLabel})` : 'Profesional'}
-          </button>
-          <button type="button" onClick={() => navigate('/')}>
-            Salir
-          </button>
-        </div>
+      <header className="video-header">
+        <h1>GLOBTHERAPIST</h1>
+        <button type="button" onClick={() => navigate('/')}>
+          <img src={home} alt="" />
+          <h5>Home</h5>
+        </button>
       </header>
 
       <HostNotification />
 
-      <div style={{ flex: 1, backgroundColor: '#000', position: 'relative' }}>
-        <div ref={localVideoRef} style={{ width: '100%', height: '100%' }} />
+      <div className="UserView-video-container">
+        <div ref={localVideoRef} className="video-cont" />
         {!cameraOn && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              color: '#fff',
-            }}
-          >
+          <div className="cam-txt">
             La cámara está apagada
           </div>
         )}
-        <div
-          ref={remoteVideoRef}
-          style={{
-            position: 'absolute',
-            top: '1rem',
-            left: '1rem',
-            width: '200px',
-            height: '150px',
-            border: '2px solid #fff',
-            zIndex: 10,
-          }}
-        />
+        {remoteCameraOn && (
+          <div className="video-pre-view-cont">
+            <div
+              className="video-pre-view"
+              ref={remoteVideoRef}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
       </div>
 
-      <div style={{ padding: '1rem', backgroundColor: '#f8f8f8' }}>
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '53%',
+          transform: 'translateX(-50%)',
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          padding: '0.5rem',
+          borderRadius: '0.5rem',
+        }}
+      >
         <button type="button" onClick={handleToggleCamera} style={{ marginRight: '1rem' }}>
           {cameraOn ? 'Apagar cámara' : 'Encender cámara'}
         </button>
@@ -230,10 +222,7 @@ const ProView = ({ meetingParams, RtcRole }) => {
           {micOn ? 'Apagar micrófono' : 'Encender micrófono'}
         </button>
       </div>
-      <ChatComponent
-        clientId={currentPro.uid}
-        channelId={meetingParams.channelId}
-      />
+      <ChatComponent clientId={currentPro.uid} channelId={meetingParams.channelId} />
     </div>
   );
 };
@@ -243,7 +232,6 @@ ProView.propTypes = {
     token: PropTypes.string.isRequired,
     channelId: PropTypes.string.isRequired,
   }).isRequired,
-  RtcRole: PropTypes.string.isRequired,
 };
 
 export default ProView;
