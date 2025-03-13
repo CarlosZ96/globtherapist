@@ -43,12 +43,14 @@ const UserView = ({ meetingParams }) => {
       try {
         await agoraClient.join(appId, meetingParams.channelId, meetingParams.token, 0);
         console.log('Usuario invitado se unió al canal');
+
+        // Evento: usuario publica un track (audio o video)
         agoraClient.on('user-published', async (user, mediaType) => {
           await agoraClient.subscribe(user, mediaType);
           console.log('Subscripción a usuario remoto', mediaType, user.uid);
 
           if (mediaType === 'video') {
-            // Con el contenedor siempre renderizado, remoteVideoRef.current ya existe
+            // El contenedor remoto ya está renderizado, se actualiza su visibilidad
             user.videoTrack.play(remoteVideoRef.current);
             setRemoteCameraOn(true);
           }
@@ -57,12 +59,22 @@ const UserView = ({ meetingParams }) => {
           }
         });
 
+        // Evento: usuario deja de publicar un track (por ejemplo, apaga la cámara)
         agoraClient.on('user-unpublished', (user, mediaType) => {
           if (mediaType === 'video') {
             setRemoteCameraOn(false);
             if (remoteVideoRef.current) {
               remoteVideoRef.current.innerHTML = '';
             }
+          }
+        });
+
+        // Evento: usuario abandona el canal
+        agoraClient.on('user-left', (user) => {
+          console.log('El usuario', user.uid, 'ha salido del canal');
+          setRemoteCameraOn(false);
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.innerHTML = '';
           }
         });
       } catch (error) {
@@ -167,7 +179,7 @@ const UserView = ({ meetingParams }) => {
               La cámara está apagada
             </div>
           )}
-          {/* El contenedor remoto se renderiza siempre y se muestra u oculta dinámicamente */}
+          {/* Contenedor remoto siempre renderizado; se muestra u oculta mediante CSS */}
           <div className="video-pre-view-cont" style={{ display: remoteCameraOn ? 'block' : 'none' }}>
             <div className="video-pre-view" ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
           </div>

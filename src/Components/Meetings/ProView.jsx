@@ -85,6 +85,8 @@ const ProView = ({ meetingParams }) => {
       try {
         await agoraClient.join(appId, meetingParams.channelId, meetingParams.token, 0);
         console.log('Se unió al canal sin tracks');
+
+        // Evento: usuario publica un track (audio o video)
         agoraClient.on('user-published', async (user, mediaType) => {
           await agoraClient.subscribe(user, mediaType);
           console.log('Subscripción a usuario remoto', mediaType, user.uid);
@@ -98,12 +100,22 @@ const ProView = ({ meetingParams }) => {
           }
         });
 
+        // Evento: usuario deja de publicar (apaga la cámara)
         agoraClient.on('user-unpublished', (user, mediaType) => {
           if (mediaType === 'video') {
             setRemoteCameraOn(false);
             if (remoteVideoRef.current) {
               remoteVideoRef.current.innerHTML = '';
             }
+          }
+        });
+
+        // Evento: usuario abandona el canal
+        agoraClient.on('user-left', (user) => {
+          console.log('El usuario', user.uid, 'ha salido del canal');
+          setRemoteCameraOn(false);
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.innerHTML = '';
           }
         });
       } catch (error) {
@@ -193,7 +205,7 @@ const ProView = ({ meetingParams }) => {
             La cámara está apagada
           </div>
         )}
-        {/* Contenedor remoto siempre renderizado y visible u oculto según remoteCameraOn */}
+        {/* Contenedor remoto siempre renderizado; se muestra u oculta mediante CSS */}
         <div className="video-pre-view-cont" style={{ display: remoteCameraOn ? 'block' : 'none' }}>
           <div className="video-pre-view" ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
         </div>
