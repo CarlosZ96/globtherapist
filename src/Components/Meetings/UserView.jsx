@@ -47,11 +47,11 @@ const UserView = ({ meetingParams }) => {
           await agoraClient.subscribe(user, mediaType);
           console.log('Subscripción a usuario remoto', mediaType, user.uid);
 
-          if (mediaType === 'video' && remoteVideoRef.current) {
+          if (mediaType === 'video') {
+            // Con el contenedor siempre renderizado, remoteVideoRef.current ya existe
             user.videoTrack.play(remoteVideoRef.current);
             setRemoteCameraOn(true);
           }
-
           if (mediaType === 'audio') {
             user.audioTrack.play();
           }
@@ -133,9 +133,7 @@ const UserView = ({ meetingParams }) => {
 
   return (
     <div className="UserView-cont" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <header
-        className="video-header"
-      >
+      <header className="video-header">
         <h1>GLOBTHERAPIST</h1>
         <button type="button" onClick={() => navigate('/')}>
           <img src={home} alt="" />
@@ -169,11 +167,10 @@ const UserView = ({ meetingParams }) => {
               La cámara está apagada
             </div>
           )}
-          {remoteCameraOn && (
-            <div className="video-pre-view-cont">
-              <div className="video-pre-view" ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
-            </div>
-          )}
+          {/* El contenedor remoto se renderiza siempre y se muestra u oculta dinámicamente */}
+          <div className="video-pre-view-cont" style={{ display: remoteCameraOn ? 'block' : 'none' }}>
+            <div className="video-pre-view" ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
+          </div>
           <div style={{
             position: 'absolute',
             bottom: '1rem',
@@ -193,10 +190,7 @@ const UserView = ({ meetingParams }) => {
           </div>
         </div>
       )}
-      <ChatComponent
-        clientId={currentUser.uid}
-        channelId={meetingParams.channelId}
-      />
+      <ChatComponent clientId={currentUser.uid} channelId={meetingParams.channelId} />
     </div>
   );
 };

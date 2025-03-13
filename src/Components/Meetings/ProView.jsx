@@ -89,11 +89,10 @@ const ProView = ({ meetingParams }) => {
           await agoraClient.subscribe(user, mediaType);
           console.log('Subscripción a usuario remoto', mediaType, user.uid);
 
-          if (mediaType === 'video' && remoteVideoRef.current) {
+          if (mediaType === 'video') {
             user.videoTrack.play(remoteVideoRef.current);
             setRemoteCameraOn(true);
           }
-
           if (mediaType === 'audio') {
             user.audioTrack.play();
           }
@@ -194,15 +193,10 @@ const ProView = ({ meetingParams }) => {
             La cámara está apagada
           </div>
         )}
-        {remoteCameraOn && (
-          <div className="video-pre-view-cont">
-            <div
-              className="video-pre-view"
-              ref={remoteVideoRef}
-              style={{ width: '100%', height: '100%' }}
-            />
-          </div>
-        )}
+        {/* Contenedor remoto siempre renderizado y visible u oculto según remoteCameraOn */}
+        <div className="video-pre-view-cont" style={{ display: remoteCameraOn ? 'block' : 'none' }}>
+          <div className="video-pre-view" ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
+        </div>
       </div>
 
       <div
