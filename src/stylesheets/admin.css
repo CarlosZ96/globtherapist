@@ -6,7 +6,23 @@
 
 .admin-header {
     height: 10%;
+    width: 100%;
     display: flex;
+    align-items: center;
+    background-color: #041B5E;
+}
+
+.admin-header h1 {
+    width: 93%;
+    text-align: center;
+    color: #ffffff59;
+    font-size: 5.4vw;
+    font-family: Itim, serif;
+    font-weight: 300;
+}
+
+.admin-header-butons-cont {
+    width: 7%;
 }
 
 .adim-options-cont {
@@ -15,18 +31,33 @@
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     place-items: center center;
-    background-color: #2B3E9D;
+    background-color: #fff;
+    margin-top: 5%;
 }
 
 .admin-option {
-    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 95%;
+    height: 95%;
+    background-color: #2B3E9D;
+    border-radius: 5px;
 }
+
+.plus-cont {
+    height: 30%;
+}
+
+.plus-img {
+    height: 100%;
+} 
 
 .admin-option-img-cont {
     height: 100%;
     width: 100%;
 }
 
-.admin-option-img-cont img {
+.admin-option-img {
     height: 200px;
 }

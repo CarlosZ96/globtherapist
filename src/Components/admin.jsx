@@ -3,6 +3,7 @@ import medical from '../img/medical-staff.png';
 import users from '../img/multiple-users-silhouette.png';
 import server from '../img/database.png';
 import per from '../img/dashboard (1).png';
+import plus from '../img/add.png';
 import '../stylesheets/admin.css';
 
 const Admin = () => {
@@ -19,6 +20,9 @@ const Admin = () => {
         <div className="admin-option">
           <div className="admin-option-img-cont">
             <img className="admin-option-img" src={medical} alt="" />
+            <div className="plus-cont">
+              <img src={plus} alt="" className="plus-img" />
+            </div>
           </div>
           <div className="admin-txt-cont">
             <h2>Pros</h2>
