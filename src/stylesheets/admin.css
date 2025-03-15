@@ -1,0 +1,32 @@
+.admin-cont {
+    height: 100vh;
+    width: 100vw;
+    background-color: #fff;
+}
+
+.admin-header {
+    height: 10%;
+    display: flex;
+}
+
+.adim-options-cont {
+    height: 60%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    place-items: center center;
+    background-color: #2B3E9D;
+}
+
+.admin-option {
+    width: 50%;
+}
+
+.admin-option-img-cont {
+    height: 100%;
+    width: 100%;
+}
+
+.admin-option-img-cont img {
+    height: 200px;
+}

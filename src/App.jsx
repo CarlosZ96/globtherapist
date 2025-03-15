@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import GlobMeeting from './Components/Meetings/GlobMeeting ';
 import './App.css';
 import Mainpage from './Components/Homepage';
+import Admin from './Components/admin';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Mainpage />} />
         <Route path="/meeting" element={<GlobMeeting />} />
+        <Route path="/Admin" element={<Admin />} />
       </Routes>
     </div>
   );
