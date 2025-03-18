@@ -88,7 +88,11 @@ const Homepage = () => {
                 </h3>
               </button>
             </div>
-            <button type="button" className="Log-Btn" onClick={logout}>
+            <button
+              type="button"
+              className="Log-Btn"
+              onClick={() => logout().then(() => window.location.reload())}
+            >
               <img src={close} alt="" />
             </button>
           </div>
