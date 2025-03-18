@@ -1,33 +1,36 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import Swal from 'sweetalert2';
 import { auth, db } from '../firebase';
 import '../stylesheets/windo.css';
 
-const CreatePro = ({ toggleCreatePro }) => {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    username: '',
-    document: { type: 'C.C', number: '' },
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    therapies: [],
-  });
+const initialFormData = {
+  fullName: '',
+  username: '',
+  document: { type: 'C.C', number: '' },
+  email: '',
+  phone: '',
+  password: '',
+  confirmPassword: '',
+  therapies: [],
+};
 
+const CreatePro = ({ toggleCreatePro }) => {
+  const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const therapyOptions = ['Mental', 'Física', 'Ocupacional', 'Lenguaje'];
   const normalizeText = (text) => {
     return text
-      .normalize('NFD') // Normaliza caracteres con tildes
-      .replace(/[\u0300-\u036f]/g, '') // Elimina diacríticos
-      .toLowerCase(); // Convierte a minúsculas
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
   };
 
   const handleChange = (e) => {
@@ -104,6 +107,8 @@ const CreatePro = ({ toggleCreatePro }) => {
         telefono: formData.phone,
         terapias: normalizedTherapies,
         horarios: {},
+        status: 'pendiente',
+        createdAt: serverTimestamp(),
       });
 
       Swal.fire({
@@ -111,16 +116,7 @@ const CreatePro = ({ toggleCreatePro }) => {
         title: '¡Éxito!',
         text: 'Cuenta Pro creada con éxito.',
       });
-      setFormData({
-        fullName: '',
-        username: '',
-        document: { type: 'C.C', number: '' },
-        email: '',
-        phone: '',
-        password: '',
-        confirmPassword: '',
-        therapies: [],
-      });
+      setFormData(initialFormData);
       toggleCreatePro();
     } catch (error) {
       console.error('Error creando Pro:', error);
@@ -134,11 +130,22 @@ const CreatePro = ({ toggleCreatePro }) => {
     }
   };
 
+  const handleClose = () => {
+    setFormData(initialFormData);
+    setErrors({});
+    toggleCreatePro();
+  };
+
   return (
-    <div className="CreatePro-overlay">
+    <div className="Login-overlay">
       <div className="CreatePro-cont">
         <form className="CreatePro-body" onSubmit={handleSubmit}>
-          <h1>Crea tu cuenta Pro</h1>
+          <div className="Create-title-cont">
+            <h1>Crear cuenta</h1>
+            <div className="close-button" onClick={handleClose}>
+              &times;
+            </div>
+          </div>
           <div className="CreatePro-input-cont">
             <label>Nombre Completo:</label>
             <input
@@ -235,9 +242,7 @@ const CreatePro = ({ toggleCreatePro }) => {
                 <button
                   key={therapy}
                   type="button"
-                  className={
-                    formData.therapies.includes(therapy) ? 'active' : ''
-                  }
+                  className={formData.therapies.includes(therapy) ? 'active' : ''}
                   onClick={() => toggleTherapy(therapy)}
                 >
                   {therapy}

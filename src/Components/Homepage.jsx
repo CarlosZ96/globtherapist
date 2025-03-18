@@ -26,14 +26,12 @@ const Homepage = () => {
   const toggleCreate = () => setShowCreate((prev) => !prev);
   const toggleCreatePro = () => setShowCreatePro((prev) => !prev);
 
-  // Estilos para cuando NO hay usuario logueado
   const noUserStyles = {
     homeWindows: { width: '70%' },
     logBtnCont: { width: '20%' },
     logBtn: { width: '50%' },
   };
 
-  // Estilos para cuando HAY usuario logueado
   const userStyles = {
     homeWindows: { width: '78%' },
     logBtnCont: { width: '12%' },
