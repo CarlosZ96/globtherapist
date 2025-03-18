@@ -235,3 +235,19 @@
     border: 3px #01268d solid;
     background-color: #fff;
 }
+
+.pending-dates {
+    position: absolute;
+    top: 15%;
+    left: -12%;
+    background-color: red;
+    border-radius: 6px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 2vw;
+    font-family: Itim, serif;
+}

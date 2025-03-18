@@ -28,14 +28,19 @@ const Homepage = () => {
 
   const noUserStyles = {
     homeWindows: { width: '70%' },
-    logBtnCont: { width: '20%' },
+    logBtnCont: { width: '20%', position: 'relative' },
     logBtn: { width: '50%' },
   };
 
   const userStyles = {
     homeWindows: { width: '78%' },
-    logBtnCont: { width: '12%' },
+    logBtnCont: { width: '12%', position: 'relative' },
   };
+
+  // Calcula el número de citas pendientes según si es usuario o pro
+  const pendingAppointmentsCount = currentPro
+    ? (currentPro.MisCitas?.length || 0)
+    : (userData?.Citas?.length || 0);
 
   const renderContent = () => {
     if (currentPro) return <ProSpace />;
@@ -77,6 +82,11 @@ const Homepage = () => {
           </div>
         ) : (
           <div className="Log-Btn-Cont" style={userStyles.logBtnCont}>
+            <span
+              className="pending-dates"
+            >
+              {pendingAppointmentsCount}
+            </span>
             <div className="Log-Btn-Cont-User">
               <button
                 type="button"
