@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import GlobMeeting from './Components/Meetings/GlobMeeting ';
 import './App.css';
 import Mainpage from './Components/Homepage';
-import Admin from './Components/admin';
+import Admin from './Components/glob/admin';
 
 function App() {
   return (

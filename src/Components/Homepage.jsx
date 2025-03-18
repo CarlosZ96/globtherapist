@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import '../stylesheets/homepage.css';
 import '../stylesheets/windo.css';
 import Globody from './Globody';
-import Admin from './admin';
+import Admin from './glob/admin';
 import ProSpace from './ProSpace';
 import Login from './windows/login';
 import close from '../img/Closegt.png';
