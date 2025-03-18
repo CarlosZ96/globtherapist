@@ -36,11 +36,9 @@ const Homepage = () => {
     homeWindows: { width: '78%' },
     logBtnCont: { width: '12%', position: 'relative' },
   };
-
-  // Calcula el número de citas pendientes según si es usuario o pro
   const pendingAppointmentsCount = currentPro
-    ? (currentPro.MisCitas?.length || 0)
-    : (userData?.Citas?.length || 0);
+    ? (currentPro.MisCitas?.filter((cita) => cita.status === 'pending').length || 0)
+    : (userData?.Citas?.filter((cita) => cita.status === 'pending').length || 0);
 
   const renderContent = () => {
     if (currentPro) return <ProSpace />;
