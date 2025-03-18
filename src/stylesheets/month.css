@@ -217,8 +217,6 @@
 }
 
 .calendar-day {
-    width: 50%;
-    height: 60%;
     border-radius: 5px;
     font-size: 3.5vw;
     font-family: Itim, serif;
@@ -240,7 +238,6 @@
 }
 
 .calendar-day.has-day:hover {
-    outline: 2px solid #2b3e9d;
     outline-offset: 3px;
     color: #fff;
     background-color: #2b3e9d;
@@ -295,13 +292,13 @@
 }
 
 .calendar-day:hover {
-    outline: 3px solid #2b3e9d;
     outline-offset: 5px;
     color: #fff;
+    background-color: #2b3e9d;
 }
 
 .inactive {
-    background-color: #7C95A6;
+    background-color: #bdbdbd;
     color: #fff;
     border: none;
     width: 90%;
