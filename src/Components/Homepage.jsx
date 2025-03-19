@@ -20,6 +20,8 @@ const Homepage = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [showCreatePro, setShowCreatePro] = useState(false);
   const [showDates, setShowDates] = useState(false);
+  // Estado para controlar la visibilidad de la notificación
+  const [showNotification, setShowNotification] = useState(true);
 
   const toggleDates = () => setShowDates((prev) => !prev);
   const toggleLogin = () => setShowLogin((prev) => !prev);
@@ -36,6 +38,8 @@ const Homepage = () => {
     homeWindows: { width: '78%' },
     logBtnCont: { width: '12%', position: 'relative' },
   };
+
+  // Filtra y cuenta solo las citas con status "pending"
   const pendingAppointmentsCount = currentPro
     ? (currentPro.MisCitas?.filter((cita) => cita.status === 'pending').length || 0)
     : (userData?.Citas?.filter((cita) => cita.status === 'pending').length || 0);
@@ -80,16 +84,21 @@ const Homepage = () => {
           </div>
         ) : (
           <div className="Log-Btn-Cont" style={userStyles.logBtnCont}>
-            <span
-              className="pending-dates"
-            >
-              {pendingAppointmentsCount}
-            </span>
+            {showNotification && (
+              <span
+                className="pending-dates"
+              >
+                {pendingAppointmentsCount}
+              </span>
+            )}
             <div className="Log-Btn-Cont-User">
               <button
                 type="button"
                 className="Log-Btn-user"
-                onClick={toggleDates}
+                onClick={() => {
+                  toggleDates();
+                  setShowNotification(false);
+                }}
               >
                 <h3 className="User-Name">
                   {currentPro?.username || userData?.username || 'Usuario'}
@@ -99,7 +108,10 @@ const Homepage = () => {
             <button
               type="button"
               className="Log-Btn"
-              onClick={() => logout().then(() => window.location.reload())}
+              onClick={() => {
+                setShowNotification(false);
+                logout().then(() => window.location.reload());
+              }}
             >
               <img src={close} alt="" />
             </button>
