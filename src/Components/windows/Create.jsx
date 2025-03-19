@@ -1,6 +1,4 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useRef, useState } from 'react';
+import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -16,16 +14,8 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
     password: '',
     confirmPassword: '',
   });
-
   const [errors, setErrors] = useState({});
   const formRef = useRef();
-  const [showMoreInfo, setShowMoreInfo] = useState(false);
-
-  const handleShowCreatePro = () => {
-    toggleCreate();
-    toggleCreatePro();
-    setShowMoreInfo(!showMoreInfo);
-  };
 
   const validateForm = () => {
     const validationErrors = {};
@@ -86,9 +76,16 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
       });
 
       Swal.fire({
-        icon: 'success',
         title: '¡Éxito!',
         text: 'Usuario creado con éxito.',
+        icon: 'success',
+        customClass: {
+          popup: 'mi-popup',
+          title: 'mi-titulo',
+          content: 'mi-contenido',
+          confirmButton: 'mi-boton-confirmar',
+        },
+        buttonsStyling: false,
       });
 
       setFormData({
@@ -101,8 +98,6 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
       toggleCreate();
     } catch (error) {
       console.error('Error creando el usuario:', error);
-      console.error('Código de error:', error.code);
-      console.error('Mensaje de error:', error.message);
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -113,7 +108,6 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
 
   const handleClose = () => {
     toggleCreate();
-    setShowMoreInfo(!showMoreInfo);
     setFormData({
       email: '',
       phone: '',
@@ -121,7 +115,31 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
       password: '',
       confirmPassword: '',
     });
-    setErrors('');
+    setErrors({});
+  };
+
+  // Función para cerrar la ventana actual y abrir la de cuenta pro
+  const handleShowCreatePro = () => {
+    toggleCreate(); // Cierra la ventana de crear usuario
+    toggleCreatePro(); // Abre la ventana de crear cuenta Pro
+  };
+  // Función para mostrar la información usando Swal
+  const mostrarInfoPro = () => {
+    Swal.fire({
+      title: '¿Eres profesional de la salud?',
+      html: `
+        <p>Si eres profesional y te gustaría trabajar con nosotros, puedes registrarte y brindar tus servicios de terapias en línea.</p>
+        <button id="crear-cuenta-pro" type="button" class="swal2-confirm swal2-styled">Crear Cuenta Pro</button>
+      `,
+      showConfirmButton: false,
+      didOpen: () => {
+        const btn = document.getElementById('crear-cuenta-pro');
+        btn.addEventListener('click', () => {
+          Swal.close(); // Cierra la alerta de Swal
+          handleShowCreatePro();
+        });
+      },
+    });
   };
 
   return (
@@ -130,7 +148,15 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
         <form className="Create-body" onSubmit={handleSubmit}>
           <div className="Create-title-cont">
             <h1>Crear Usuario</h1>
-            <div className="close-button" onClick={handleClose}>
+            <div
+              className="close-button"
+              role="button"
+              tabIndex="0"
+              onClick={handleClose}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') handleClose();
+              }}
+            >
               &times;
             </div>
           </div>
@@ -196,31 +222,11 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
           </div>
           <div className="Create-pro-popup">
             <h4>¿Eres profesional de la salud?</h4>
-            <button
-              type="button"
-              onClick={() => setShowMoreInfo(!showMoreInfo)}
-            >
+            <button type="button" onClick={mostrarInfoPro}>
               Saber más
             </button>
           </div>
         </form>
-
-        {showMoreInfo && (
-          <div className="overlay">
-            <div className="info-popup">
-              <div className="close-buttons" onClick={() => setShowMoreInfo(!showMoreInfo)}>
-                &times;
-              </div>
-              <p>
-                Si eres profesional y te gustaría trabajar con nosotros, puedes
-                registrarte y brindar tus servicios de terapias en línea.
-              </p>
-              <button type="button" onClick={handleShowCreatePro}>
-                Crear Cuenta Pro
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -95,7 +95,6 @@
 }
 
 .Log-Btn {
-    width: 30%;
     height: 60%;
     background: none;
     border: none;
@@ -122,6 +121,7 @@
     align-items: center;
     justify-content: center;
     color: #fff;
+    font-size: 1.8vw;
 }
 
 .Home-body {
