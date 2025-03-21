@@ -107,7 +107,7 @@ const CreatePro = ({ toggleCreatePro }) => {
         telefono: formData.phone,
         terapias: normalizedTherapies,
         horarios: {},
-        status: 'pendiente',
+        status: 'creado',
         createdAt: serverTimestamp(),
       });
 

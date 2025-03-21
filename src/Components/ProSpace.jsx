@@ -5,6 +5,7 @@ import { db, auth } from '../firebase';
 import Calendar from './Calendar/CalendarWithToggle';
 import ProData from './ProData';
 import Hdv from './Hdv';
+import her from '../img/Heykiyou 1.png';
 import '../stylesheets/prospace.css';
 
 const ProSpace = () => {
@@ -28,7 +29,6 @@ const ProSpace = () => {
           setStatus(null);
         }
       } else {
-        // Si no hay usuario autenticado
         setStatus(null);
       }
       setLoading(false);
@@ -46,8 +46,28 @@ const ProSpace = () => {
       {status === 'aprobado' ? (
         <Calendar collection="pros" />
       ) : (
-        <div>
-          <h1>Estamos validando tus datos</h1>
+        <div className="prospace-apro">
+          <div className="prospace-title-cont">
+            <h1>GLOBTHERAPIST</h1>
+          </div>
+          <div className="prospace-status-cont">
+            <div className="prospace-status-create-cont">
+              <div className="prospace-request-cont">
+                <div className="prospace-request-img-cont">
+                  <img src={her} className="her-img" alt="" />
+                </div>
+                <div className="prospace-request-txt-cont">
+                  <div>
+                    <h1>Hola, user</h1>
+                  </div>
+                  <div>
+                    <h2>¿POR QUE?</h2>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
       )}
       <ProData />

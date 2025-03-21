@@ -178,3 +178,44 @@
     background-color: #2b3e9d;
     text-align: center;
 }
+
+.prospace-apro {
+    height: 90vh;
+    width: 100%;
+    background-color: #2b3e9d;
+}
+
+.prospace-title-cont {
+    height: 10%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 4vw;
+    color: #ffffff49;
+    font-family: Itim, serif;
+    font-weight: 100;
+}
+
+.prospace-status-cont {
+    height: 90%;
+}
+
+.prospace-status-create-cont {
+    height: 96%;
+}
+
+.prospace-request-cont {
+    height: 50%;
+    width: 100%;
+    background-color: #fff;
+}
+
+.prospace-request-img-cont {
+    width: 30%;
+}
+
+.her-img {
+    width: 200px;
+}
