@@ -1,23 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { doc, getDoc } from 'firebase/firestore';
-import { ref, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../firebase';
+import { db } from '../firebase';
 import User from '../img/user.png';
 
 const Hdvwindow = ({ proId, onClose }) => {
-  const [proData, setProData] = React.useState(null);
-  const [profileImage, setProfileImage] = React.useState(User);
+  const [proData, setProData] = useState(null);
+  const [profileImage, setProfileImage] = useState(User);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchProData = async () => {
       try {
         const proDoc = await getDoc(doc(db, 'pros', proId));
         if (proDoc.exists()) {
           const data = proDoc.data();
-          setProData(data.Hdv);
+          setProData(data);
+          if (data.files && data.files.profileImageUrl) {
+            setProfileImage(data.files.profileImageUrl);
+          } else {
+            setProfileImage(User);
+          }
         } else {
           console.error('No se encontró el profesional en Firestore.');
+          setProData({});
         }
       } catch (error) {
         console.error('Error obteniendo datos del profesional:', error);
@@ -25,21 +30,6 @@ const Hdvwindow = ({ proId, onClose }) => {
     };
 
     fetchProData();
-  }, [proId]);
-
-  React.useEffect(() => {
-    const fetchProfileImage = async () => {
-      try {
-        const imageRef = ref(storage, `profileImages/${proId}/profile.jpg`);
-        const url = await getDownloadURL(imageRef);
-        setProfileImage(url);
-      } catch (error) {
-        console.error('Error obteniendo la imagen de perfil:', error);
-        setProfileImage(User);
-      }
-    };
-
-    fetchProfileImage();
   }, [proId]);
 
   if (!proData) {
@@ -53,28 +43,28 @@ const Hdvwindow = ({ proId, onClose }) => {
           &times;
         </button>
         <div className="user-image-comt">
-          <img src={profileImage} alt="user" className="pro-img" />
+          <img src={profileImage} alt="Perfil profesional" className="pro-img" />
         </div>
-        <h2>{proData.profession}</h2>
+        <h2>{proData.profession || 'Profesión no disponible'}</h2>
         <p>
           <strong>Especialización:</strong>
           {' '}
-          {proData.specialization}
+          {proData.specialization || 'No disponible'}
         </p>
         <p>
           <strong>Años de experiencia:</strong>
           {' '}
-          {proData.yearsOfExperience}
+          {proData.yearsOfExperience || 'No disponible'}
         </p>
         <p>
           <strong>Egresado en:</strong>
           {' '}
-          {proData.university}
+          {proData.university || 'No disponible'}
         </p>
         <p>
           <strong>Historia profesional:</strong>
           {' '}
-          {proData.professionalHistory}
+          {proData.professionalHistory || 'No disponible'}
         </p>
       </div>
     </div>

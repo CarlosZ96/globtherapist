@@ -12,6 +12,7 @@
     width: 98vw;
     height: max-content;
     background-color: #fff;
+    margin-bottom: 2%;
 }
 
 .calendar-month-cont {
@@ -158,6 +159,21 @@
     margin-bottom: 2%;
 }
 
+.Edit-Hours {
+    width: 5%;
+    height: 68%;
+    position: absolute;
+    left: 79%;
+    top: 10%;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.edit-btn {
+    height: 90%;
+}
+
 .Hours-cont h3 {
     font-size: 2.5vw;
     font-family: Itim, serif;
@@ -204,16 +220,25 @@
     border: none;
     border-radius: 5px;
     height: 100%;
-    width: 60%;
+    width: 55%;
     background-color: #2b3a67;
 }
 
 .See-Hours h3 {
     margin: 0;
+    font-size: 3vw;
     color: #fff;
     font-family: Itim, serif;
     font-weight: 200;
     font-style: normal;
+}
+
+.disable {
+    background-color: #c2c2c281;
+}
+
+.disable h3 {
+    color: #94939383;
 }
 
 .calendar-day {
@@ -305,6 +330,7 @@
     width: 90%;
     height: 100%;
 }
+
 
 .active {
     width: 90%;
@@ -532,4 +558,5 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    position: relative;
 }
