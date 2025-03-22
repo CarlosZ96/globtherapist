@@ -51,22 +51,35 @@ const ProSpace = () => {
             <h1>GLOBTHERAPIST</h1>
           </div>
           <div className="prospace-status-cont">
-            <div className="prospace-status-create-cont">
-              <div className="prospace-request-cont">
-                <div className="prospace-request-img-cont">
-                  <img src={her} className="her-img" alt="" />
+            {status === 'creado' ? (
+              <div className="prospace-status-create-cont">
+                <div className="prospace-request-cont">
+                  <div className="prospace-request-img-cont">
+                    <img src={her} className="her-img" alt="" />
+                  </div>
+                  <div className="prospace-request-txt-cont">
+                    <div className="prospace-request-txt">
+                      <h1>Hola, user</h1>
+                    </div>
+                    <div>
+                      <h2>¿POR QUE?</h2>
+                    </div>
+                  </div>
                 </div>
-                <div className="prospace-request-txt-cont">
-                  <div>
-                    <h1>Hola, user</h1>
-                  </div>
-                  <div>
-                    <h2>¿POR QUE?</h2>
-                  </div>
+                <div className="prospace-explain-cont">
+                  <p>
+                    Now that we will work together to help
+                    our users live a healthier life,
+                    we need to build trust, which is why we must validate
+                    how professional you are!
+                  </p>
                 </div>
               </div>
-
-            </div>
+            ) : (
+              <div>
+                <h1>pendiente</h1>
+              </div>
+            )}
           </div>
         </div>
       )}

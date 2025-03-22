@@ -209,13 +209,56 @@
 .prospace-request-cont {
     height: 50%;
     width: 100%;
-    background-color: #fff;
+    background-color: #2b3e9d;
+    display: flex;
 }
 
 .prospace-request-img-cont {
     width: 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .her-img {
     width: 200px;
+}
+
+.prospace-request-txt-cont {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.prospace-request-txt {
+    height: 60%;
+    width: 80%;
+    background-color: #4f63c2;
+    border-radius: 5px;
+}
+
+.prospace-request-txt h1 {
+    text-align: center;
+    font-size: 2vw;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.prospace-explain-cont {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 50%;
+}
+
+.prospace-explain-cont p {
+    height: 50%;
+    width: 96%;
+    background-color: #4f63c2;
+    color: #fff;
 }
