@@ -6,6 +6,9 @@ import Calendar from './Calendar/CalendarWithToggle';
 import ProData from './ProData';
 import Hdv from './Hdv';
 import her from '../img/Heykiyou 1.png';
+import reading from '../img/BZZRINCANTATION.png';
+import wating from '../img/waitingr 1.png';
+import mail from '../img/mailSend.png';
 import '../stylesheets/prospace.css';
 
 const ProSpace = () => {
@@ -60,6 +63,9 @@ const ProSpace = () => {
                   <div className="prospace-request-txt-cont">
                     <div className="prospace-request-txt">
                       <h1>Hola, user</h1>
+                      <p>
+                        Antes de continuar tenemos que validar tus datos.
+                      </p>
                     </div>
                     <div>
                       <h2>¿POR QUE?</h2>
@@ -73,11 +79,31 @@ const ProSpace = () => {
                     we need to build trust, which is why we must validate
                     how professional you are!
                   </p>
+                  <button type="button">Ir</button>
                 </div>
               </div>
             ) : (
-              <div>
-                <h1>pendiente</h1>
+              <div className="waiting-cont">
+                <h1 className="waiting-title">Estamos revisdando tus datos</h1>
+                <div className="waiting-img-cont">
+                  <img src={reading} alt="" />
+                </div>
+                <div className="waiting-time-cont">
+                  <div className="waiting-time-img-cont">
+                    <img src={wating} alt="" />
+                  </div>
+                  <div className="waiting-time-txt">
+                    <div className="waiting-time-back">
+                      <p>
+                        Tardaremos de 2 a 3 dias habiles en validar tu informacion
+                      </p>
+                      <div className="waiting-send-email">
+                        <img src={mail} alt="" />
+                        <h4>Te enviaremos la respuesta a tu correo</h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
