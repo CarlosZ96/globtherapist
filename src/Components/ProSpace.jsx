@@ -59,32 +59,36 @@ const ProSpace = () => {
                 <div className="prospace-request-cont">
                   <div className="prospace-request-img-cont">
                     <img src={her} className="her-img" alt="" />
+                    <div className="bubble" />
+                    <div className="bubble" />
                   </div>
                   <div className="prospace-request-txt-cont">
                     <div className="prospace-request-txt">
-                      <h1>Hola, user</h1>
+                      <h1>Hola, usuario</h1>
                       <p>
-                        Antes de continuar tenemos que validar tus datos.
+                        Antes de continuar, necesitamos validar tus datos.
                       </p>
                     </div>
-                    <div>
-                      <h2>¿POR QUE?</h2>
+                    <div className="why-cont">
+                      <h2>¿POR QUÉ?</h2>
                     </div>
                   </div>
                 </div>
                 <div className="prospace-explain-cont">
-                  <p>
-                    Now that we will work together to help
-                    our users live a healthier life,
-                    we need to build trust, which is why we must validate
-                    how professional you are!
-                  </p>
+                  <div className="prospace-explain-txt-cont">
+                    <p>
+                      Ahora que trabajaremos juntos para ayudar
+                      a nuestros usuarios a vivir una vida más saludable,
+                      necesitamos construir confianza, ¡por eso debemos validar
+                      qué tan profesional eres!
+                    </p>
+                  </div>
                   <button type="button">Ir</button>
                 </div>
               </div>
             ) : (
               <div className="waiting-cont">
-                <h1 className="waiting-title">Estamos revisdando tus datos</h1>
+                <h1 className="waiting-title">Estamos revisando tus datos</h1>
                 <div className="waiting-img-cont">
                   <img src={reading} alt="" />
                 </div>
@@ -95,7 +99,7 @@ const ProSpace = () => {
                   <div className="waiting-time-txt">
                     <div className="waiting-time-back">
                       <p>
-                        Tardaremos de 2 a 3 dias habiles en validar tu informacion
+                        Tardaremos de 2 a 3 días hábiles en validar tu información
                       </p>
                       <div className="waiting-send-email">
                         <img src={mail} alt="" />

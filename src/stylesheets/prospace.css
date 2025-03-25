@@ -220,6 +220,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .her-img {
@@ -239,14 +240,34 @@
     width: 80%;
     background-color: #4f63c2;
     border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .prospace-request-txt h1 {
     text-align: center;
-    font-size: 2vw;
+    font-size: 6vw;
     color: #fff;
     font-family: Itim, serif;
     font-weight: lighter;
+    height: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.prospace-request-txt p {
+    text-align: center;
+    font-size: 4vw;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    height: 55%;
+    width: 87%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .prospace-explain-cont {
@@ -255,13 +276,39 @@
     align-items: center;
     width: 100%;
     height: 50%;
+    position: relative;
 }
 
-.prospace-explain-cont p {
-    height: 50%;
-    width: 96%;
+.prospace-explain-cont button {
+    position: absolute;
+    top: 73%;
+    left: 80%;
+    width: 12%;
+    height: 13%;
+    background-color: #041b5e;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+}
+
+.prospace-explain-txt-cont {
+    height: 86%;
+    width: 90%;
     background-color: #4f63c2;
     color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.prospace-explain-txt-cont p {
+    width: 91%;
+    font-size: 4vw;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    align-items: center;
 }
 
 .waiting-cont {
@@ -377,4 +424,21 @@
     color: #000;
     font-family: Itim, serif;
     font-weight: lighter;
+}
+
+.bubble {
+    height: 12%;
+    width: 16%;
+    background-color: #4f63c2;
+    border-radius: 50%;
+    position: absolute;
+    left: 76%;
+    top: 56%;
+}
+
+.prospace-request-img-cont .bubble:last-child {
+    left: 96%;
+    top: 44%;
+    height: 15%;
+    width: 20%;
 }

@@ -13,10 +13,6 @@ const Admin = () => {
     <div className="admin-cont">
       <header className="admin-header">
         <h1>GLOBTHERAPIST</h1>
-        <div className="admin-header-butons-cont">
-          <button type="button">carlos</button>
-          <button type="button">x</button>
-        </div>
       </header>
       <div className="admin-body">
         <div className="adim-options-cont">

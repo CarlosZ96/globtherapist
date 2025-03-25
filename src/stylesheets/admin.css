@@ -15,6 +15,7 @@
     display: flex;
     align-items: center;
     background-color: #041B5E;
+    justify-content: center;
 }
 
 .admin-header h1 {
@@ -214,4 +215,16 @@
     font-family: Itim, serif;
     font-weight: lighter;
     background-color: #c5c5c5;
+}
+
+.why-cont {
+    width: 100%;
+}
+
+.why-cont h2 {
+    font-size: 5vw;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: 100;
+    text-align: center;
 }
