@@ -433,12 +433,12 @@
     border-radius: 50%;
     position: absolute;
     left: 76%;
-    top: 56%;
+    top: 50%;
 }
 
 .prospace-request-img-cont .bubble:last-child {
     left: 96%;
-    top: 44%;
+    top: 36%;
     height: 15%;
     width: 20%;
 }
