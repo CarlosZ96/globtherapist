@@ -6,18 +6,13 @@ import {
   collection, getDocs, updateDoc, doc, getDoc,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
-
-// IMPORTA TU MODAL
 import AdminProModal from '../AdminProModal';
-
 import '../../stylesheets/admin.css';
 
 const AdminPros = () => {
   const [totalPros, setTotalPros] = useState(0);
   const [approvedCount, setApprovedCount] = useState(0);
   const [pendingPros, setPendingPros] = useState([]);
-
-  // ESTADOS PARA EL MODAL
   const [showModal, setShowModal] = useState(false);
   const [selectedProData, setSelectedProData] = useState(null);
 
@@ -41,21 +36,18 @@ const AdminPros = () => {
 
         await Promise.all(docs.map(async (docSnapshot) => {
           const data = docSnapshot.data();
-          const proDocId = docSnapshot.id; // GUARDAR UID/ID
+          const proDocId = docSnapshot.id;
 
-          // Si no existe campo status, lo creamos por defecto
           if (!Object.prototype.hasOwnProperty.call(data, 'status')) {
             const proRef = doc(db, 'pros', proDocId);
             await updateDoc(proRef, { status: 'pendiente' });
             data.status = 'pendiente';
           }
 
-          // Contar aprobados
           if (data.status === 'aprobado') {
             approved += 1;
           }
 
-          // Guardar los pendientes en un array
           if (data.status === 'pendiente') {
             let creationDate;
             if (data.createdAt && data.createdAt.toDate) {
@@ -63,8 +55,6 @@ const AdminPros = () => {
             } else {
               creationDate = 'No definida';
             }
-
-            // GUARDAMOS TAMBIÉN EL ID DEL DOCUMENTO
             pendingList.push({
               id: proDocId,
               email: data.email,
@@ -84,19 +74,14 @@ const AdminPros = () => {
     fetchPros();
   }, []);
 
-  // CUANDO HACES CLIC EN UN PRO PENDIENTE
   const handleProClick = async (proItem) => {
     try {
-      // 1. Obtenemos la info completa del doc
       const proRef = doc(db, 'pros', proItem.id);
       const proSnap = await getDoc(proRef);
 
       if (proSnap.exists()) {
-        // 2. Guardamos sus datos en selectedProData
         const data = proSnap.data();
-        // data incluye Nombre, email, telefono, Documento, Hdv, files, etc.
-        setSelectedProData(data);
-        // 3. Abrimos el modal
+        setSelectedProData({ ...data, docId: proItem.id });
         setShowModal(true);
       } else {
         console.log('No existe el doc del pro con id:', proItem.id);
@@ -106,48 +91,30 @@ const AdminPros = () => {
     }
   };
 
-  // Cerrar el modal
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedProData(null);
   };
 
-  // Aprobar
   const handleApprove = async () => {
     if (!selectedProData) return;
     try {
-      // Buscamos el doc del pro con la info que tengas
-      // Si no guardaste la ID en selectedProData, puedes guardarla aparte
-      // o usar "pendingPros" para encontrar su ID.
-      // Supongamos que la guardaste en selectedProData._docId
-      // En este ejemplo, la ID la guardamos en proItem.id. Podrías guardarla en un ref global.
-
-      // EJEMPLO (si guardaste la ID en selectedProData._docId):
-      // const proRef = doc(db, 'pros', selectedProData._docId);
-
-      // O, si guardaste la ID en un estado aparte, úsala.
-      // Para simplificar, lo dejamos como un "TODO".
-
-      // Lógica de aprobación
       console.log('Aprobando...');
-      // await updateDoc(proRef, { status: 'aprobado' });
-
+      const proRef = doc(db, 'pros', selectedProData.docId);
+      await updateDoc(proRef, { status: 'aprobado' });
       setShowModal(false);
       setSelectedProData(null);
-      // refrescar la lista si deseas
     } catch (error) {
       console.error('Error al aprobar:', error);
     }
   };
 
-  // Rechazar
   const handleReject = async () => {
     if (!selectedProData) return;
     try {
       console.log('Rechazando...');
-      // Ejemplo de actualización de status
-      // const proRef = doc(db, 'pros', selectedProData._docId);
-      // await updateDoc(proRef, { status: 'rechazado' });
+      const proRef = doc(db, 'pros', selectedProData.docId);
+      await updateDoc(proRef, { status: 'rechazado' });
 
       setShowModal(false);
       setSelectedProData(null);
@@ -196,7 +163,6 @@ const AdminPros = () => {
         </div>
       </div>
 
-      {/* RENDERIZAMOS EL MODAL */}
       <AdminProModal
         show={showModal}
         onClose={handleCloseModal}

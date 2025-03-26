@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-// AdminProModal.jsx
 import React from 'react';
 import PropTypes from 'prop-types';
+import '../stylesheets/AdminProModal.css';
 
 const AdminProModal = ({
   show,
@@ -131,6 +131,11 @@ const AdminProModal = ({
               <span>No hay certificados</span>
             )}
           </div>
+        </div>
+
+        <div className="adminProModal-reason">
+          <h4>Motifo del rechazo:</h4>
+          <textarea name="reason" id="reason" placeholder="Detalla el motivo.." />
         </div>
 
         <div className="adminProModal-buttons">
