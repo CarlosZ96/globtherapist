@@ -13,15 +13,12 @@ import { storage, db } from '../firebase';
 
 const ProData = () => {
   const { currentUser, currentPro } = useAuth();
-  // Para la imagen de perfil se separa la URL y el archivo original
   const [profileImageUrl, setProfileImageUrl] = useState(User);
   const [profileImageFile, setProfileImageFile] = useState(null);
-
   const [hdvFile, setHdvFile] = useState(null);
   const [professionalCardFile, setProfessionalCardFile] = useState(null);
   const [certificateFiles, setCertificateFiles] = useState([]);
-
-  // Función para subir un archivo y retornar su URL
+  const [formDisabled, setFormDisabled] = useState(false);
   const handleFileUpload = async (file, path) => {
     if (!file || !currentUser) return;
     const fileRef = ref(storage, `${path}/${currentUser.uid}/${file.name}`);
@@ -68,34 +65,25 @@ const ProData = () => {
       return;
     }
 
-    // Subir cada archivo y obtener sus URLs
     const hdvUrl = await handleFileUpload(hdvFile, 'hdvFiles');
     const professionalCardUrl = await handleFileUpload(professionalCardFile, 'professionalCards');
-    // Nota: para la imagen de perfil ya se subió en handleProfileImageChange, pero si deseas
-    // "refrescar" o asegurarte de guardar la versión subida, puedes volver a subirla:
-    // const profileImageUploadedUrl = await handleFileUpload(profileImageFile, 'profileImages');
-    // En este ejemplo, usaremos la URL ya guardada en profileImageUrl.
-
     const certificateUrls = await Promise.all(
       certificateFiles.map((file) => handleFileUpload(file, 'certificates')),
     );
 
-    // Construir el objeto con la información de los archivos
     const filesData = {
       profileImageFileName: profileImageFile.name,
-      profileImageUrl, // URL obtenida en handleProfileImageChange
+      profileImageUrl,
       hdvFileName: hdvFile.name,
       hdvUrl,
       professionalCardFileName: professionalCardFile.name,
       professionalCardUrl,
-      // Guardamos los certificados como un arreglo de objetos con nombre y URL
       certificateFiles: certificateFiles.map((file, index) => ({
         fileName: file.name,
         url: certificateUrls[index],
       })),
     };
 
-    // Actualizar el documento del usuario (en este ejemplo, en la colección 'pros')
     try {
       const userDocRef = doc(db, 'pros', currentUser.uid);
       await updateDoc(userDocRef, {
@@ -103,6 +91,7 @@ const ProData = () => {
       });
       console.log('Datos de archivos guardados:', filesData);
       alert('¡Archivos subidos y datos guardados correctamente!');
+      setFormDisabled(true);
     } catch (error) {
       console.error('Error al guardar la información de archivos:', error);
       alert('Hubo un error al guardar la información de archivos.');
@@ -110,7 +99,7 @@ const ProData = () => {
   };
 
   return (
-    <div className="prodata-cont">
+    <div id="prodata-cont" className="prodata-cont">
       <div className="prodata-title">
         <div className="question-cont">
           <h1>?</h1>
@@ -131,7 +120,7 @@ const ProData = () => {
               style={{ display: 'none' }}
               id="profileImageInput"
             />
-            <button type="button">Cambiar imagen</button>
+            <button type="button" disabled={formDisabled}>Cambiar imagen</button>
           </div>
           <h2 className="pro-name">{currentPro?.Nombre || 'pro name'}</h2>
         </div>
@@ -155,9 +144,8 @@ const ProData = () => {
               {currentPro?.Documento?.number}
             </p>
           </div>
-          {/* Input personalizado para HDV */}
           <div className="hdv-cont">
-            <label htmlFor="hdvInput" className="upload-hdv">
+            <label disabled={formDisabled} htmlFor="hdvInput" className="upload-hdv">
               <img src={Upload} alt="" />
               <h3>Subir HDV</h3>
             </label>
@@ -170,9 +158,8 @@ const ProData = () => {
             />
             {hdvFile && <p className="file-name">{hdvFile.name}</p>}
           </div>
-          {/* Input personalizado para Tarjeta Profesional */}
           <div className="pro-professional-card">
-            <label htmlFor="proCardInput" className="upload-hdv">
+            <label disabled={formDisabled} htmlFor="proCardInput" className="upload-hdv">
               <img src={Upload} alt="" />
               <h3>Subir tarjeta profesional</h3>
             </label>
@@ -187,9 +174,8 @@ const ProData = () => {
               <p className="file-name">{professionalCardFile.name}</p>
             )}
           </div>
-          {/* Input personalizado para Certificados */}
           <div className="pro-certificates-cont">
-            <label htmlFor="certificateInput" className="upload-hdv">
+            <label disabled={formDisabled} htmlFor="certificateInput" className="upload-hdv">
               <img src={Upload} alt="" />
               <h3>Subir tus certificados</h3>
             </label>
@@ -207,9 +193,9 @@ const ProData = () => {
             ))}
           </div>
         </div>
-        <div className="pro-button-cont">
-          <button type="submit" onClick={handleSubmit}>Guardar cambios</button>
-        </div>
+        <button type="submit" onClick={handleSubmit} disabled={formDisabled}>
+          Guardar cambios
+        </button>
       </div>
     </div>
   );

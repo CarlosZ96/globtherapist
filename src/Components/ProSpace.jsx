@@ -83,7 +83,12 @@ const ProSpace = () => {
                       qué tan profesional eres!
                     </p>
                   </div>
-                  <button type="button">Ir</button>
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('prodata-cont')?.scrollIntoView({ behavior: 'smooth' })}
+                  >
+                    Ir
+                  </button>
                 </div>
               </div>
             ) : (
