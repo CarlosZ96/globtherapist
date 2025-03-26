@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import '../stylesheets/AdminProModal.css';
 
@@ -34,11 +35,23 @@ const AdminProModal = ({
     certificateFiles = [],
   } = files;
 
+  // Estados para controlar el campo de motivo del rechazo
+  const [showReason, setShowReason] = useState(false);
+  const [reason, setReason] = useState('');
+
   const handleApprove = () => {
     if (onApprove) onApprove();
   };
-  const handleReject = () => {
-    if (onReject) onReject();
+
+  // Lógica para el botón rechazar:
+  // Si el campo de motivo no está visible, se muestra (sin actualizar el status).
+  // Si ya está visible y tiene un valor, se ejecuta onReject.
+  const handleRejectClick = () => {
+    if (!showReason) {
+      setShowReason(true);
+    } else if (reason.trim() === '') {
+      alert('Por favor, ingresa el motivo del rechazo.');
+    } else if (onReject) onReject(reason);
   };
 
   return (
@@ -97,7 +110,9 @@ const AdminProModal = ({
         <div className="adminProModal-row">
           <label>Hoja de Vida:</label>
           {hdvUrl ? (
-            <a href={hdvUrl} target="_blank" rel="noreferrer">Ver / Descargar</a>
+            <a href={hdvUrl} target="_blank" rel="noreferrer">
+              Ver / Descargar
+            </a>
           ) : (
             <span>No disponible</span>
           )}
@@ -106,7 +121,9 @@ const AdminProModal = ({
         <div className="adminProModal-row">
           <label>Tarjeta profesional:</label>
           {professionalCardUrl ? (
-            <a href={professionalCardUrl} target="_blank" rel="noreferrer">Ver / Descargar</a>
+            <a href={professionalCardUrl} target="_blank" rel="noreferrer">
+              Ver / Descargar
+            </a>
           ) : (
             <span>No disponible</span>
           )}
@@ -133,16 +150,30 @@ const AdminProModal = ({
           </div>
         </div>
 
-        <div className="adminProModal-reason">
-          <h4>Motifo del rechazo:</h4>
-          <textarea name="reason" id="reason" placeholder="Detalla el motivo.." />
+        {/* Campo de motivo del rechazo: oculto por defecto */}
+        <div
+          className="adminProModal-reason"
+          style={{
+            display: showReason ? 'block' : 'none',
+            border: showReason ? '2px solid #EA3E3E' : 'none',
+            padding: showReason ? '5px' : '0',
+          }}
+        >
+          <h4>Motivo del rechazo:</h4>
+          <textarea
+            name="reason"
+            id="reason"
+            placeholder="Detalla el motivo..."
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
         </div>
 
         <div className="adminProModal-buttons">
           <button
             type="button"
             className="reject-btn"
-            onClick={handleReject}
+            onClick={handleRejectClick}
           >
             Rechazar
           </button>
@@ -158,6 +189,7 @@ const AdminProModal = ({
     </div>
   );
 };
+
 AdminProModal.propTypes = {
   show: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
