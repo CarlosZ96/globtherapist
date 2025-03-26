@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import Swal from 'sweetalert2';
 import '../../stylesheets/windo.css';
+import getEmailHtml from '../mails/emailTemplate';
 import { auth, db } from '../../firebase';
 
 const Create = ({ toggleCreate, toggleCreatePro }) => {
@@ -47,7 +48,6 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
       return;
     }
     try {
-      // Crear usuario en Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
@@ -55,7 +55,6 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
       );
       const { user } = userCredential;
 
-      // Guardar datos del usuario en Firestore
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         username: formData.userName,
@@ -70,8 +69,7 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
         message: {
           subject: '¡Bienvenido a GlobTherapist!',
           text: `Hola ${formData.userName}, te damos la bienvenida a GlobTherapist. Gracias por registrarte.`,
-          html: `<p>Hola <strong>${formData.userName}</strong>,</p>
-                 <p>Bienvenido a nuestra GlobTherapist. Gracias por registrarte.</p>`,
+          html: getEmailHtml(formData.userName),
         },
       });
 
@@ -118,12 +116,10 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
     setErrors({});
   };
 
-  // Función para cerrar la ventana actual y abrir la de cuenta pro
   const handleShowCreatePro = () => {
-    toggleCreate(); // Cierra la ventana de crear usuario
-    toggleCreatePro(); // Abre la ventana de crear cuenta Pro
+    toggleCreate();
+    toggleCreatePro();
   };
-  // Función para mostrar la información usando Swal
   const mostrarInfoPro = () => {
     Swal.fire({
       title: '¿Eres profesional de la salud?',
@@ -135,7 +131,7 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
       didOpen: () => {
         const btn = document.getElementById('crear-cuenta-pro');
         btn.addEventListener('click', () => {
-          Swal.close(); // Cierra la alerta de Swal
+          Swal.close();
           handleShowCreatePro();
         });
       },
