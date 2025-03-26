@@ -5,7 +5,7 @@ const getEmailHtml = (userName) => `
          style="background-color: #2B3E9D; margin: 0; padding: 0;">
     <!-- Contenedor principal con fondo azul (#2B3E9D) -->
     <tr>
-      <td align="center" style="padding: 10px;">
+      <td align="center" style="padding: 20px;">
         
         <!-- Tabla blanca central -->
         <table border="0" cellpadding="0" cellspacing="0" width="600" 
@@ -14,7 +14,7 @@ const getEmailHtml = (userName) => `
           <!-- Cabecera: Título grande "GLOBTHERAPIST" -->
           <tr>
             <td align="center" 
-                style="background-color: #2B3E9D; padding: 10px 0; color: rgb(255 255 255 / 15%); 
+                style="background-color: #2B3E9D; padding: 30px 0; color: rgba(255,255,255,0.9); 
                        font-size: 36px; font-weight: bold;">
               GLOBTHERAPIST
             </td>
@@ -26,26 +26,19 @@ const getEmailHtml = (userName) => `
               <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <!-- Texto de Bienvenida (columna izquierda) -->
-<td style="
-width: 300px; 
-height: 120px; 
-color: #041B5E; 
-line-height: 1.4; 
-padding-right: 10px;
-">
-<strong style="display: inline-block; width: 300px;">
-  ¡Hola ${userName}👋, bienvenido a GlobTherapist!
-</strong><br/>
-<span>
-  ¡No más filas ni trancones, aquí podrás programar diferentes tipos de terapias
-  personalizadas a tus necesidades sin salir de casa al mejor precio!
-</span>
-</td>
+                  <td valign="top" 
+                      style="color: #041B5E; font-size: 20px; line-height: 1.5; padding-right: 10px;">
+                    <strong>¡Hola ${userName}, bienvenido a GlobTherapist!</strong><br/>
+                    <span style="font-size: 16px;">
+                      ¡No más filas ni trancones, aquí podrás programar diferentes tipos de terapias 
+                      personalizadas a tus necesidades sin salir de casa al mejor precio!
+                    </span>
+                  </td>
                   <!-- Imagen de ejemplo (columna derecha) -->
                   <td valign="top" align="right" style="padding-left: 10px;">
                     <img src="https://images.pexels.com/photos/4225920/pexels-photo-4225920.jpeg" 
                          alt="Persona recibiendo terapia en línea"
-                         style="border-radius: 8px; max-width: 150px;">
+                         style="border-radius: 8px; max-width: 300px;">
                   </td>
                 </tr>
               </table>
@@ -68,12 +61,12 @@ padding-right: 10px;
             <td style="background-color: #EF5557; padding: 15px;">
               <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td style="color: #4B0000; font-size: 18px; font-weight: bold;">
+                  <td style="color: #4B0000; font-size: 25px; font-weight: bold;">
                     Física 💪
                   </td>
                 </tr>
                 <tr>
-                  <td style="color: #FFFFFF; font-size: 14px; line-height: 1.5;">
+                  <td style="color: #FFFFFF; font-size: 18px; line-height: 1.5;">
                     Ejercicios personalizados y actividades adaptadas. 
                     Te ayudamos a mejorar tu fuerza y movilidad.
                   </td>
@@ -87,12 +80,12 @@ padding-right: 10px;
             <td style="background-color: #687AD7; padding: 15px;">
               <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td style="color: #041B5E; font-size: 18px; font-weight: bold;">
+                  <td style="color: #041B5E; font-size: 25px; font-weight: bold;">
                     Lenguaje 💬
                   </td>
                 </tr>
                 <tr>
-                  <td style="color: #FFFFFF; font-size: 14px; line-height: 1.5;">
+                  <td style="color: #FFFFFF; font-size: 18px; line-height: 1.5;">
                     Te ayudamos a fortalecer tu comunicación, redacción y personalizar métodos 
                     y técnicas efectivas.
                   </td>
@@ -106,12 +99,12 @@ padding-right: 10px;
             <td style="background-color: #38DDE3; padding: 15px;">
               <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td style="color: #041B5E; font-size: 18px; font-weight: bold;">
+                  <td style="color: #041B5E; font-size: 25px; font-weight: bold;">
                     Mental 🧠
                   </td>
                 </tr>
                 <tr>
-                  <td style="color: #FFFFFF; font-size: 14px; line-height: 1.5;">
+                  <td style="color: #FFFFFF; font-size: 18px; line-height: 1.5;">
                     Junto a un profesional experto, aprende a manejar tu bienestar emocional 
                     y mejora tu salud mental.
                   </td>
@@ -125,12 +118,12 @@ padding-right: 10px;
             <td style="background-color: #FFD904; padding: 15px;">
               <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td style="color: #041B5E; font-size: 18px; font-weight: bold;">
+                  <td style="color: #041B5E; font-size: 25px; font-weight: bold;">
                     Ocupacional 💼
                   </td>
                 </tr>
                 <tr>
-                  <td style="color: #000000; font-size: 14px; line-height: 1.5;">
+                  <td style="color: #000000; font-size: 18px; line-height: 1.5;">
                     Te ayudamos a mejorar tu adaptación y autonomía, enfocándonos en actividades 
                     de la vida diaria y laboral.
                   </td>
@@ -144,7 +137,7 @@ padding-right: 10px;
             <td align="center" style="padding: 20px;">
               <a href="#" 
                  style="background-color: #041B5E; color: #FFFFFF; text-decoration: none; 
-                        padding: 15px 25px; border-radius: 4px; font-size: 16px;">
+                        padding: 10px 25px; border-radius: 4px; font-size: 25px;">
                 Agenda tu cita aquí
               </a>
             </td>
