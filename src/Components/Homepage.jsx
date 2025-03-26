@@ -39,7 +39,6 @@ const Homepage = () => {
     logBtnCont: { width: '12%', position: 'relative' },
   };
 
-  // Filtra y cuenta solo las citas con status "pending"
   const pendingAppointmentsCount = currentPro
     ? (currentPro.MisCitas?.filter((cita) => cita.status === 'pending').length || 0)
     : (userData?.Citas?.filter((cita) => cita.status === 'pending').length || 0);

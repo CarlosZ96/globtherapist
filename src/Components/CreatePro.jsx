@@ -7,6 +7,7 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import Swal from 'sweetalert2';
 import { auth, db } from '../firebase';
+import getEmailHtml from './mails/emailTemplate';
 import '../stylesheets/windo.css';
 
 const initialFormData = {
@@ -24,7 +25,7 @@ const CreatePro = ({ toggleCreatePro }) => {
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-
+  const emailHtml = getEmailHtml(formData.fullName, 'pros');
   const therapyOptions = ['Mental', 'Física', 'Ocupacional', 'Lenguaje'];
   const normalizeText = (text) => {
     return text
@@ -118,6 +119,14 @@ const CreatePro = ({ toggleCreatePro }) => {
       });
       setFormData(initialFormData);
       toggleCreatePro();
+      await setDoc(doc(db, 'mail', user.uid), {
+        to: formData.email,
+        message: {
+          subject: '¡Bienvenido a GlobTherapist!',
+          text: `Hola ${formData.fullName}, te damos la bienvenida a GlobTherapist.`,
+          html: emailHtml,
+        },
+      });
     } catch (error) {
       console.error('Error creando Pro:', error);
       Swal.fire({

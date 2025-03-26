@@ -69,7 +69,7 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
         message: {
           subject: '¡Bienvenido a GlobTherapist!',
           text: `Hola ${formData.userName}, te damos la bienvenida a GlobTherapist. Gracias por registrarte.`,
-          html: getEmailHtml(formData.userName),
+          html: getEmailHtml(formData.userName, 'users'),
         },
       });
 

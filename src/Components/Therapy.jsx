@@ -15,7 +15,6 @@ const Therapy = () => {
     currentUser, updateUserCitas, updateProMisCitas, pros, citaGlobal, setCitaGlobal,
   } = useAuth();
 
-  // Función para normalizar textos
   const normalizeText = (text) => {
     return text
       .normalize('NFD')
@@ -23,7 +22,6 @@ const Therapy = () => {
       .toLowerCase();
   };
 
-  // Función para sumar 40 minutos al startTime y calcular el endTime
   const calculateEndTime = (start, minutesToAdd) => {
     const [hours, minutes] = start.split(':').map(Number);
     const totalMinutes = hours * 60 + minutes + minutesToAdd;
@@ -50,7 +48,6 @@ const Therapy = () => {
     description: '',
   });
 
-  // Función para normalizar la hora a formato "HH:mm"
   const normalizeTime = (time) => {
     const timeLower = time.toLowerCase();
     const [hour, minute] = timeLower.replace(/[^0-9:]/g, '').split(':');
@@ -64,7 +61,6 @@ const Therapy = () => {
     return `${String(normalizedHour).padStart(2, '0')}:${minute}`;
   };
 
-  // Validaciones del formulario
   const [errors, setErrors] = useState({
     name: '',
     phone: '',
@@ -269,8 +265,6 @@ const Therapy = () => {
       const proDocRef = doc(db, 'pros', selectedPro);
       const proDoc = await getDoc(proDocRef);
       const proName = proDoc.data()?.Nombre || 'Profesional no encontrado';
-
-      // Eliminar el rango de horas seleccionado del array Timeslots
       const proData = proDoc.data();
       const horarios = proData.horarios || {};
       const monthHorarios = horarios[citaGlobal.month] || [];
@@ -291,16 +285,10 @@ const Therapy = () => {
           ...horarios, [citaGlobal.month]: updatedMonthHorarios,
         },
       });
-
-      // Conversión de datos para Agora:
-      // Se normaliza la hora de inicio,
-      // se calcula la hora de fin y se establece la duración de 40 minutos.
       const normalizedSelectedTime = normalizeTime(citaGlobal.time);
       const startTime = normalizedSelectedTime;
       const endTime = calculateEndTime(normalizedSelectedTime, 40);
       const duration = 40;
-
-      // Para el usuario: se agrega el id del profesional (proUid)
       const userCita = {
         date: citaGlobal.date,
         month: citaGlobal.month,
@@ -331,7 +319,6 @@ const Therapy = () => {
       await updateDoc(userRef, { Citas: updatedCitas });
       console.log('Cita guardada en Firestore para el usuario:', userCita);
 
-      // Para el profesional: se agrega el id del usuario (userId)
       const proCita = {
         date: citaGlobal.date,
         month: citaGlobal.month,
@@ -371,7 +358,6 @@ const Therapy = () => {
         window.location.reload();
       });
 
-      // Resetear estados y datos del formulario
       setFormData({
         name: '',
         phone: '',
