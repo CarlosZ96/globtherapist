@@ -4,7 +4,8 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import Swal from 'sweetalert2';
 import '../../stylesheets/windo.css';
-import getEmailHtml from '../mails/emailTemplate';
+import { render } from '@react-email/render';
+import WelcomeEmail from '../mails/WelcomeEmail';
 import { auth, db } from '../../firebase';
 
 const Create = ({ toggleCreate, toggleCreatePro }) => {
@@ -63,13 +64,19 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
         Citas: [],
         role: 'usuario',
       });
-
+      const htmlContent = await render(
+        <WelcomeEmail
+          style={{ maxWidth: 800, margin: '0 auto' }}
+          userName={formData.userName}
+          collection="users"
+        />,
+      );
       await setDoc(doc(db, 'mail', user.uid), {
         to: formData.email,
         message: {
           subject: '¡Bienvenido a GlobTherapist!',
-          text: `Hola ${formData.userName}, te damos la bienvenida a GlobTherapist. Gracias por registrarte.`,
-          html: getEmailHtml(formData.userName, 'users'),
+          text: `Hola ${formData.userName}, te damos la bienvenida...`,
+          html: htmlContent,
         },
       });
 

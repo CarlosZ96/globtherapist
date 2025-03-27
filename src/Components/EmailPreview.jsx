@@ -1,11 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import getEmailHtml from './mails/emailTemplate';
+import WelcomeEmail from './mails/WelcomeEmail';
 
 const EmailPreview = ({ userName }) => {
-  // Genera el contenido HTML usando la misma plantilla
-  const htmlContent = getEmailHtml(userName);
-  return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+  return (
+    <div style={{ maxWidth: 800, margin: '0 auto' }}>
+      <WelcomeEmail userName={userName} collection="pros" />
+    </div>
+  );
 };
 
 EmailPreview.propTypes = {
