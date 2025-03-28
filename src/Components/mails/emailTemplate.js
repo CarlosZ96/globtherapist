@@ -4,7 +4,6 @@ function getEmailHtml({
   // Props mínimos que necesitas (ajusta según tus necesidades)
   collection, // 'users' o 'pros'
   therapyType, // 'fisica', 'lenguaje', 'mental', 'ocupacional'
-  id2, // si requieres usarlo en alguna parte de la plantilla
   date, // ejemplo: 'Lun 20'
   fullDate, // ejemplo: 'De Marzo a las 8:00am'
   userName, // nombre del usuario (si collection = 'users')
@@ -72,87 +71,103 @@ function getEmailHtml({
   // Elegimos la configuración según la terapia (o fisica por defecto)
   const { color, icon, text } = therapyConfigs[therapyType] || therapyConfigs.fisica;
 
-  // Plantilla de correo en HTML
-  const emailHtml = `   
-        <div style="
-        font-family: Arial, sans-serif; 
-        background-color: #F2F5FC; 
-        padding: 20px; 
-        width: 420px;
-        height: 600px;
-        margin: 0 151px 0 151px;
-        border-radius: 10px;
-        color: #081F4A;
-      ">
-        <!-- Saludo dinámico -->
-        <p style="
-          font-size: 22px; 
-          margin: 0 0 20px 0; 
-          text-align: center;
-        ">
-          ${greetingText}
-        </p>
+  // Plantilla de correo en HTML usando tablas para lograr un layout similar a flex
+  const emailHtml = `
+<center>    
+  <table width="420" align="center" cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; background-color: #F2F5FC; border-radius: 10px; overflow: hidden;">
+        <tr>
+          <td align="center" style="padding: 20px;">
+            <p style="font-size: 22px; margin: 0 0 20px 0; text-align: center; color: #041B5E; font-weight: bold;">
+              ${greetingText}
+            </p>
   
-        <!-- Sección: ¿Cuándo es la cita? -->
-        <h3 style="font-size: 22px; margin-bottom: 12px; margin-left: 64px;">
-          ¿Cuándo es la cita? <span style="font-size: 23px;">🤔</span>
-        </h3>
-        <div style="
-          background-color: #081F4A; 
-          color: #FFFFFF; 
-          padding: 10px;
-          height: 70px; 
-          border-radius: 8px; 
-          text-align: center; 
-          margin-bottom: 20px;
-        ">
-          <div style="font-size: 20px; font-weight: bold;">${date || 'Lun 20'}</div>
-          <div style="font-size: 20px;">${fullDate || 'De Marzo a las 8:00am'}</div>
-        </div>
+            <!-- Sección: ¿Cuándo es la cita? -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;">
+              <tr>
+                <td align="left" style="font-size: 22px; padding-left: 64px; padding-bottom: 12px; color: #041B5E;">
+                  ¿Cuándo es la cita? <span style="font-size: 23px;">🤔</span>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="background-color: #081F4A; color:#fff; padding: 10px; border-radius: 8px; margin: 0 auto;">
+                  <div style="font-size: 20px; font-weight: bold;">${date || 'Lun 20'}</div>
+                  <div style="font-size: 20px;">${fullDate || 'De Marzo a las 8:00am'}</div>
+                </td>
+              </tr>
+            </table>
   
-        <!-- Sección: ¿Con quién? -->
-        <h3 style="font-size: 22px; margin-bottom: 12px; margin-left: 112px;">${withWhomTitle}</h3>
-        <div style="
-          align-items: center; 
-          margin-bottom: 10px;
-        ">
-          <div style="margin-left: 10px; background-color: #081F4A; height: 70px;">
-            <div style="font-size: 16px; font-weight: bold; color:#FFF30C; text-align: center;">${withWhomName}</div>
-            <div style="font-size: 20px; color:#687AD7;">Correo:<h4 style="font-size: 14px; color:#fff ;"> ${withWhomEmail}</h4>
-            </div>
-            <div style="font-size: 14px; color:#fff;">
-              ${withWhomExtraLabel}: ${withWhomExtraValue}
-            </div>
-          </div>
-        </div>
+            <!-- Sección: ¿Con quién? -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px; color: #041B5E;">
+              <tr>
+                <td align="left" style="font-size: 22px; padding-left: 112px; padding-bottom: 12px;">
+                  ${withWhomTitle}
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table width="100%" cellpadding="5" cellspacing="0" border="0" style="background-color: #081F4A; height: 70px;">
+                    <tr>
+                      <td align="center" style="font-size: 16px; font-weight: bold; color: #FFF30C;">
+                        ${withWhomName}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <table cellpadding="0" cellspacing="0" border="0" align="center">
+                          <tr>
+                            <td style="font-size: 20px; color: #687AD7; padding-right: 5px;">
+                              Correo:
+                            </td>
+                            <td>
+                              <h4 style="font-size: 14px; color: #fff; margin: 0;">
+                                ${withWhomEmail}
+                              </h4>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center" style="font-size: 14px; color: #fff;">
+                        ${withWhomExtraLabel}: ${withWhomExtraValue}
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
   
-        <!-- Sección: ¿Qué terapia es? -->
-        <h3 style="font-size: 16px; margin-bottom: 8px;">¿Qué terapia es?</h3>
-        <div style="
-          background-color: ${color}; 
-          padding: 10px; 
-          border-radius: 8px; 
-          color: #FFFFFF;
-        ">
-          <span style="font-size: 16px; font-weight: bold; margin-right: 6px;">
-            ${therapyType || 'fisica'}
-          </span>
-          <span style="font-size: 18px;">${icon}</span>
-          <p style="margin: 8px 0 0 0; font-size: 14px;">
-            ${text}
-          </p>
-        </div>
-  
-        <!-- Puedes usar 'id2' aquí si lo necesitas -->
-        ${
-  id2
-    ? `<div style="margin-top: 20px; font-size: 12px; text-align: center;">
-                 ID2 de referencia: <strong>${id2}</strong>
-               </div>`
-    : ''
-}
-  
-      </div>
+            <!-- Sección: ¿Qué terapia es? -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;">
+              <tr>
+                <td align="left" style="font-size: 16px; padding-bottom: 8px; color: #041B5E;">
+                  ¿Qué terapia es?
+                </td>
+              </tr>
+              <tr>
+                <td style="background-color: ${color}; padding: 10px; border-radius: 8px; color: #FFFFFF; height: 150px;">
+                  <table cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="font-size: 16px; font-weight: bold; padding-right: 6px; width: 30px;">
+                        ${therapyType || 'fisica'}
+                      </td>
+                      <td style="font-size: 18px;">
+                        ${icon}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" style="padding-top: 8px; font-size: 14px; width:">
+                        ${text}
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+</center>
     `;
 
   return emailHtml;

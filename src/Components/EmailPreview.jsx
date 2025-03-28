@@ -20,11 +20,11 @@ const EmailPreview = ({ userName }) => {
 
   return (
     <div style={{
-      minHeight: 600, maxWidth: 800, margin: '0 auto', backgroundColor: '#2B3E9D', paddingTop: 10,
+      minHeight: 600, maxWidth: 800, margin: '0 auto', backgroundColor: '#2B3E9D', paddingTop: 10, paddingBottom: 30,
     }}
     >
       <h2 style={{
-        height: 50, textAlign: 'center', fontSize: '30px',
+        height: 50, textAlign: 'center', fontSize: '30px', color: '#ffffff73', fontFamily: 'Arial, sans-serif',
       }}
       >
         ¡Gracias por confiar en nosotros!
