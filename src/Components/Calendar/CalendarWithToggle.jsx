@@ -444,6 +444,11 @@ const Calendar = ({
                   </button>
                 </div>
               ))}
+              {availablePros.length === 0 && (
+                <div className="no-pros-message">
+                  <h3>No hay pros disponibles para esta fecha</h3>
+                </div>
+              )}
               {selectedProId && (
                 <ProModal proId={selectedProId} onClose={handleCloseModal} />
               )}

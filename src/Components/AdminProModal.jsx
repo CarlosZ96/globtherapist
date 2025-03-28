@@ -203,7 +203,10 @@ AdminProModal.propTypes = {
     }),
     Hdv: PropTypes.shape({
       profession: PropTypes.string,
-      yearsOfExperience: PropTypes.string,
+      yearsOfExperience: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+      ]),
       university: PropTypes.string,
       professionalHistory: PropTypes.string,
     }),

@@ -9,14 +9,19 @@ const Hdvwindow = ({ proId, onClose }) => {
   const [profileImage, setProfileImage] = useState(User);
 
   useEffect(() => {
+    if (!proId) return;
     const fetchProData = async () => {
       try {
         const proDoc = await getDoc(doc(db, 'pros', proId));
         if (proDoc.exists()) {
           const data = proDoc.data();
-          setProData(data);
-          if (data.files && data.files.profileImageUrl) {
-            setProfileImage(data.files.profileImageUrl);
+          // Acceder al mapa Hdv dentro del documento
+          const hdvData = data.Hdv || {};
+          setProData(hdvData); // Guardar solo los datos de Hdv
+
+          // Verificar imagen de perfil (ajusta la ruta si está dentro de Hdv)
+          if (hdvData.files && hdvData.files.profileImageUrl) {
+            setProfileImage(hdvData.files.profileImageUrl);
           } else {
             setProfileImage(User);
           }

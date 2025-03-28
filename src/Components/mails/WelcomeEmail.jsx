@@ -236,7 +236,7 @@ const WelcomeEmail = ({ userName, collection = 'users' }) => {
 
           {/* Botón de acción */}
           <Section style={section}>
-            <Button href="#" style={button}>
+            <Button href="https://globtherapist.vercel.app/" style={button}>
               Agenda tu cita aquí
             </Button>
           </Section>
