@@ -1,5 +1,3 @@
-// emailTemplate.js
-
 function getEmailHtml({
   // Props mínimos que necesitas (ajusta según tus necesidades)
   collection, // 'users' o 'pros'
@@ -172,5 +170,45 @@ function getEmailHtml({
 
   return emailHtml;
 }
+
+export const getValidationEmailHtml = () => {
+  return `
+<center>    
+  <table width="420" align="center" cellpadding="0" cellspacing="0" border="0" 
+         style="font-family: Arial, sans-serif; background-color: #F2F5FC; 
+                border-radius: 10px; overflow: hidden; padding: 30px 20px;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <h1 style="color: #041B5E; font-size: 28px; margin-bottom: 25px;">
+          Estamos revisando tus datos
+        </h1>
+        
+        <div style="background-color: #FFFFFF; border-radius: 12px; padding: 25px; 
+                    margin-bottom: 25px; text-align: center;">
+          <p style="color: #4A5568; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+            Tardaremos de 2 a 3 días hábiles en validar tu información.
+          </p>
+          
+          <p style="color: #4A5568; font-size: 16px; line-height: 1.6;">
+            Ahora trabajaremos juntos para ayudar a nuestros usuarios a tener una vida más saludable 
+            y tenemos que afinar nuestra confianza, por eso tenemos que validar ¡Lo pro que eres!
+          </p>
+        </div>
+
+        <div style="border-top: 2px solid #E2E8F0; padding-top: 25px;">
+          <p style="color: #718096; font-size: 14px; margin: 0;">
+            Más información en: 
+            <a href="mailto:globtherapist@gmail.com" 
+               style="color: #687AD7; text-decoration: none;">
+              globtherapist@gmail.com
+            </a>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </table>
+</center>
+  `;
+};
 
 export default getEmailHtml;

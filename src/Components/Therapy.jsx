@@ -2,10 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { getAuth } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import {
+  doc, getDoc, updateDoc, addDoc, collection,
+} from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
 import Calendar from './Calendar/CalendarWithToggle';
+import getEmailHtml from './mails/emailTemplate';
 import '../stylesheets/Therapy.css';
 
 const Therapy = () => {
@@ -264,10 +267,44 @@ const Therapy = () => {
     try {
       const proDocRef = doc(db, 'pros', selectedPro);
       const proDoc = await getDoc(proDocRef);
-      const proName = proDoc.data()?.Nombre || 'Profesional no encontrado';
+      const proName = proDoc.data()?.username || 'Profesional no encontrado';
       const proData = proDoc.data();
       const horarios = proData.horarios || {};
       const monthHorarios = horarios[citaGlobal.month] || [];
+
+      const emailData = {
+        collection: 'users',
+        therapyType: formData.therapyType.toLowerCase(),
+        date: citaGlobal.date,
+        fullDate: `${citaGlobal.date} de ${citaGlobal.month} a las ${citaGlobal.time}`,
+        userName: formData.name,
+        proName: proData.username,
+        userEmail: formData.email,
+        userTel: formData.phone,
+        userProfession: proData.especialidad || 'Terapeuta',
+      };
+
+      await addDoc(collection(db, 'mail'), {
+        to: formData.email,
+        message: {
+          subject: 'Confirmación de cita - GLOBTHERAPIST',
+          html: getEmailHtml(emailData),
+        },
+      });
+
+      const proEmailData = {
+        ...emailData,
+        collection: 'pros',
+        userProfession: formData.therapyType,
+      };
+
+      await addDoc(collection(db, 'mail'), {
+        to: proData.email,
+        message: {
+          subject: 'Nueva cita agendada - GLOBTHERAPIST',
+          html: getEmailHtml(proEmailData),
+        },
+      });
 
       const updatedMonthHorarios = monthHorarios.map((day) => {
         if (day.date === citaGlobal.date) {
@@ -293,9 +330,9 @@ const Therapy = () => {
         date: citaGlobal.date,
         month: citaGlobal.month,
         time: citaGlobal.time,
-        startTime, // Hora de inicio en formato "HH:mm"
-        endTime, // Hora de fin calculada (startTime + 40 minutos)
-        duration, // Duración en minutos (40)
+        startTime,
+        endTime,
+        duration,
         therapyType: normalizeText(formData.therapyType),
         description: formData.description,
         status: 'pending',
