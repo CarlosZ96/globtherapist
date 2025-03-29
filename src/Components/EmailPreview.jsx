@@ -1,29 +1,25 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { getValidationEmailHtml } from './mails/emailTemplate';
+import { getSuccessEmailHtml } from './mails/emailTemplate';
 
-const EmailPreview = ({ userName }) => {
-  const emailHtml = getValidationEmailHtml({
-    userName,
-    userEmail: 'ejemplo@globtherapist.com',
-  });
+const EmailPreview = () => {
+  // Arreglo de prueba con las terapias que tenga el profesional
+  const terapias = ['fisica', 'lenguaje', 'mental'];
+  // Se genera el HTML del correo usando getSuccessEmailHtml
+  const emailHtml = getSuccessEmailHtml(terapias);
 
   return (
-    <div style={{
-      minHeight: 600,
-      maxWidth: 800,
-      margin: '0 auto',
-      backgroundColor: '#F2F5FC',
-      padding: '20px',
-    }}
+    <div
+      style={{
+        minHeight: 600,
+        maxWidth: 800,
+        margin: '0 auto',
+        backgroundColor: '#F2F5FC',
+        padding: '20px',
+      }}
     >
       <div dangerouslySetInnerHTML={{ __html: emailHtml }} />
     </div>
   );
-};
-
-EmailPreview.propTypes = {
-  userName: PropTypes.string.isRequired,
 };
 
 export default EmailPreview;

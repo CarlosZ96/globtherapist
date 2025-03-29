@@ -1,3 +1,5 @@
+// emailTemplate.js
+
 function getEmailHtml({
   // Props mínimos que necesitas (ajusta según tus necesidades)
   collection, // 'users' o 'pros'
@@ -164,7 +166,109 @@ function getEmailHtml({
   return emailHtml;
 }
 
-export const getValidationEmailHtml = () => {
+export function getSuccessEmailHtml(terapias = []) {
+  const therapyConfigs = {
+    fisica: {
+      color: '#EF5557',
+      icon: '💪',
+      text: 'Ejercicios personalizados adaptados a tus necesidades  te ayudaremos a recuperar la movilidad y la fuerza.',
+    },
+    lenguaje: {
+      color: '#687AD7',
+      icon: '💬',
+      text: 'Te ayudamos a fortalecer tu comunicación, escucha y habla mediante prácticos y personalizados métodos.',
+    },
+    mental: {
+      color: '#38DDE3',
+      icon: '🧠',
+      text: 'Junto con un profesional exploraremos de manera segura tus pensamientos y experiencias para fortalecer tu bienestar emocional.',
+    },
+    ocupacional: {
+      color: '#FFD904',
+      icon: '💼',
+      text: 'Te apoyaremos para que te desenvuelvas con confianza y eficiencia en tus actividades diarias (trabajo, hogar, autocuidado).',
+    },
+  };
+
+  let therapyButtonsHtml = '';
+  terapias.forEach((therapy) => {
+    const config = therapyConfigs[therapy] || therapyConfigs.fisica;
+    // Convertir el string 'fisica' en 'Fisica' para el título, por ejemplo
+    const capitalizedTherapy = therapy.charAt(0).toUpperCase() + therapy.slice(1);
+
+    therapyButtonsHtml += `
+      <tr>
+        <td align="center" 
+            style="
+              background-color: ${config.color};
+              border-radius: 6px;
+              padding: 10px;
+              margin-bottom: 10px;
+              font-size: 18px;
+              color: #FFFFFF;
+              font-weight: bold;
+            "
+        >
+          ${capitalizedTherapy} ${config.icon}
+        </td>
+      </tr>
+      <tr><td style="height: 10px;"></td></tr>
+    `;
+  });
+
+  // Plantilla final
+  return `
+<center>
+  <table width="420" align="center" cellpadding="0" cellspacing="0" border="0"
+         style="font-family: Arial, sans-serif; background-color: #F2F5FC; border-radius: 10px; overflow: hidden;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <h2 style="color: #041B5E; font-size: 24px; margin: 0 0 15px 0;">
+          ¡Todo está correcto!
+        </h2>
+        <p style="color: #4A5568; font-size: 16px; margin: 0 0 20px 0; text-align: center;">
+          ¡Validamos tus datos y todo está perfecto!
+        </p>
+        <h3 style="color: #041B5E; font-size: 18px; margin-bottom: 15px;">
+          ¿Qué sigue ahora?
+        </h3>
+          <p style="color: #041B5E; font-size: 16px; line-height: 1.6; padding:20px">
+            Ahora puedes recibir pacientes para terapias:
+          </p>
+        <!-- Sección de botones de terapias -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;">
+          ${therapyButtonsHtml}
+        </table>
+
+        <p style="color: #4A5568; font-size: 14px; margin: 0 0 20px 0; text-align: center;">
+          También en nuestra página podrás elegir tus horarios de atención
+        </p>
+
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td align="center" style="background-color: #081F4A; border-radius: 6px; padding: 10px;">
+              <a href="#" 
+                 style="
+                   display: inline-block;
+                   color: #FFFFFF;
+                   text-decoration: none;
+                   font-size: 16px;
+                   font-weight: bold;
+                 ">
+                ¡Empieza ya!
+              </a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</center>
+  `;
+}
+
+// Exportamos la función principal y las adicionales
+export function getValidationEmailHtml() {
   return `
 <center>    
   <table width="420" align="center" cellpadding="0" cellspacing="0" border="0" 
@@ -176,7 +280,6 @@ export const getValidationEmailHtml = () => {
           Estamos revisando tus datos
         </h1>
         
-        <!-- Agregar imagen con enlace encima del contenedor de validación -->
         <a target="_blank" style="text-decoration: none;">
           <img src="https://cdn-icons-png.flaticon.com/512/3574/3574808.png" alt="Reading Book Icon" style="width: 165px; height: auto; margin-bottom: 15px;">
         </a>
@@ -207,6 +310,6 @@ export const getValidationEmailHtml = () => {
   </table>
 </center>
   `;
-};
+}
 
 export default getEmailHtml;
