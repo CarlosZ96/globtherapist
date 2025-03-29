@@ -4,6 +4,7 @@ import { doc, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db, storage } from '../firebase';
 import '../stylesheets/prospace.css';
 import User from '../img/user.png';
+import { getValidationEmailHtml } from './mails/emailTemplate';
 
 const Hdv = () => {
   const [profileImage, setProfileImage] = useState(User);
@@ -52,6 +53,21 @@ const Hdv = () => {
 
         // Actualiza el status a "pendiente"
         await updateDoc(proRef, { status: 'pendiente' });
+        console.log('Status actualizado a pendiente');
+
+        // Genera el contenido del email de validación
+        const emailContent = getValidationEmailHtml();
+
+        // Envía el correo usando la extensión de Trigger Email
+        // Se asume que la extensión escucha documentos nuevos en la colección "mail"
+        await setDoc(doc(db, 'mail', user.uid), {
+          to: user.email,
+          message: {
+            subject: 'Estamos revisando tus datos',
+            html: emailContent,
+          },
+        });
+        console.log('Correo de validación enviado al pro:', user.email);
 
         // Limpia el formulario
         setProfession('');
