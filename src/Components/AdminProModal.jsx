@@ -2,13 +2,17 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import {
+  doc, setDoc, updateDoc,
+} from 'firebase/firestore';
+import { db } from '../firebase';
+import { getSuccessEmailHtml } from './mails/emailTemplate';
 import '../stylesheets/AdminProModal.css';
 
 const AdminProModal = ({
   show,
   onClose,
   proData,
-  onApprove,
   onReject,
 }) => {
   if (!show || !proData) return null;
@@ -19,6 +23,7 @@ const AdminProModal = ({
     Documento = {},
     Hdv = {},
     files = {},
+    docId, // asumimos que proData incluye docId
   } = proData;
 
   const { number: docNumber = '', type: docType = '' } = Documento;
@@ -28,7 +33,6 @@ const AdminProModal = ({
     university = '',
     professionalHistory = '',
   } = Hdv;
-
   const {
     hdvUrl = '',
     professionalCardUrl = '',
@@ -39,19 +43,46 @@ const AdminProModal = ({
   const [showReason, setShowReason] = useState(false);
   const [reason, setReason] = useState('');
 
-  const handleApprove = () => {
-    if (onApprove) onApprove();
+  // Maneja la aprobación: actualiza status a "aprobado" y envía el correo
+  const handleApprove = async () => {
+    try {
+      // Actualiza el status del pro a "aprobado" en Firestore
+      const proRef = doc(db, 'pros', docId);
+      await updateDoc(proRef, { status: 'aprobado' });
+      console.log('Status actualizado a aprobado');
+
+      // Genera el contenido del correo usando getSuccessEmailHtml
+      // Aquí se puede utilizar un arreglo de terapias del pro si lo tienes en proData,
+      // o un arreglo de prueba.
+      const terapias = proData.terapias || ['fisica', 'lenguaje', 'mental'];
+      const emailContent = getSuccessEmailHtml(terapias);
+
+      // Envía el correo creando un documento en la colección "mail"
+      await setDoc(doc(db, 'mail', docId), {
+        to: email,
+        message: {
+          subject: '¡Tu cuenta ha sido aprobada!',
+          html: emailContent,
+        },
+      });
+      console.log('Correo de aprobación enviado a:', email);
+
+      // Cierra el modal y limpia los datos
+      onClose();
+    } catch (error) {
+      console.error('Error al aprobar:', error);
+    }
   };
 
-  // Lógica para el botón rechazar:
-  // Si el campo de motivo no está visible, se muestra (sin actualizar el status).
-  // Si ya está visible y tiene un valor, se ejecuta onReject.
+  // Manejo para el rechazo (igual que antes)
   const handleRejectClick = () => {
     if (!showReason) {
       setShowReason(true);
     } else if (reason.trim() === '') {
       alert('Por favor, ingresa el motivo del rechazo.');
-    } else if (onReject) onReject(reason);
+    } else if (onReject) {
+      onReject(reason);
+    }
   };
 
   return (
@@ -220,13 +251,13 @@ AdminProModal.propTypes = {
         }),
       ),
     }),
+    docId: PropTypes.string, // id del documento en Firestore
+    terapias: PropTypes.arrayOf(PropTypes.string), // (opcional) arreglo de terapias
   }).isRequired,
-  onApprove: PropTypes.func,
   onReject: PropTypes.func,
 };
 
 AdminProModal.defaultProps = {
-  onApprove: null,
   onReject: null,
 };
 
