@@ -1,9 +1,22 @@
 import React from 'react';
-import { getSuccessEmailHtml } from './mails/emailTemplate';
+import getEmailHtml from './mails/emailTemplate';
 
 const EmailPreview = () => {
-  const terapias = ['fisica', 'lenguaje', 'mental'];
-  const emailHtml = getSuccessEmailHtml(terapias);
+  // Datos de prueba para la vista previa
+  const emailData = {
+    collection: 'pros',
+    therapyType: 'fisica',
+    date: '20',
+    dayOfWeek: 'lun', // Se mostrará como "Lun 20"
+    fullDate: 'de Marzo a las 8:00am',
+    userName: 'Juan',
+    proName: 'Dr. Pérez',
+    userEmail: 'juan@example.com',
+    userProfession: 'Fisioterapeuta',
+    userTel: '555-1234',
+  };
+
+  const emailHtml = getEmailHtml(emailData);
 
   return (
     <div

@@ -1,16 +1,19 @@
 // emailTemplate.js
 
 function getEmailHtml({
-  collection,
-  therapyType,
-  date,
-  fullDate,
-  userName,
-  proName,
-  userEmail,
-  userProfession,
-  userTel,
+  collection, // 'users' o 'pros'
+  therapyType, // 'fisica', 'lenguaje', 'mental', 'ocupacional'
+  date, // Ej: "20"
+  dayOfWeek, // Ej: "lun" o "martes" (se mostrará "Lun" o "Martes")
+  fullDate, // Ej: "de Marzo a las 8:00am"
+  userName, // nombre del usuario (si collection = 'users')
+  proName, // nombre del profesional (si collection = 'pros')
+  userEmail, // email (depende de con quién es la cita)
+  userProfession, // profesión (o teléfono) según corresponda
+  userTel, // teléfono si es un pro recibiendo cita
 }) {
+  const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s);
+
   let greetingText;
   if (collection === 'users') {
     greetingText = `Hola, ${userName} tu cita se programó exitosamente`;
@@ -60,33 +63,33 @@ function getEmailHtml({
   };
 
   const { color, icon, text } = therapyConfigs[therapyType] || therapyConfigs.fisica;
-
+  const formattedDate = dayOfWeek ? `${capitalize(dayOfWeek)} ${date}` : (date || 'Lun 20');
   const emailHtml = `
 <center>    
   <table width="420" align="center" cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; background-color: #F2F5FC; border-radius: 10px; overflow: hidden;">
     <tr>
-      <td align="center" style="padding: 20px;">
-        <p style="font-size: 22px; margin: 0 0 20px 0; text-align: center; color: #041B5E; font-weight: bold;">
+      <td align="center" style="padding: 20px; background-color: #2B3E9D;">
+        <p style="font-size: 22px; margin: 0 0 20px 0; text-align: center; color: #fff; font-weight: bold;">
           ${greetingText}
         </p>
 
         <!-- Sección: ¿Cuándo es la cita? -->
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;">
           <tr>
-            <td align="left" style="font-size: 22px; padding-left: 64px; padding-bottom: 12px; color: #041B5E;">
+            <td align="left" style="font-size: 22px; padding-left: 64px; padding-bottom: 12px; color: #fff;">
               ¿Cuándo es la cita? <span style="font-size: 23px;">🤔</span>
             </td>
           </tr>
           <tr>
             <td align="center" style="background-color: #081F4A; color:#fff; padding: 10px; border-radius: 8px; margin: 0 auto;">
-              <div style="font-size: 20px; font-weight: bold;">${date || 'Lun 20'}</div>
+              <div style="font-size: 20px; font-weight: bold;">${formattedDate}</div>
               <div style="font-size: 20px;">${fullDate || 'De Marzo a las 8:00am'}</div>
             </td>
           </tr>
         </table>
 
         <!-- Sección: ¿Con quién? -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px; color: #041B5E;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px; color: #fff;">
           <tr>
             <td align="left" style="font-size: 22px; padding-left: 112px; padding-bottom: 12px;">
               ${withWhomTitle}
@@ -129,7 +132,7 @@ function getEmailHtml({
         <!-- Sección: ¿Qué terapia es? -->
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;">
           <tr>
-            <td align="left" style="font-size: 16px; padding-bottom: 8px; color: #041B5E;">
+            <td align="left" style="font-size: 16px; padding-bottom: 8px; color: #fff;">
               ¿Qué terapia es?
             </td>
           </tr>
