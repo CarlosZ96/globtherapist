@@ -1,10 +1,11 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  doc, setDoc, updateDoc,
-} from 'firebase/firestore';
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getSuccessEmailHtml } from './mails/emailTemplate';
 import '../stylesheets/AdminProModal.css';
@@ -41,14 +42,50 @@ const AdminProModal = ({
 
   const [showReason, setShowReason] = useState(false);
   const [reason, setReason] = useState('');
+  // Estado para las terapias activas (botones) que inician vacías
+  const [selectedTherapies, setSelectedTherapies] = useState([]);
+
+  // Función para normalizar el texto (elimina tildes y pasa a minúsculas)
+  const normalizeText = (text) => {
+    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  };
+
+  // Función para activar o desactivar una terapia al hacer click
+  const handleTherapyClick = (therapy) => {
+    const normalizedTherapy = normalizeText(therapy);
+    const exists = selectedTherapies.some(
+      (t) => normalizeText(t) === normalizedTherapy,
+    );
+    if (exists) {
+      // Remueve la terapia del array
+      setSelectedTherapies(selectedTherapies.filter(
+        (t) => normalizeText(t) !== normalizedTherapy,
+      ));
+    } else {
+      // Agrega la terapia
+      setSelectedTherapies([...selectedTherapies, therapy]);
+    }
+  };
+
   const handleApprove = async () => {
     try {
+      const activeTherapiesNormalized = selectedTherapies.map((therapy) => normalizeText(therapy));
+      const currentTherapies = proData.terapias || [];
+      const currentTherapiesNormalized = currentTherapies.map((therapy) => normalizeText(therapy));
+      // eslint-disable-next-line max-len
+      const updatedTherapies = currentTherapiesNormalized.filter((therapy) => activeTherapiesNormalized.includes(therapy));
+      activeTherapiesNormalized.forEach((therapy) => {
+        if (!updatedTherapies.includes(therapy)) {
+          updatedTherapies.push(therapy);
+        }
+      });
       const proRef = doc(db, 'pros', docId);
-      await updateDoc(proRef, { status: 'aprobado' });
+      await updateDoc(proRef, {
+        status: 'aprobado',
+        terapias: updatedTherapies,
+      });
       console.log('Status actualizado a aprobado');
-      const terapias = proData.terapias || ['fisica', 'lenguaje', 'mental'];
-      const emailContent = getSuccessEmailHtml(terapias);
-
+      const emailContent = getSuccessEmailHtml(activeTherapiesNormalized);
       await setDoc(doc(db, 'mail', docId), {
         to: email,
         message: {
@@ -57,7 +94,6 @@ const AdminProModal = ({
         },
       });
       console.log('Correo de aprobación enviado a:', email);
-
       onClose();
     } catch (error) {
       console.error('Error al aprobar:', error);
@@ -73,6 +109,9 @@ const AdminProModal = ({
       onReject(reason);
     }
   };
+
+  // Array fijo de terapias
+  const therapies = ['Lenguaje', 'Física', 'Mental', 'Ocupacional'];
 
   return (
     <div className="adminProModal-overlay">
@@ -148,12 +187,25 @@ const AdminProModal = ({
             <span>No disponible</span>
           )}
         </div>
+
         <div className="adminProModal-therapies">
-          <div>Lenguaje</div>
-          <div>Física</div>
-          <div>Mental</div>
-          <div>Ocupacional</div>
+          {therapies.map((therapy, index) => {
+            const isActive = selectedTherapies.some(
+              (t) => normalizeText(t) === normalizeText(therapy),
+            );
+            return (
+              <div
+                key={index}
+                onClick={() => handleTherapyClick(therapy)}
+                className={isActive ? 'proModal-terapie-act' : 'proModal-terapie'}
+                style={{ cursor: 'pointer' }}
+              >
+                {therapy}
+              </div>
+            );
+          })}
         </div>
+
         <div className="adminProModal-row-certificates">
           <label>Certificaciones:</label>
           <div className="adminProModal-cert-list">
@@ -244,8 +296,8 @@ AdminProModal.propTypes = {
         }),
       ),
     }),
-    docId: PropTypes.string, // id del documento en Firestore
-    terapias: PropTypes.arrayOf(PropTypes.string), // (opcional) arreglo de terapias
+    docId: PropTypes.string,
+    terapias: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
   onReject: PropTypes.func,
 };
