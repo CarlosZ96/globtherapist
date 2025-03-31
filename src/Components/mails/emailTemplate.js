@@ -220,19 +220,20 @@ export function getSuccessEmailHtml(terapias = []) {
   return `
 <center>
   <table width="420" align="center" cellpadding="0" cellspacing="0" border="0"
-         style="font-family: Arial, sans-serif; background-color: #F2F5FC; border-radius: 10px; overflow: hidden;">
+         style="font-family: Arial, sans-serif; background-color: #2B3E9D; border-radius: 10px; overflow: hidden;">
     <tr>
       <td align="center" style="padding: 20px;">
-        <h2 style="color: #041B5E; font-size: 24px; margin: 0 0 15px 0;">
+        <h2 style="color: #fff; font-size: 24px; margin: 0 0 15px 0;">
           ¡Todo está correcto!
         </h2>
-        <p style="color: #4A5568; font-size: 16px; margin: 0 0 20px 0; text-align: center;">
+        <img src="https://cdn-icons-png.flaticon.com/256/8171/8171556.png" alt="Reading Book Icon" style="width: 165px; height: auto; margin-bottom: 15px;">
+        <p style="color: #fff; font-size: 16px; margin: 0 0 20px 0; text-align: center;">
           ¡Validamos tus datos y todo está perfecto!
         </p>
-        <h3 style="color: #041B5E; font-size: 18px; margin-bottom: 15px;">
+        <h3 style="color: #fff; font-size: 18px; margin-bottom: 15px;">
           ¿Qué sigue ahora?
         </h3>
-          <p style="color: #041B5E; font-size: 16px; line-height: 1.6; padding:20px">
+          <p style="color: #fff; font-size: 16px; line-height: 1.6; padding:20px">
             Ahora puedes recibir pacientes para terapias:
           </p>
         <!-- Sección de botones de terapias -->
@@ -240,7 +241,7 @@ export function getSuccessEmailHtml(terapias = []) {
           ${therapyButtonsHtml}
         </table>
 
-        <p style="color: #4A5568; font-size: 14px; margin: 0 0 20px 0; text-align: center;">
+        <p style="color: #fff; font-size: 14px; margin: 0 0 20px 0; text-align: center;">
           También en nuestra página podrás elegir tus horarios de atención
         </p>
 
