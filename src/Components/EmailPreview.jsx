@@ -6,9 +6,9 @@ const EmailPreview = () => {
   const emailData = {
     collection: 'pros',
     therapyType: 'fisica',
-    date: '20',
+    date: '1',
     dayOfWeek: 'lun', // Se mostrará como "Lun 20"
-    fullDate: 'de Marzo a las 8:00am',
+    fullDate: 'de Abril a las 8:00am',
     userName: 'Juan',
     proName: 'Dr. Pérez',
     userEmail: 'juan@example.com',

@@ -276,7 +276,7 @@ const Therapy = () => {
         collection: 'users',
         therapyType: formData.therapyType.toLowerCase(),
         date: citaGlobal.date,
-        fullDate: `${citaGlobal.date} de ${citaGlobal.month} a las ${citaGlobal.time}`,
+        fullDate: `de ${citaGlobal.month} a las ${citaGlobal.time}`,
         userName: formData.name,
         proName: proData.username,
         userEmail: formData.email,
