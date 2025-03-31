@@ -68,13 +68,12 @@ const Hdv = () => {
           },
         });
         console.log('Correo de validación enviado al pro:', user.email);
-
-        // Limpia el formulario
         setProfession('');
         setSpecialization('');
         setYearsOfExperience(0);
         setUniversity('');
         setProfessionalHistory('');
+        window.location.reload();
       } catch (error) {
         console.error('Error guardando datos en Firestore:', error);
       }
