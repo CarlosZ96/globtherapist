@@ -4,6 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import Calendar from './Calendar/CalendarWithToggle';
 import ProData from './ProData';
+import Therapie from './therapie';
 import Hdv from './Hdv';
 import her from '../img/Heykiyou 1.png';
 import reading from '../img/BZZRINCANTATION.png';
@@ -118,6 +119,7 @@ const ProSpace = () => {
           </div>
         </div>
       )}
+      <Therapie />
       <ProData />
       <Hdv />
     </div>

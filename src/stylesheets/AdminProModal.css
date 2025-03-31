@@ -130,3 +130,10 @@
     background-color: #3cad5b;
   }
   
+  .adminProModal-therapies{
+    height: 10vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    place-items: center center;
+  }

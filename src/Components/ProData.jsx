@@ -59,7 +59,6 @@ const ProData = () => {
   };
 
   const handleSubmit = async () => {
-    // Ahora también se requiere que profileImageFile esté definido
     if (!hdvFile || !profileImageFile || !professionalCardFile) {
       alert('HDV, la imagen de perfil y la tarjeta profesional son obligatorios');
       return;

@@ -23,7 +23,7 @@ const AdminProModal = ({
     Documento = {},
     Hdv = {},
     files = {},
-    docId, // asumimos que proData incluye docId
+    docId,
   } = proData;
 
   const { number: docNumber = '', type: docType = '' } = Documento;
@@ -39,25 +39,16 @@ const AdminProModal = ({
     certificateFiles = [],
   } = files;
 
-  // Estados para controlar el campo de motivo del rechazo
   const [showReason, setShowReason] = useState(false);
   const [reason, setReason] = useState('');
-
-  // Maneja la aprobación: actualiza status a "aprobado" y envía el correo
   const handleApprove = async () => {
     try {
-      // Actualiza el status del pro a "aprobado" en Firestore
       const proRef = doc(db, 'pros', docId);
       await updateDoc(proRef, { status: 'aprobado' });
       console.log('Status actualizado a aprobado');
-
-      // Genera el contenido del correo usando getSuccessEmailHtml
-      // Aquí se puede utilizar un arreglo de terapias del pro si lo tienes en proData,
-      // o un arreglo de prueba.
       const terapias = proData.terapias || ['fisica', 'lenguaje', 'mental'];
       const emailContent = getSuccessEmailHtml(terapias);
 
-      // Envía el correo creando un documento en la colección "mail"
       await setDoc(doc(db, 'mail', docId), {
         to: email,
         message: {
@@ -67,14 +58,12 @@ const AdminProModal = ({
       });
       console.log('Correo de aprobación enviado a:', email);
 
-      // Cierra el modal y limpia los datos
       onClose();
     } catch (error) {
       console.error('Error al aprobar:', error);
     }
   };
 
-  // Manejo para el rechazo (igual que antes)
   const handleRejectClick = () => {
     if (!showReason) {
       setShowReason(true);
@@ -159,7 +148,12 @@ const AdminProModal = ({
             <span>No disponible</span>
           )}
         </div>
-
+        <div className="adminProModal-therapies">
+          <div>Lenguaje</div>
+          <div>Física</div>
+          <div>Mental</div>
+          <div>Ocupacional</div>
+        </div>
         <div className="adminProModal-row-certificates">
           <label>Certificaciones:</label>
           <div className="adminProModal-cert-list">
@@ -181,7 +175,6 @@ const AdminProModal = ({
           </div>
         </div>
 
-        {/* Campo de motivo del rechazo: oculto por defecto */}
         <div
           className="adminProModal-reason"
           style={{

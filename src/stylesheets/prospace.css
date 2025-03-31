@@ -583,3 +583,63 @@
     background-color: #2b3e9d;
     color: #fff;
 }
+
+.therapies{
+    width: 100vw;
+}
+
+.Therapies-cont {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    place-items: center center;
+    width: 100%;
+    height: 38vh;
+    background-color: #2b3e9d;
+}
+
+.therapies-title {
+    width: 100%;
+    height: 8vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.therapies-title h1 {
+    color: #041b5e;
+    font-size: 4.4vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.thera-cont-act {
+    width: 60%;
+    height: 80%;
+    border: none;
+    color: #fff;
+    background-color: #15275f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 4vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.thera-cont {
+    width: 60%;
+    height: 80%;
+    border: none;
+    color: #12193f7a;
+    background-color: #4F63C2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 4vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
