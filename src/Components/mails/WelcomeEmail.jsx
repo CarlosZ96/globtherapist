@@ -156,12 +156,10 @@ const WelcomeEmail = ({ userName, collection = 'users' }) => {
       <Preview>¡Bienvenido a GlobTherapist!</Preview>
       <Body style={body}>
         <Container style={container}>
-          {/* Cabecera */}
           <Section style={header}>
             <Text style={headerText}>GLOBTHERAPIST</Text>
           </Section>
 
-          {/* Sección de Bienvenida */}
           <Section style={section}>
             <Row>
               <Column style={{ padding: '10px', width: '100%' }}>

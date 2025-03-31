@@ -6,8 +6,9 @@ import PropTypes from 'prop-types';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import Swal from 'sweetalert2';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { auth, db } from '../firebase';
-import getEmailHtml from './mails/emailTemplate';
+import WelcomeEmail from './mails/WelcomeEmail';
 import '../stylesheets/windo.css';
 
 const initialFormData = {
@@ -25,7 +26,9 @@ const CreatePro = ({ toggleCreatePro }) => {
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const emailHtml = getEmailHtml(formData.fullName, 'pros');
+  const emailHtml = renderToStaticMarkup(
+    <WelcomeEmail userName={formData.fullName} collection="pros" />,
+  );
   const therapyOptions = ['Mental', 'Física', 'Ocupacional', 'Lenguaje'];
   const normalizeText = (text) => {
     return text

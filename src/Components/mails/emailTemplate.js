@@ -1,18 +1,16 @@
 // emailTemplate.js
 
 function getEmailHtml({
-  // Props mínimos que necesitas (ajusta según tus necesidades)
-  collection, // 'users' o 'pros'
-  therapyType, // 'fisica', 'lenguaje', 'mental', 'ocupacional'
-  date, // ejemplo: 'Lun 20'
-  fullDate, // ejemplo: 'De Marzo a las 8:00am'
-  userName, // nombre del usuario (si collection = 'users')
-  proName, // nombre del profesional (si collection = 'pros')
-  userEmail, // email (depende de con quién es la cita)
-  userProfession, // profesión (o teléfono) según corresponda
-  userTel, // teléfono si es un pro recibiendo cita
+  collection,
+  therapyType,
+  date,
+  fullDate,
+  userName,
+  proName,
+  userEmail,
+  userProfession,
+  userTel,
 }) {
-  // Texto dinámico para el saludo según 'collection'
   let greetingText;
   if (collection === 'users') {
     greetingText = `Hola, ${userName} tu cita se programó exitosamente`;
@@ -20,7 +18,6 @@ function getEmailHtml({
     greetingText = `Hola, ${proName}, ${userName} programó una cita contigo`;
   }
 
-  // Texto dinámico para la sección "¿Con quién?"
   const withWhomTitle = '¿Con quién?';
   let withWhomName = '';
   let withWhomEmail = '';
@@ -39,7 +36,6 @@ function getEmailHtml({
     withWhomExtraValue = userTel || '123456789';
   }
 
-  // Configuración de la terapia según 'therapyType'
   const therapyConfigs = {
     fisica: {
       color: '#EF5557',
@@ -193,7 +189,6 @@ export function getSuccessEmailHtml(terapias = []) {
   let therapyButtonsHtml = '';
   terapias.forEach((therapy) => {
     const config = therapyConfigs[therapy] || therapyConfigs.fisica;
-    // Convertir el string 'fisica' en 'Fisica' para el título, por ejemplo
     const capitalizedTherapy = therapy.charAt(0).toUpperCase() + therapy.slice(1);
 
     therapyButtonsHtml += `
@@ -216,7 +211,6 @@ export function getSuccessEmailHtml(terapias = []) {
     `;
   });
 
-  // Plantilla final
   return `
 <center>
   <table width="420" align="center" cellpadding="0" cellspacing="0" border="0"

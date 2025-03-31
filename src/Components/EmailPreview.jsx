@@ -2,9 +2,7 @@ import React from 'react';
 import { getSuccessEmailHtml } from './mails/emailTemplate';
 
 const EmailPreview = () => {
-  // Arreglo de prueba con las terapias que tenga el profesional
   const terapias = ['fisica', 'lenguaje', 'mental'];
-  // Se genera el HTML del correo usando getSuccessEmailHtml
   const emailHtml = getSuccessEmailHtml(terapias);
 
   return (
