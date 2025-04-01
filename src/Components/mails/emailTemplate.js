@@ -310,4 +310,55 @@ export function getValidationEmailHtml() {
   `;
 }
 
+export function getRejectionEmailHtml({ reason, attemptsLeft = 1 }) {
+  return `
+<center>
+  <table width="420" align="center" cellpadding="0" cellspacing="0" border="0"
+         style="font-family: Arial, sans-serif; background-color: #F2F5FC; border-radius: 10px; overflow: hidden;">
+    <tr>
+      <td align="center" style="padding: 20px; background-color: #2B3E9D;">
+        <h2 style="color: #fff; font-size: 24px; margin: 0 0 15px 0;">
+          Algo no ha ido bien
+        </h2>
+        <img 
+          src="https://cdn-icons-png.flaticon.com/512/5894/5894028.png"
+          alt="Rechazo Icon"
+          style="width: 120px; height: auto; margin-bottom: 15px;"
+        />
+        <p style="color: #fff; font-size: 16px; margin: 0 0 20px 0; text-align: center;">
+          Luego de validar tus datos hemos encontrado un problema:
+        </p>
+        <!-- Contenedor interno con fondo gris para el motivo -->
+        <div style="
+          background-color: #80808033; 
+          border-radius: 8px; 
+          padding: 15px; 
+          margin-bottom: 15px;
+          max-width: 350px;
+          margin: 0 auto 15px auto;
+        ">
+          <p style="color: #ffffff; font-size: 15px; margin: 0; text-align: left;">
+            ${reason || 'Motivo no especificado.'}
+          </p>
+        </div>
+        <p style="color: #fff; font-size: 15px; margin: 0 0 10px 0; text-align: center;">
+          No te preocupes, aún puedes volver a enviar tus datos.
+        </p>
+        <p style="color: #fff; font-size: 15px; margin: 0 0 20px 0; text-align: center;">
+          Número de intentos: <strong>${attemptsLeft}</strong>
+        </p>
+        <p style="color: #fff; font-size: 14px; margin: 0; text-align: center;">
+          Más información en:
+          <a href="mailto:globtherapist@gmail.com"
+             style="color: #FFD904; text-decoration: none;">
+            globtherapist@gmail.com
+          </a>
+        </p>
+      </td>
+    </tr>
+  </table>
+</center>
+  `;
+}
+
 export default getEmailHtml;

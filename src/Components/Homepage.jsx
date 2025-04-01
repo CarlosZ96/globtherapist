@@ -20,7 +20,6 @@ const Homepage = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [showCreatePro, setShowCreatePro] = useState(false);
   const [showDates, setShowDates] = useState(false);
-  // Estado para controlar la visibilidad de la notificación
   const [showNotification, setShowNotification] = useState(true);
 
   const toggleDates = () => setShowDates((prev) => !prev);

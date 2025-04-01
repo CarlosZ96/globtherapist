@@ -47,19 +47,11 @@ const Hdv = () => {
       };
 
       try {
-        // Guarda los datos de la historia profesional
         await setDoc(proRef, { Hdv: hdvData }, { merge: true });
         console.log('Datos guardados correctamente en Firestore');
-
-        // Actualiza el status a "pendiente"
         await updateDoc(proRef, { status: 'pendiente' });
         console.log('Status actualizado a pendiente');
-
-        // Genera el contenido del email de validación
         const emailContent = getValidationEmailHtml();
-
-        // Envía el correo usando la extensión de Trigger Email
-        // Se asume que la extensión escucha documentos nuevos en la colección "mail"
         await setDoc(doc(db, 'mail', user.uid), {
           to: user.email,
           message: {

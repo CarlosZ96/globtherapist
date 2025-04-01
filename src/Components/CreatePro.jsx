@@ -112,6 +112,7 @@ const CreatePro = ({ toggleCreatePro }) => {
         terapias: normalizedTherapies,
         horarios: {},
         status: 'creado',
+        validations: 3,
         createdAt: serverTimestamp(),
       });
 
