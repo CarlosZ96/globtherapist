@@ -15,6 +15,7 @@ const AdminProModal = ({
   onClose,
   proData,
   onReject,
+  onApprove,
 }) => {
   if (!show || !proData) return null;
   const {
@@ -94,6 +95,7 @@ const AdminProModal = ({
         },
       });
       console.log('Correo de aprobación enviado a:', email);
+      onApprove();
       onClose();
     } catch (error) {
       console.error('Error al aprobar:', error);
@@ -106,7 +108,7 @@ const AdminProModal = ({
     } else if (reason.trim() === '') {
       alert('Por favor, ingresa el motivo del rechazo.');
     } else if (onReject) {
-      onReject(reason);
+      onReject(reason); // Pasar la razón al método onReject
     }
   };
 
@@ -269,6 +271,7 @@ const AdminProModal = ({
 AdminProModal.propTypes = {
   show: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  onApprove: PropTypes.func.isRequired,
   proData: PropTypes.shape({
     Nombre: PropTypes.string,
     email: PropTypes.string,

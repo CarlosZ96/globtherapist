@@ -3,10 +3,11 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useEffect, useState } from 'react';
 import {
-  collection, getDocs, updateDoc, doc, getDoc,
+  collection, getDocs, updateDoc, doc, getDoc, setDoc,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import AdminProModal from '../AdminProModal';
+import { getRejectionEmailHtml } from '../mails/emailTemplate';
 import '../../stylesheets/admin.css';
 
 const AdminPros = () => {
@@ -109,12 +110,32 @@ const AdminPros = () => {
     }
   };
 
-  const handleReject = async () => {
+  const handleReject = async (reason) => { // Recibir la razón como parámetro
     if (!selectedProData) return;
     try {
       console.log('Rechazando...');
       const proRef = doc(db, 'pros', selectedProData.docId);
-      await updateDoc(proRef, { status: 'rechazado' });
+
+      // Actualizar estado a rechazado
+      await updateDoc(proRef, {
+        status: 'rechazado',
+        rejectionReason: reason, // Guardar la razón en Firestore si es necesario
+        attemptsLeft: 3, // Establecer intentos si aplica
+      });
+
+      // Crear documento para Trigger Email
+      const emailContent = getRejectionEmailHtml({
+        reason,
+        attemptsLeft: 3,
+      });
+
+      await setDoc(doc(db, 'mail', `${selectedProData.docId}-rejection`), {
+        to: selectedProData.email,
+        message: {
+          subject: 'Estado de tu solicitud de profesional',
+          html: emailContent,
+        },
+      });
 
       setShowModal(false);
       setSelectedProData(null);
@@ -122,7 +143,6 @@ const AdminPros = () => {
       console.error('Error al rechazar:', error);
     }
   };
-
   return (
     <div className="Admin-pros-cont">
       <div className="Admin-pros-cont-title">
