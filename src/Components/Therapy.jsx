@@ -8,6 +8,7 @@ import {
 import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
 import Calendar from './Calendar/CalendarWithToggle';
+import Mp from './payments/MP';
 import getEmailHtml from './mails/emailTemplate';
 import '../stylesheets/Therapy.css';
 
@@ -568,6 +569,11 @@ const Therapy = () => {
                   <p>No hay una cita seleccionada.</p>
                 )}
               </div>
+            </div>
+          )}
+          {formData.therapyType && (
+            <div style={{ marginTop: '20px' }}>
+              <Mp therapyType={formData.therapyType} />
             </div>
           )}
           <button type="submit" className="DynamiCanlendar-btn">

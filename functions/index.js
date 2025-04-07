@@ -1,5 +1,5 @@
 /* eslint-disable global-require */
-// index.js (Firebase Functions para tokens de Agora RTC)
+// index.js (Firebase Functions para tokens de Agora RTC y Mercado Pago)
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
@@ -8,8 +8,15 @@ if (process.env.NODE_ENV !== 'production') {
 const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
+// Importa la instancia por defecto de Mercado Pago
+const mercadopago = require('mercadopago').default;
 const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
 const chatToken = require('./chatToken');
+
+// Configura Mercado Pago con el access token (almacenado en functions config)
+mercadopago.configure({
+  access_token: functions.config().mercadopago.token,
+});
 
 const app = express();
 
@@ -64,5 +71,46 @@ app.get('/', (req, res) => {
   }
 });
 
-exports.createAgoraToken = functions.https.onRequest(app);
+// Endpoint para generar token de chat de Agora
 exports.createAgoraChatToken = chatToken.createAgoraChatToken;
+
+// Exporta la app de Agora para los tokens RTC
+exports.createAgoraToken = functions.https.onRequest(app);
+
+/* =====================================================
+   Función para crear preferencia de Mercado Pago
+   ===================================================== */
+
+exports.createPreference = functions.https.onRequest((req, res) => {
+  // Aplica CORS para esta función
+  cors(req, res, async () => {
+    if (req.method !== 'POST') {
+      return res.status(405).send('Method Not Allowed');
+    }
+    try {
+      const { title, price, quantity } = req.body;
+
+      const preference = {
+        items: [
+          {
+            title,
+            unit_price: Number(price),
+            quantity: Number(quantity),
+          },
+        ],
+        back_urls: {
+          success: 'https://tuapp.com/success',
+          failure: 'https://tuapp.com/failure',
+          pending: 'https://tuapp.com/pending',
+        },
+        auto_return: 'approved',
+      };
+
+      const response = await mercadopago.preferences.create(preference);
+      return res.status(200).json({ id: response.body.id });
+    } catch (error) {
+      console.error('Error al crear preferencia:', error);
+      return res.status(500).json({ error: 'Error al crear preferencia' });
+    }
+  });
+});
