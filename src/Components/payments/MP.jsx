@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { Payment, initMercadoPago } from '@mercadopago/sdk-react';
+
+initMercadoPago('TU_PUBLIC_KEY'); // Reemplaza con tu public key
 
 const MP = ({ therapyType }) => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [preferenceId, setPreferenceId] = useState(null);
+  const [price, setPrice] = useState(0);
 
   const therapyPrices = {
     mental: 80000,
@@ -12,62 +15,85 @@ const MP = ({ therapyType }) => {
     ocupacional: 41000,
   };
 
-  const handlePayment = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
+  useEffect(() => {
+    const createPreference = async () => {
       const normalizedType = therapyType.toLowerCase();
-      const price = therapyPrices[normalizedType];
+      const amount = therapyPrices[normalizedType];
+      setPrice(amount);
 
-      if (!price) throw new Error('Tipo de terapia no válido');
+      try {
+        const response = await fetch(
+          'https://us-central1-globtherapist.cloudfunctions.net/mercadoPago/create-preference',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              amount,
+              description: `${therapyType} Terapia`,
+            }),
+          },
+        );
 
+        const { id } = await response.json();
+        setPreferenceId(id);
+      } catch (error) {
+        console.error('Error creating preference:', error);
+      }
+    };
+
+    createPreference();
+  }, [therapyType]);
+
+  const handleSubmit = async ({ formData }) => {
+    try {
       const response = await fetch(
-        'https://us-central1-globtherapist.cloudfunctions.net/createPreference',
+        'https://us-central1-globtherapist.cloudfunctions.net/mercadoPago/process-payment',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            title: `${therapyType} Terapia`,
-            price,
-            quantity: 1,
+            ...formData,
+            transaction_amount: price,
+            description: `${therapyType} Terapia`,
           }),
         },
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error en el servidor');
+      const result = await response.json();
+      if (result.status === 'approved') {
+        // Redirigir a página de éxito
       }
-
-      const { id: preferenceId } = await response.json();
-      window.location.href = `https://www.mercadopago.com.co/checkout/v1/redirect?pref_id=${preferenceId}`;
-    } catch (errorr) {
-      console.error('Error:', errorr);
-      setError(error.message);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error('Payment error:', error);
     }
   };
 
-  const normalizedType = therapyType.toLowerCase();
-  const price = therapyPrices[normalizedType];
-
   return (
     <div className="payment-container">
-      {error && <div className="error-message">{error}</div>}
+      {preferenceId && (
+        <Payment
+          initialization={{ amount: price, preferenceId }}
+          customization={{
+            paymentMethods: {
+              bankTransfer: 'all', // Habilita PSE
+              creditCard: 'excluded',
+              debitCard: 'excluded',
+              ticket: 'excluded',
+            },
+          }}
+          onSubmit={handleSubmit}
+          onError={(error) => console.error('Brick error:', error)}
+          onReady={() => console.log('Brick ready')}
+        />
+      )}
 
-      <button
-        type="button"
-        onClick={handlePayment}
-        disabled={loading}
-      >
-        {loading ? 'Procesando...' : `Pagar ${therapyType} Terapia - ${price.toLocaleString('es-CO', {
+      <div className="price-display">
+        {price.toLocaleString('es-CO', {
           style: 'currency',
           currency: 'COP',
           minimumFractionDigits: 0,
-        })}`}
-      </button>
+        })}
+      </div>
     </div>
   );
 };
