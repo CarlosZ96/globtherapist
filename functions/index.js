@@ -1,6 +1,5 @@
 /* eslint-disable global-require */
-// index.js (Firebase Functions para tokens de Agora RTC y Mercado Pago)
-
+process.env.NODE_OPTIONS = '--no-warnings';
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
@@ -8,15 +7,16 @@ if (process.env.NODE_ENV !== 'production') {
 const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
-// Importa la instancia por defecto de Mercado Pago
-const mercadopago = require('mercadopago').default;
+const mercadopago = require('mercadopago');
 const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
 const chatToken = require('./chatToken');
 
-// Configura Mercado Pago con el access token (almacenado en functions config)
 mercadopago.configure({
-  access_token: functions.config().mercadopago.token,
+  access_token: process.env.MP_ACCESS_TOKEN || functions.config().mercadopago?.token,
+  sandbox: process.env.NODE_ENV !== 'production',
 });
+
+console.log('MP Token:', process.env.MP_ACCESS_TOKEN || functions.config().mercadopago?.token ? 'OK' : 'NO CONFIGURADO');
 
 const app = express();
 
@@ -38,8 +38,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
-
-// Endpoint para generar token de videollamada (RTC)
 app.get('/', (req, res) => {
   res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
   const { channelId, role, uid } = req.query;
@@ -71,18 +69,9 @@ app.get('/', (req, res) => {
   }
 });
 
-// Endpoint para generar token de chat de Agora
 exports.createAgoraChatToken = chatToken.createAgoraChatToken;
-
-// Exporta la app de Agora para los tokens RTC
 exports.createAgoraToken = functions.https.onRequest(app);
-
-/* =====================================================
-   Función para crear preferencia de Mercado Pago
-   ===================================================== */
-
 exports.createPreference = functions.https.onRequest((req, res) => {
-  // Aplica CORS para esta función
   cors(req, res, async () => {
     if (req.method !== 'POST') {
       return res.status(405).send('Method Not Allowed');
@@ -91,17 +80,16 @@ exports.createPreference = functions.https.onRequest((req, res) => {
       const { title, price, quantity } = req.body;
 
       const preference = {
-        items: [
-          {
-            title,
-            unit_price: Number(price),
-            quantity: Number(quantity),
-          },
-        ],
+        items: [{
+          title: title.substring(0, 255),
+          unit_price: Number(price),
+          quantity: Number(quantity),
+          currency_id: 'COP',
+        }],
         back_urls: {
-          success: 'https://tuapp.com/success',
-          failure: 'https://tuapp.com/failure',
-          pending: 'https://tuapp.com/pending',
+          success: process.env.MP_SUCCESS_URL,
+          failure: process.env.MP_FAILURE_URL,
+          pending: process.env.MP_PENDING_URL,
         },
         auto_return: 'approved',
       };
