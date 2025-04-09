@@ -1,15 +1,24 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Payment, initMercadoPago } from '@mercadopago/sdk-react';
+import { initMercadoPago } from '@mercadopago/sdk-react';
 
-// Inicializa el SDK con tu clave pública
-initMercadoPago('TU_PUBLIC_KEY'); // Reemplaza 'TU_PUBLIC_KEY' con la tuya
+initMercadoPago('TEST-91f4cd81-8588-4208-bfad-d68460c6c42b');
 
 const MP = ({ therapyType }) => {
-  const [preferenceId, setPreferenceId] = useState(null);
   const [price, setPrice] = useState(0);
+  const [email, setEmail] = useState('');
+  const [docType, setDocType] = useState('CC');
+  const [docNumber, setDocNumber] = useState('');
 
-  // Lista de precios para cada tipo de terapia
+  // Tipos de documento permitidos para Colombia
+  const documentTypes = [
+    { value: 'CC', label: 'Cédula de Ciudadanía' },
+    { value: 'CE', label: 'Cédula de Extranjería' },
+    { value: 'NIT', label: 'NIT' },
+    { value: 'Pasaporte', label: 'Pasaporte' },
+  ];
+
   const therapyPrices = {
     mental: 80000,
     fisica: 70000,
@@ -18,94 +27,80 @@ const MP = ({ therapyType }) => {
   };
 
   useEffect(() => {
-    const createPreference = async () => {
-      const normalizedType = therapyType.toLowerCase();
-      const amount = therapyPrices[normalizedType];
-      setPrice(amount);
-
-      try {
-        const response = await fetch(
-          'https://us-central1-globtherapist.cloudfunctions.net/api/mercadoPago/create-preference',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              amount,
-              description: `${therapyType} Terapia`,
-            }),
-          },
-        );
-
-        const { id } = await response.json();
-        setPreferenceId(id);
-      } catch (error) {
-        console.error('Error creating preference:', error);
-      }
-    };
-
-    createPreference();
+    const normalizedType = therapyType.toLowerCase();
+    setPrice(therapyPrices[normalizedType]);
   }, [therapyType]);
 
-  // Función que se ejecuta cuando se presiona el botón dentro del Payment Brick
-  const handleSubmit = async ({ formData }) => {
+  const handlePayment = async () => {
     try {
       const response = await fetch(
-        'https://us-central1-globtherapist.cloudfunctions.net/api/mercadoPago/process-payment',
+        'https://us-central1-globtherapist.cloudfunctions.net/api/mercadoPago/create-pse-payment',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            ...formData,
-            transaction_amount: price,
-            description: `${therapyType} Terapia`,
+            amount: price,
+            therapyType,
+            email,
+            docType,
+            docNumber,
           }),
         },
       );
 
-      const result = await response.json();
-      if (result.status === 'approved') {
-        // Redirige o muestra mensaje de éxito
-        console.log('Pago aprobado', result);
-      } else {
-        console.warn('Pago no aprobado', result);
-      }
+      const { redirectUrl } = await response.json();
+      window.location.href = redirectUrl;
     } catch (error) {
-      console.error('Payment error:', error);
+      console.error('Error al procesar el pago:', error);
     }
   };
 
   return (
     <div className="payment-container">
-      {preferenceId && (
-        <Payment
-          initialization={{ amount: price, preferenceId }}
-          // Actualización en la personalización del Brick para incluir PSE
-          customization={{
-            paymentMethods: {
-              // Se activa bankTransfer para que aparezca PSE
-              bankTransfer: 'all',
-              // Activa cualquier método que requiera preferencia
-              // (por ejemplo, PSE puede venir dentro de 'mercadoPago')
-              mercadoPago: 'all',
-              // Si deseas excluir otros métodos:
-              creditCard: 'excluded',
-              debitCard: 'excluded',
-              ticket: 'excluded',
-            },
-          }}
-          onSubmit={handleSubmit}
-          onError={(error) => console.error('Brick error:', error)}
-          onReady={() => console.log('Brick ready')}
+      <div className="form-group">
+        <label>Correo electrónico:</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
         />
-      )}
+      </div>
 
-      <div className="price-display">
+      <div className="form-group">
+        <label>Tipo de documento:</label>
+        <select
+          value={docType}
+          onChange={(e) => setDocType(e.target.value)}
+          required
+        >
+          {documentTypes.map((doc) => (
+            <option key={doc.value} value={doc.value}>
+              {doc.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="form-group">
+        <label>Número de documento:</label>
+        <input
+          type="text"
+          value={docNumber}
+          onChange={(e) => setDocNumber(e.target.value)}
+          required
+        />
+      </div>
+
+      <button type="button" onClick={handlePayment} className="pay-button">
+        Pagar
+        {' '}
         {price.toLocaleString('es-CO', {
           style: 'currency',
           currency: 'COP',
           minimumFractionDigits: 0,
         })}
-      </div>
+      </button>
     </div>
   );
 };

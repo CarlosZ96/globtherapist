@@ -10,6 +10,7 @@ const express = require('express');
 const cors = require('cors');
 const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
 const chatToken = require('./chatToken');
+const mercadopagoFunctions = require('./mercadopago');
 
 const app = express();
 
@@ -31,8 +32,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
-
-// Endpoint para generar token de videollamada (RTC)
 app.get('/', (req, res) => {
   res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
   const { channelId, role, uid } = req.query;
@@ -66,3 +65,4 @@ app.get('/', (req, res) => {
 
 exports.createAgoraToken = functions.https.onRequest(app);
 exports.createAgoraChatToken = chatToken.createAgoraChatToken;
+exports.createPSEPayment = mercadopagoFunctions.createPSEPayment;
