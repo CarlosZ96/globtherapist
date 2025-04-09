@@ -1,107 +1,68 @@
-/* eslint-disable consistent-return */
 /* eslint-disable global-require */
-const { onRequest } = require('firebase-functions/v2/https');
-const { logger, setGlobalOptions } = require('firebase-functions/v2');
+// index.js (Firebase Functions para tokens de Agora RTC)
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
+const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
 const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
-const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
-
-setGlobalOptions({
-  region: 'us-central1',
-  memory: '1GB',
-  timeoutSeconds: 60,
-});
-
-// Configuración Mercado Pago
-const mpClient = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN,
-});
+const chatToken = require('./chatToken');
 
 const app = express();
-app.use(express.json());
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://globtherapist.vercel.app'],
-}));
 
-// ========== Agora ==========
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://globtherapist.vercel.app',
+];
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+// Endpoint para generar token de videollamada (RTC)
 app.get('/', (req, res) => {
-  try {
-    const { channelId, role, uid } = req.query;
-    if (!channelId || !role) throw new Error('Parámetros requeridos');
+  res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
+  const { channelId, role, uid } = req.query;
 
+  if (!channelId || !role) {
+    return res.status(400).json({ error: 'channelId y role son requeridos' });
+  }
+
+  const numericUid = Number(uid) || 0;
+  const expireTime = 3600;
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const privilegeExpireTime = currentTimestamp + expireTime;
+
+  const agoraRole = RtcRole.PUBLISHER;
+
+  try {
     const token = RtcTokenBuilder.buildTokenWithUid(
       process.env.AGORA_APP_ID,
       process.env.AGORA_APP_CERTIFICATE,
       channelId,
-      Number(uid) || 0,
-      RtcRole.PUBLISHER,
-      Math.floor(Date.now() / 1000) + 3600,
+      numericUid,
+      agoraRole,
+      privilegeExpireTime,
     );
-
-    res.json({ token });
+    return res.status(200).json({ token });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error generating RTC token:', error);
+    return res.status(500).json({ error: error.toString() });
   }
 });
 
-// ========== Mercado Pago ==========
-const mpApp = express();
-mpApp.use(express.json());
-mpApp.use(cors());
-
-// Crear preferencia para el Brick
-mpApp.post('/create-preference', async (req, res) => {
-  try {
-    const { amount, description } = req.body;
-
-    const preference = await new Preference(mpClient).create({
-      body: {
-        items: [{
-          title: description,
-          unit_price: Number(amount),
-          quantity: 1,
-          currency_id: 'COP',
-        }],
-        payment_methods: {
-          excluded_payment_types: [
-            { id: 'ticket' },
-            { id: 'atm' },
-            { id: 'credit_card' },
-            { id: 'debit_card' },
-            { id: 'digital_wallet' },
-          ],
-          default_payment_method_id: 'pse',
-        },
-        statement_descriptor: 'GlobTherapist',
-        binary_mode: true,
-      },
-    });
-
-    res.json({ id: preference.id });
-  } catch (error) {
-    logger.error('Error MP Preference:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Procesar pago desde el Brick
-mpApp.post('/process-payment', async (req, res) => {
-  try {
-    const payment = await new Payment(mpClient).create({
-      body: {
-        ...req.body,
-        transaction_amount: Number(req.body.transaction_amount),
-        payment_method_id: 'pse',
-      },
-    });
-
-    res.json(payment);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Exportar funciones
-exports.createAgoraToken = onRequest(app);
-exports.mercadoPago = onRequest(mpApp);
+exports.createAgoraToken = functions.https.onRequest(app);
+exports.createAgoraChatToken = chatToken.createAgoraChatToken;
