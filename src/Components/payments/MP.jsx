@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Payment, initMercadoPago } from '@mercadopago/sdk-react';
 
-initMercadoPago('TU_PUBLIC_KEY'); // Reemplaza con tu public key
+// Inicializa el SDK con tu clave pública
+initMercadoPago('TU_PUBLIC_KEY'); // Reemplaza 'TU_PUBLIC_KEY' con la tuya
 
 const MP = ({ therapyType }) => {
   const [preferenceId, setPreferenceId] = useState(null);
   const [price, setPrice] = useState(0);
 
+  // Lista de precios para cada tipo de terapia
   const therapyPrices = {
     mental: 80000,
     fisica: 70000,
@@ -23,7 +25,7 @@ const MP = ({ therapyType }) => {
 
       try {
         const response = await fetch(
-          'https://us-central1-globtherapist.cloudfunctions.net/mercadoPago/create-preference',
+          'https://us-central1-globtherapist.cloudfunctions.net/api/mercadoPago/create-preference',
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -44,10 +46,11 @@ const MP = ({ therapyType }) => {
     createPreference();
   }, [therapyType]);
 
+  // Función que se ejecuta cuando se presiona el botón dentro del Payment Brick
   const handleSubmit = async ({ formData }) => {
     try {
       const response = await fetch(
-        'https://us-central1-globtherapist.cloudfunctions.net/mercadoPago/process-payment',
+        'https://us-central1-globtherapist.cloudfunctions.net/api/mercadoPago/process-payment',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -61,7 +64,10 @@ const MP = ({ therapyType }) => {
 
       const result = await response.json();
       if (result.status === 'approved') {
-        // Redirigir a página de éxito
+        // Redirige o muestra mensaje de éxito
+        console.log('Pago aprobado', result);
+      } else {
+        console.warn('Pago no aprobado', result);
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -73,9 +79,15 @@ const MP = ({ therapyType }) => {
       {preferenceId && (
         <Payment
           initialization={{ amount: price, preferenceId }}
+          // Actualización en la personalización del Brick para incluir PSE
           customization={{
             paymentMethods: {
-              bankTransfer: 'all', // Habilita PSE
+              // Se activa bankTransfer para que aparezca PSE
+              bankTransfer: 'all',
+              // Activa cualquier método que requiera preferencia
+              // (por ejemplo, PSE puede venir dentro de 'mercadoPago')
+              mercadoPago: 'all',
+              // Si deseas excluir otros métodos:
               creditCard: 'excluded',
               debitCard: 'excluded',
               ticket: 'excluded',
@@ -99,7 +111,8 @@ const MP = ({ therapyType }) => {
 };
 
 MP.propTypes = {
-  therapyType: PropTypes.oneOf(['Mental', 'Fisica', 'Lenguaje', 'Ocupacional']).isRequired,
+  therapyType: PropTypes.oneOf(['Mental', 'Fisica', 'Lenguaje', 'Ocupacional'])
+    .isRequired,
 };
 
 export default MP;
