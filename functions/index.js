@@ -1,6 +1,4 @@
 /* eslint-disable global-require */
-// index.js (Firebase Functions para tokens de Agora RTC)
-
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
@@ -10,7 +8,7 @@ const express = require('express');
 const cors = require('cors');
 const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
 const chatToken = require('./chatToken');
-const mercadopagoFunctions = require('./mercadopago');
+const mercadopagoFunctions = require('./mercadopago'); // Mantenemos solo la nueva función
 
 const app = express();
 
@@ -32,6 +30,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+
 app.get('/', (req, res) => {
   res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
   const { channelId, role, uid } = req.query;
@@ -63,6 +62,9 @@ app.get('/', (req, res) => {
   }
 });
 
+// Mantenemos las funciones de Agora sin cambios
 exports.createAgoraToken = functions.https.onRequest(app);
 exports.createAgoraChatToken = chatToken.createAgoraChatToken;
-exports.createPSEPayment = mercadopagoFunctions.createPSEPayment;
+
+// Nueva función unificada de Mercado Pago (eliminamos las anteriores)
+exports.createPayment = mercadopagoFunctions.createPayment;

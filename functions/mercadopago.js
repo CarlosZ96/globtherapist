@@ -1,42 +1,47 @@
-const mercadopago = require('mercadopago');
 const functions = require('firebase-functions');
+const { MercadoPagoConfig, Payments } = require('mercadopago');
+const cors = require('cors');
 
-mercadopago.configure({
-  access_token: process.env.MP_ACCESS_TOKEN,
+const corsHandler = cors({ origin: true });
+
+const client = new MercadoPagoConfig({
+  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || 'TEST-2400667744553776-031717-f3674df0979637213ae96babb278b9e9-313341255',
 });
 
-exports.createPSEPayment = functions.https.onRequest(async (req, res) => {
-  try {
-    const {
-      amount, therapyType, email, docType, docNumber,
-    } = req.body;
+const payments = new Payments(client);
 
-    const paymentData = {
-      transaction_amount: amount,
-      description: `${therapyType} Terapia`,
-      payment_method_id: 'pse',
-      payer: {
-        email,
-        identification: {
-          type: docType,
-          number: docNumber,
+exports.createPayment = functions.https.onRequest((req, res) => {
+  corsHandler(req, res, async () => {
+    try {
+      const { therapyType, amount, ...formData } = req.body;
+
+      const paymentData = {
+        transaction_amount: amount,
+        description: `${therapyType} Terapia`,
+        payment_method_id: formData.payment_method_id,
+        payer: {
+          email: formData.payer.email,
+          identification: formData.payer.identification,
         },
-      },
-      additional_info: {
-        ip_address: req.ip,
-      },
-      transaction_details: {
-        financial_institution: '1022',
-      },
-      callback_url: 'https://globtherapist.vercel.app/confirmacion',
-    };
+        ...(formData.payment_method_id === 'pse' && {
+          transaction_details: {
+            financial_institution: formData.financial_institution,
+          },
+        }),
+        ...(formData.token && { token: formData.token }),
+        installments: formData.installments || 1,
+      };
 
-    const response = await mercadopago.payment.create(paymentData);
-    res.json({
-      redirect_url: response.body.transaction_details.external_resource_url,
-    });
-  } catch (error) {
-    console.error('Error en MercadoPago:', error);
-    res.status(500).json({ error: error.message });
-  }
+      const response = await payments.create({ body: paymentData });
+
+      if (response.transaction_details?.external_resource_url) {
+        res.json({ redirect_url: response.transaction_details.external_resource_url });
+      } else {
+        res.json({ status: response.status });
+      }
+    } catch (error) {
+      console.error('Error MercadoPago:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
 });
