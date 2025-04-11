@@ -6,11 +6,31 @@ import Swal from 'sweetalert2';
 // 1. Inicialización correcta del SDK
 initMercadoPago('TEST-91f4cd81-8588-4208-bfad-d68460c6c42b', {
   locale: 'es-CO',
+  advancedFraudPrevention: true,
+  trackingDisabled: false,
 });
 
 const MP = ({ therapyType, onPaymentSuccess }) => {
   const [price, setPrice] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [sdkReady, setSdkReady] = useState(false); // Nuevo estado
+
+  useEffect(() => {
+    const initializeSDK = async () => {
+      try {
+        await initMercadoPago('TEST-91f4cd81-8588-4208-bfad-d68460c6c42b', {
+          locale: 'es-CO',
+          advancedFraudPrevention: true,
+        });
+        setSdkReady(true);
+      } catch (error) {
+        console.error('Error inicializando MercadoPago:', error);
+        Swal.fire('Error', 'No se pudo cargar el sistema de pagos', 'error');
+      }
+    };
+
+    initializeSDK();
+  }, []);
   // 2. Mapeo de precios válido
   const therapyPrices = {
     mental: 80000,
@@ -18,6 +38,13 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
     lenguaje: 55000,
     ocupacional: 41000,
   };
+
+  useEffect(() => {
+    if (sdkReady) {
+      const normalizedType = therapyType.toLowerCase();
+      setPrice(therapyPrices[normalizedType]);
+    }
+  }, [therapyType, sdkReady]);
 
   // 3. Actualización correcta del precio según terapia
   useEffect(() => {

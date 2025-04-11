@@ -16,7 +16,6 @@ exports.createPayment = functions.https.onRequest((req, res) => {
       const {
         therapyType, amount, paymentMethodId, payerData,
       } = req.body;
-
       const paymentData = {
         transaction_amount: amount,
         description: `${therapyType} Terapia`,
@@ -27,12 +26,16 @@ exports.createPayment = functions.https.onRequest((req, res) => {
             type: payerData.docType,
             number: payerData.docNumber,
           },
+          entity_type: 'individual',
         },
         ...(paymentMethodId === 'pse' && {
           transaction_details: {
             financial_institution: payerData.bank,
           },
         }),
+        additional_info: {
+          ip_address: req.ip || '127.0.0.1',
+        },
       };
 
       const result = await payment.create({ body: paymentData });
