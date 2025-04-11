@@ -233,196 +233,135 @@ const Therapy = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Validar formulario
     if (!validateForm()) {
       console.error('El formulario no es válido.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Campos incompletos',
+        text: 'Por favor completa todos los campos requeridos.',
+      });
       return;
     }
 
+    // Validar usuario autenticado
     if (!currentUser) {
-      console.error('Usuario no autenticado.');
       Swal.fire({
         icon: 'error',
-        title: 'Error',
+        title: 'Error de autenticación',
         text: 'Debes iniciar sesión para agendar una cita.',
       });
       return;
     }
 
-    if (!citaGlobal) {
+    // Validar cita seleccionada
+    if (!citaGlobal?.date || !citaGlobal?.time) {
       Swal.fire({
         icon: 'warning',
         title: 'Cita no seleccionada',
-        text: 'Por favor, selecciona una cita antes de confirmar.',
+        text: 'Por favor selecciona una fecha y hora para la cita.',
       });
       return;
     }
 
+    // Validar profesional seleccionado
     if (!selectedPro) {
       Swal.fire({
         icon: 'warning',
-        title: 'Selección incompleta',
-        text: 'Por favor, selecciona un profesional.',
+        title: 'Profesional no seleccionado',
+        text: 'Por favor selecciona un profesional para la cita.',
       });
       return;
     }
 
+    // Mostrar modal de pago si todo está correcto
+    setShowPayment(true);
+  };
+
+  // Función que se ejecuta tras el pago exitoso
+  const handlePaymentSuccess = async () => {
     try {
       const proDocRef = doc(db, 'pros', selectedPro);
       const proDoc = await getDoc(proDocRef);
-      const proName = proDoc.data()?.username || 'Profesional no encontrado';
       const proData = proDoc.data();
-      const horarios = proData.horarios || {};
-      const monthHorarios = horarios[citaGlobal.month] || [];
 
-      const emailData = {
-        collection: 'users',
-        therapyType: formData.therapyType.toLowerCase(),
+      // Crear objeto de cita para usuario
+      const userCita = {
         date: citaGlobal.date,
-        fullDate: `de ${citaGlobal.month} a las ${citaGlobal.time}`,
+        month: citaGlobal.month,
+        time: citaGlobal.time,
+        startTime: normalizeTime(citaGlobal.time),
+        endTime: calculateEndTime(normalizeTime(citaGlobal.time), 40),
+        duration: 40,
+        therapyType: normalizeText(formData.therapyType),
+        description: formData.description,
+        status: 'paid', // Cambiado a 'paid' tras pago exitoso
+        uid: citaGlobal.uid,
+        proName: proData.username || 'Profesional no encontrado',
+        proUid: selectedPro,
+      };
+
+      // Actualizar datos del usuario
+      const userRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userRef, {
+        Citas: [...(currentUser.Citas || []), userCita],
+      });
+
+      // Crear objeto de cita para profesional
+      const proCita = {
+        ...userCita,
+        userEmail: currentUser.email,
+        userName: formData.name,
+        userPhone: formData.phone,
+        userId: currentUser.uid,
+      };
+
+      // Actualizar datos del profesional
+      await updateDoc(proDocRef, {
+        MisCitas: [...(proData.MisCitas || []), proCita],
+      });
+
+      // Enviar emails de confirmación
+      const emailData = {
+        therapyType: formData.therapyType,
+        date: `${citaGlobal.date} de ${citaGlobal.month}`,
+        time: citaGlobal.time,
         userName: formData.name,
         proName: proData.username,
         userEmail: formData.email,
-        userTel: formData.phone,
-        userProfession: proData.especialidad || 'Terapeuta',
       };
 
       await addDoc(collection(db, 'mail'), {
         to: formData.email,
         message: {
           subject: 'Confirmación de cita - GLOBTHERAPIST',
-          html: getEmailHtml(emailData),
+          html: getEmailHtml({ ...emailData, type: 'user' }),
         },
       });
-
-      const proEmailData = {
-        ...emailData,
-        collection: 'pros',
-        userProfession: formData.therapyType,
-      };
 
       await addDoc(collection(db, 'mail'), {
         to: proData.email,
         message: {
           subject: 'Nueva cita agendada - GLOBTHERAPIST',
-          html: getEmailHtml(proEmailData),
+          html: getEmailHtml({ ...emailData, type: 'pro' }),
         },
       });
 
-      const updatedMonthHorarios = monthHorarios.map((day) => {
-        if (day.date === citaGlobal.date) {
-          const updatedTimeslots = day.Timeslots.filter((timeslot) => {
-            const [startTimeSlot] = timeslot.split('-');
-            return normalizeTime(startTimeSlot) !== normalizeTime(citaGlobal.time);
-          });
-          return { ...day, Timeslots: updatedTimeslots };
-        }
-        return day;
-      });
-
-      await updateDoc(proDocRef, {
-        horarios: {
-          ...horarios, [citaGlobal.month]: updatedMonthHorarios,
-        },
-      });
-      const normalizedSelectedTime = normalizeTime(citaGlobal.time);
-      const startTime = normalizedSelectedTime;
-      const endTime = calculateEndTime(normalizedSelectedTime, 40);
-      const duration = 40;
-      const userCita = {
-        date: citaGlobal.date,
-        month: citaGlobal.month,
-        time: citaGlobal.time,
-        startTime,
-        endTime,
-        duration,
-        therapyType: normalizeText(formData.therapyType),
-        description: formData.description,
-        status: 'pending',
-        uid: citaGlobal.uid,
-        proName,
-        proUid: selectedPro,
-      };
-
-      const userRef = doc(db, 'users', currentUser.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        console.error('El usuario no existe en Firestore.');
-        return;
-      }
-
-      const userData = userSnap.data();
-      const prevCitas = userData.Citas || [];
-      const updatedCitas = [...prevCitas, userCita];
-
-      await updateDoc(userRef, { Citas: updatedCitas });
-      console.log('Cita guardada en Firestore para el usuario:', userCita);
-
-      const proCita = {
-        date: citaGlobal.date,
-        month: citaGlobal.month,
-        time: citaGlobal.time,
-        startTime,
-        endTime,
-        duration,
-        therapyType: normalizeText(formData.therapyType),
-        description: formData.description,
-        status: 'pending',
-        userEmail: currentUser.email,
-        userName: formData.name,
-        userPhone: formData.phone,
-        uid: citaGlobal.uid,
-        userId: currentUser.uid,
-      };
-
-      const proMisCitasRef = doc(db, 'pros', selectedPro);
-      const proMisCitasSnap = await getDoc(proMisCitasRef);
-      if (!proMisCitasSnap.exists()) {
-        console.error('El profesional no existe en Firestore.');
-        return;
-      }
-
-      const proMisCitasData = proMisCitasSnap.data();
-      const prevMisCitas = proMisCitasData.MisCitas || [];
-      const updatedMisCitas = [...prevMisCitas, proCita];
-
-      await updateDoc(proMisCitasRef, { MisCitas: updatedMisCitas });
-      console.log('Cita guardada en Firestore para el profesional:', proCita);
-      setShowPayment(true);
+      // Limpiar estados y mostrar confirmación
+      setShowPayment(false);
       Swal.fire({
         icon: 'success',
-        title: '¡Éxito!',
-        text: 'La cita ha sido agendada correctamente.',
-      }).then(() => {
-        window.location.reload();
+        title: '¡Cita agendada!',
+        text: 'Hemos enviado la confirmación a tu correo electrónico.',
+        willClose: () => window.location.reload(),
       });
-
-      setFormData({
-        name: '',
-        phone: '',
-        email: user?.email || '',
-        therapyType: '',
-        description: '',
-      });
-      setSelectedPro(null);
-      setCitaGlobal({
-        date: '',
-        month: '',
-        time: '',
-        therapyType: '',
-        description: '',
-        status: 'pending',
-        uid: '',
-        proName: '',
-      });
-      setSelectedAppointments([]);
-      setShowAppointmentError(false);
     } catch (error) {
-      console.error('Error al agendar la cita:', error);
+      console.error('Error en el proceso de pago:', error);
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Hubo un error al agendar la cita. Por favor, inténtalo de nuevo.',
+        title: 'Error en el pago',
+        text: 'Hubo un problema procesando tu pago. Por favor intenta nuevamente.',
       });
     }
   };
@@ -572,9 +511,19 @@ const Therapy = () => {
               </div>
             </div>
           )}
-          {formData.therapyType && (
-            <div style={{ marginTop: '20px' }}>
-              <Mp therapyType={formData.therapyType} />
+          {showPayment && (
+            <div className="payment-modal">
+              <button
+                type="button"
+                className="close-payment-btn"
+                onClick={() => setShowPayment(false)}
+              >
+                X
+              </button>
+              <Mp
+                therapyType={formData.therapyType}
+                onPaymentSuccess={handlePaymentSuccess}
+              />
             </div>
           )}
           <button type="submit" className="DynamiCanlendar-btn">
