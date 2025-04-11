@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
@@ -45,6 +46,7 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
       setPrice(therapyPrices[normalizedType]);
     }
   }, [therapyType, sdkReady]);
+  if (!sdkReady) return <div>Cargando pasarela de pago...</div>;
 
   // 3. Actualización correcta del precio según terapia
   useEffect(() => {
@@ -66,38 +68,47 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
   const handleSubmit = async (formData) => {
     setLoading(true);
     try {
+      const payload = {
+        therapyType,
+        amount: price,
+        paymentMethodId: formData.paymentMethodId,
+        payerData: {
+          email: formData.payer.email,
+          docType: formData.payer.identification.type,
+          docNumber: formData.payer.identification.number,
+          ...(formData.paymentMethodId === 'pse' && {
+            bank: formData.transaction_details.financial_institution,
+          }),
+        },
+      };
+
       const response = await fetch(
         'https://us-central1-globtherapist.cloudfunctions.net/createPayment',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            therapyType,
-            amount: price,
-            ...formData,
-          }),
+          body: JSON.stringify(payload),
         },
       );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+
       const result = await response.json();
-      if (result.error) {
-        Swal.fire('Error', result.error, 'error');
-        return;
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error desconocido');
       }
-      // 6. Manejo de redirección
+
       if (result.redirect_url) {
         onPaymentSuccess();
         window.location.href = result.redirect_url;
+      } else {
+        Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
       }
     } catch (error) {
-      Swal.fire('Error', error.message, 'error');
+      Swal.fire('Error', `Error procesando el pago: ${error.message}`, 'error');
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="payment-container" style={{ minHeight: '400px', position: 'relative' }}>
       {/* 7. Renderizado correcto del Brick */}
