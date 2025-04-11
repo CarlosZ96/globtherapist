@@ -37,6 +37,7 @@ const Therapy = () => {
   const [selectedAppointments, setSelectedAppointments] = useState([]);
   const [showAppointmentError, setShowAppointmentError] = useState(false);
   const [selectedPro, setSelectedPro] = useState(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   const handleDateSelection = (appointments) => {
     console.log('Citas seleccionadas recibidas:', appointments);
@@ -387,7 +388,7 @@ const Therapy = () => {
 
       await updateDoc(proMisCitasRef, { MisCitas: updatedMisCitas });
       console.log('Cita guardada en Firestore para el profesional:', proCita);
-
+      setShowPayment(true);
       Swal.fire({
         icon: 'success',
         title: '¡Éxito!',

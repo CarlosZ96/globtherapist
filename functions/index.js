@@ -8,7 +8,7 @@ const express = require('express');
 const cors = require('cors');
 const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
 const chatToken = require('./chatToken');
-const mercadopagoFunctions = require('./mercadopago'); // Mantenemos solo la nueva función
+const mercadopagoFunctions = require('./mercadopago');
 
 const app = express();
 
@@ -62,9 +62,6 @@ app.get('/', (req, res) => {
   }
 });
 
-// Mantenemos las funciones de Agora sin cambios
 exports.createAgoraToken = functions.https.onRequest(app);
 exports.createAgoraChatToken = chatToken.createAgoraChatToken;
-
-// Nueva función unificada de Mercado Pago (eliminamos las anteriores)
 exports.createPayment = mercadopagoFunctions.createPayment;
