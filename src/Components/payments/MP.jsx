@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
 import Swal from 'sweetalert2';
+import '../../stylesheets/MP.css';
 
 const MP = ({ therapyType, onPaymentSuccess }) => {
-  // Estados en orden fijo y consistente
   const [price, setPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [sdkReady, setSdkReady] = useState(false);
 
-  // Objeto de precios (mejor práctica: fuera del cuerpo del componente)
   const therapyPrices = {
     mental: 80000,
     fisica: 70000,
@@ -17,72 +16,54 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
     ocupacional: 41000,
   };
 
-  // Único efecto para inicialización y actualización de precio
   useEffect(() => {
     const initializeMP = async () => {
       try {
-        // 1. Inicializar SDK
         await initMercadoPago('TEST-91f4cd81-8588-4208-bfad-d68460c6c42b', {
           locale: 'es-CO',
           advancedFraudPrevention: true,
         });
 
-        // 2. Actualizar precio solo después de inicialización exitosa
-        const normalizedType = therapyType.toLowerCase();
-        setPrice(therapyPrices[normalizedType]);
-
-        // 3. Marcar SDK como listo
+        setPrice(therapyPrices[therapyType.toLowerCase()]);
         setSdkReady(true);
       } catch (error) {
-        console.error('Error inicializando MercadoPago:', error);
-        Swal.fire('Error', 'No se pudo cargar el sistema de pagos', 'error');
+        console.error('Error inicializando SDK:', error);
+        Swal.fire('Error', 'Error al cargar la pasarela de pago', 'error');
       }
     };
-
     initializeMP();
-  }, [therapyType]); // Solo terapia como dependencia
-
-  // Configuración de métodos de pago
-  const customization = {
-    paymentMethods: {
-      creditCard: 'all',
-      debitCard: 'all',
-      bankTransfer: 'all',
-      maxInstallments: 1,
-    },
-    presentation: {
-      visual: {
-        style: {
-          theme: 'dark', // Opciones: 'dark' | 'light' | 'bootstrap'
-        },
-      },
-    },
-  };
+  }, [therapyType]);
 
   const handleSubmit = async (formData) => {
     setLoading(true);
     try {
-      const paymentMethodId = formData.payment_method_id || formData.formData?.payment_method_id;
-      const payer = formData.payer || formData.formData?.payer;
-      // eslint-disable-next-line max-len
-      const transactionDetails = formData.transaction_details || formData.formData?.transaction_details;
+      console.log('Datos del Brick:', JSON.stringify(formData, null, 2));
 
-      if (!payer?.email) {
-        throw new Error('El email es requerido');
-      }
+      // Extraer datos de la estructura del Brick
+      const brickData = formData.formData || formData;
+      const paymentMethodId = brickData.payment_method_id;
+      const { payer } = brickData;
+      const transactionDetails = brickData.transaction_details;
+
+      // Validaciones mejoradas
+      if (!payer?.email) throw new Error('El email es requerido');
+      if (!payer.identification?.number) throw new Error('Número de documento es requerido');
+
       const payload = {
         therapyType: therapyType.toLowerCase(),
         amount: price,
         paymentMethodId,
         payerData: {
           email: payer.email,
-          docType: payer.identification?.type || 'CC',
-          docNumber: String(payer.identification?.number || '').replace(/\D/g, ''),
+          docType: payer.identification.type || 'CC',
+          docNumber: String(payer.identification.number).replace(/\D/g, ''),
           ...(paymentMethodId === 'pse' && {
             bank: transactionDetails?.financial_institution,
           }),
         },
       };
+
+      console.log('Payload al backend:', JSON.stringify(payload, null, 2));
 
       const response = await fetch(
         'https://us-central1-globtherapist.cloudfunctions.net/createPayment',
@@ -93,11 +74,12 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         },
       );
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.error || 'Error en la transacción');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error en la transacción');
       }
+
+      const result = await response.json();
 
       if (result.redirect_url) {
         onPaymentSuccess();
@@ -106,17 +88,15 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
       }
     } catch (error) {
-      console.log('Datos del formulario:', JSON.stringify(formData, null, 2));
-      Swal.fire('Error', `Error procesando el pago: ${error.message}`, 'error');
+      Swal.fire('Error', error.message.split(':')[0], 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  // Condicional DEBE ir después de todos los hooks
   if (!sdkReady) {
     return (
-      <div className="payment-loading">
+      <div className="loading-screen">
         <div className="spinner" />
         <p>Cargando pasarela de pago...</p>
       </div>
@@ -124,19 +104,39 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
   }
 
   return (
-    <div className="payment-container" style={{ minHeight: '400px', position: 'relative' }}>
+    <div className="payment-container">
       {loading && (
-        <div className="payment-overlay">
-          <div className="payment-spinner" />
-          <p>Procesando pago...</p>
+        <div className="processing-overlay">
+          <div className="processing-spinner" />
+          <p>Procesando tu pago...</p>
         </div>
       )}
 
       <Payment
-        initialization={{ amount: price }}
-        customization={customization}
+        initialization={{
+          amount: price,
+          payer: {
+            email: '', // Campo obligatorio vacío
+          },
+        }}
+        customization={{
+          paymentMethods: {
+            creditCard: 'all',
+            debitCard: 'all',
+            bankTransfer: ['pse'], // Solo PSE
+            maxInstallments: 1,
+          },
+          visual: {
+            style: {
+              theme: 'bootstrap',
+              customVariables: {
+                formBackgroundColor: '#ffffff',
+                baseColor: '#007bff',
+              },
+            },
+          },
+        }}
         onSubmit={handleSubmit}
-        onReady={() => console.log('Brick listo')}
         onError={(error) => {
           console.error('Error en Brick:', error);
           Swal.fire('Error', error.message, 'error');
