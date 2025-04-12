@@ -1,38 +1,15 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
 import Swal from 'sweetalert2';
 
-// 1. Inicialización correcta del SDK
-initMercadoPago('TEST-91f4cd81-8588-4208-bfad-d68460c6c42b', {
-  locale: 'es-CO',
-  advancedFraudPrevention: true,
-  trackingDisabled: false,
-});
-
 const MP = ({ therapyType, onPaymentSuccess }) => {
+  // Estados en orden fijo y consistente
   const [price, setPrice] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [sdkReady, setSdkReady] = useState(false); // Nuevo estado
+  const [sdkReady, setSdkReady] = useState(false);
 
-  useEffect(() => {
-    const initializeSDK = async () => {
-      try {
-        await initMercadoPago('TEST-91f4cd81-8588-4208-bfad-d68460c6c42b', {
-          locale: 'es-CO',
-          advancedFraudPrevention: true,
-        });
-        setSdkReady(true);
-      } catch (error) {
-        console.error('Error inicializando MercadoPago:', error);
-        Swal.fire('Error', 'No se pudo cargar el sistema de pagos', 'error');
-      }
-    };
-
-    initializeSDK();
-  }, []);
-  // 2. Mapeo de precios válido
+  // Objeto de precios (mejor práctica: fuera del cuerpo del componente)
   const therapyPrices = {
     mental: 80000,
     fisica: 70000,
@@ -40,44 +17,69 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
     ocupacional: 41000,
   };
 
+  // Único efecto para inicialización y actualización de precio
   useEffect(() => {
-    if (sdkReady) {
-      const normalizedType = therapyType.toLowerCase();
-      setPrice(therapyPrices[normalizedType]);
-    }
-  }, [therapyType, sdkReady]);
-  if (!sdkReady) return <div>Cargando pasarela de pago...</div>;
+    const initializeMP = async () => {
+      try {
+        // 1. Inicializar SDK
+        await initMercadoPago('TEST-91f4cd81-8588-4208-bfad-d68460c6c42b', {
+          locale: 'es-CO',
+          advancedFraudPrevention: true,
+        });
 
-  // 3. Actualización correcta del precio según terapia
-  useEffect(() => {
-    const normalizedType = therapyType.toLowerCase();
-    setPrice(therapyPrices[normalizedType]);
-  }, [therapyType]);
+        // 2. Actualizar precio solo después de inicialización exitosa
+        const normalizedType = therapyType.toLowerCase();
+        setPrice(therapyPrices[normalizedType]);
 
-  // 4. Configuración de métodos de pago
+        // 3. Marcar SDK como listo
+        setSdkReady(true);
+      } catch (error) {
+        console.error('Error inicializando MercadoPago:', error);
+        Swal.fire('Error', 'No se pudo cargar el sistema de pagos', 'error');
+      }
+    };
+
+    initializeMP();
+  }, [therapyType]); // Solo terapia como dependencia
+
+  // Configuración de métodos de pago
   const customization = {
     paymentMethods: {
       creditCard: 'all',
       debitCard: 'all',
-      bankTransfer: 'all', // Incluye PSE
+      bankTransfer: 'all',
       maxInstallments: 1,
+    },
+    presentation: {
+      visual: {
+        style: {
+          theme: 'dark', // Opciones: 'dark' | 'light' | 'bootstrap'
+        },
+      },
     },
   };
 
-  // 5. Manejo de envío de pago
   const handleSubmit = async (formData) => {
     setLoading(true);
     try {
+      const paymentMethodId = formData.payment_method_id || formData.formData?.payment_method_id;
+      const payer = formData.payer || formData.formData?.payer;
+      // eslint-disable-next-line max-len
+      const transactionDetails = formData.transaction_details || formData.formData?.transaction_details;
+
+      if (!payer?.email) {
+        throw new Error('El email es requerido');
+      }
       const payload = {
-        therapyType,
+        therapyType: therapyType.toLowerCase(),
         amount: price,
-        paymentMethodId: formData.paymentMethodId,
+        paymentMethodId,
         payerData: {
-          email: formData.payer.email,
-          docType: formData.payer.identification.type,
-          docNumber: formData.payer.identification.number,
-          ...(formData.paymentMethodId === 'pse' && {
-            bank: formData.transaction_details.financial_institution,
+          email: payer.email,
+          docType: payer.identification?.type || 'CC',
+          docNumber: String(payer.identification?.number || '').replace(/\D/g, ''),
+          ...(paymentMethodId === 'pse' && {
+            bank: transactionDetails?.financial_institution,
           }),
         },
       };
@@ -94,7 +96,7 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Error desconocido');
+        throw new Error(result.error || 'Error en la transacción');
       }
 
       if (result.redirect_url) {
@@ -104,29 +106,48 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
       }
     } catch (error) {
+      console.log('Datos del formulario:', JSON.stringify(formData, null, 2));
       Swal.fire('Error', `Error procesando el pago: ${error.message}`, 'error');
     } finally {
       setLoading(false);
     }
   };
+
+  // Condicional DEBE ir después de todos los hooks
+  if (!sdkReady) {
+    return (
+      <div className="payment-loading">
+        <div className="spinner" />
+        <p>Cargando pasarela de pago...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="payment-container" style={{ minHeight: '400px', position: 'relative' }}>
-      {/* 7. Renderizado correcto del Brick */}
-      {loading && <div className="loading-overlay">Cargando métodos de pago...</div>}
+      {loading && (
+        <div className="payment-overlay">
+          <div className="payment-spinner" />
+          <p>Procesando pago...</p>
+        </div>
+      )}
+
       <Payment
         initialization={{ amount: price }}
         customization={customization}
         onSubmit={handleSubmit}
-        onError={(error) => console.error(error)}
+        onReady={() => console.log('Brick listo')}
+        onError={(error) => {
+          console.error('Error en Brick:', error);
+          Swal.fire('Error', error.message, 'error');
+        }}
       />
     </div>
   );
 };
 
-// 8. Validación de props
 MP.propTypes = {
-  therapyType: PropTypes.oneOf(['Mental', 'Fisica', 'Lenguaje', 'Ocupacional'])
-    .isRequired,
+  therapyType: PropTypes.oneOf(['Mental', 'Fisica', 'Lenguaje', 'Ocupacional']).isRequired,
   onPaymentSuccess: PropTypes.func.isRequired,
 };
 
