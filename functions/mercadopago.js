@@ -74,10 +74,8 @@ exports.createPayment = functions.https.onRequest((req, res) => {
         paymentData.callback_url = 'https://tu-dominio.com/confirmacion-pago';
       }
 
-      // Crear pago en Mercado Pago
       const result = await payment.create({ body: paymentData });
 
-      // Respuesta exitosa
       return res.status(200).json({
         id: result.id,
         status: result.status,
@@ -87,7 +85,6 @@ exports.createPayment = functions.https.onRequest((req, res) => {
         ticket_url: result.point_of_interaction?.transaction_data?.ticket_url,
       });
     } catch (error) {
-      // Manejo de errores
       console.error('Error en procesamiento de pago:', {
         error: error.message,
         stack: error.stack,
