@@ -80,7 +80,6 @@ exports.createPayment = functions.https.onRequest((req, res) => {
             code: 'MISSING_BANK',
           });
         }
-
         paymentData.payer.entity_type = 'individual';
         paymentData.transaction_details = {
           financial_institution: req.body.payerData.bank,
