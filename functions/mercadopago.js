@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable no-restricted-syntax */
 const functions = require('firebase-functions');
 const { MercadoPagoConfig, Payment } = require('mercadopago');
@@ -12,7 +13,7 @@ const payment = new Payment(client);
 exports.createPayment = functions.https.onRequest((req, res) => {
   corsMiddleware(req, res, async () => {
     try {
-      // Validación mejorada de campos
+      // Validación de campos
       const requiredFields = [
         'therapyType',
         'amount',
@@ -39,6 +40,14 @@ exports.createPayment = functions.https.onRequest((req, res) => {
         });
       }
 
+      // Validación específica para tarjetas
+      if (req.body.paymentMethodId !== 'pse' && !req.body.token) {
+        return res.status(400).json({
+          error: 'Token requerido para pagos con tarjeta',
+          code: 'MISSING_TOKEN',
+        });
+      }
+
       // Validación de monto
       const therapyType = req.body.therapyType.toLowerCase();
       const expectedPrices = {
@@ -55,11 +64,10 @@ exports.createPayment = functions.https.onRequest((req, res) => {
         });
       }
 
-      // Construcción del pago
+      // Construcción dinámica del pago
       const paymentData = {
         transaction_amount: req.body.amount,
         description: `${therapyType} Terapia`,
-        payment_method_id: req.body.paymentMethodId,
         payer: {
           email: req.body.payerData.email,
           identification: {
@@ -70,44 +78,46 @@ exports.createPayment = functions.https.onRequest((req, res) => {
         additional_info: {
           ip_address: req.ip || '127.0.0.1',
         },
+        ...(req.body.paymentMethodId === 'pse' ? {
+          payment_method_id: 'pse',
+          processing_mode: 'aggregator',
+          payer: {
+            ...(req.body.payerData.bank && { entity_type: 'individual' }),
+          },
+          transaction_details: {
+            financial_institution: req.body.payerData.bank,
+          },
+          callback_url: 'https://tu-dominio.com/confirmacion',
+        } : {
+          token: req.body.token,
+          installments: Number(req.body.installments) || 1,
+          issuer_id: req.body.issuer_id,
+        }),
       };
-
-      // Configuración específica para PSE
-      if (req.body.paymentMethodId === 'pse') {
-        if (!req.body.payerData?.bank) {
-          return res.status(400).json({
-            error: 'Código de banco requerido para PSE',
-            code: 'MISSING_BANK',
-          });
-        }
-        paymentData.payer.entity_type = 'individual';
-        paymentData.transaction_details = {
-          financial_institution: req.body.payerData.bank,
-        };
-        paymentData.callback_url = 'http://localhost:3000/confirmacion';
-      }
 
       // Crear pago en Mercado Pago
       const result = await payment.create({ body: paymentData });
 
       // Respuesta exitosa
-      return res.status(200).json({
+      res.status(200).json({
         id: result.id,
         status: result.status,
-        payment_method: result.payment_method_id,
+        payment_method_id: result.payment_method_id,
         redirect_url: result.transaction_details?.external_resource_url,
       });
     } catch (error) {
-      console.error('Error en el proceso de pago:', {
-        message: error.message,
+      console.error('Error detallado:', {
+        code: error?.cause?.code,
+        status: error?.cause?.status,
+        message: error?.cause?.message,
+        requestId: error?.cause?.headers?.['x-request-id'],
         stack: error.stack,
-        requestBody: req.body,
       });
 
-      return res.status(500).json({
+      res.status(500).json({
         error: 'Error procesando el pago',
-        code: error.code || 'MP_ERROR',
-        details: process.env.NODE_ENV === 'production' ? undefined : error.message,
+        code: error?.cause?.code || 'MP_ERROR',
+        details: error.message,
       });
     }
   });

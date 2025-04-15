@@ -39,11 +39,9 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
     try {
       console.log('Datos del Brick:', JSON.stringify(formData, null, 2));
 
-      // Extraer datos de la estructura del Brick
       const brickData = formData.formData || formData;
       const paymentMethodId = brickData.payment_method_id;
-      const { payer } = brickData;
-      const transactionDetails = brickData.transaction_details;
+      const { payer, transactionDetails } = brickData;
 
       // Validaciones mejoradas
       if (!payer?.email) throw new Error('El email es requerido');
@@ -61,6 +59,12 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
             bank: transactionDetails?.financial_institution,
           }),
         },
+        // Campos específicos para tarjetas
+        ...(paymentMethodId !== 'pse' && {
+          token: brickData.token,
+          installments: brickData.installments,
+          issuer_id: brickData.issuer_id,
+        }),
       };
 
       console.log('Payload al backend:', JSON.stringify(payload, null, 2));
@@ -78,16 +82,30 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Error en la transacción');
       }
-
       const result = await response.json();
-
       if (result.redirect_url) {
         onPaymentSuccess();
-        window.location.href = result.redirect_url;
+        // Manejo mejorado para PSE
+        // eslint-disable-next-line no-unused-vars
+        const bankWindow = window.open(result.redirect_url, '_blank');
+        const checkPayment = setInterval(async () => {
+          try {
+            const statusResponse = await fetch(`/check-payment/${result.id}`);
+            const statusData = await statusResponse.json();
+            if (statusData.status === 'approved') {
+              clearInterval(checkPayment);
+              Swal.fire('Éxito', 'Pago aprobado', 'success');
+            }
+          } catch (error) {
+            console.error('Error verificando estado:', error);
+          }
+        }, 5000);
       } else {
         Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
+        onPaymentSuccess();
       }
     } catch (error) {
+      console.error('Error completo:', error);
       Swal.fire('Error', error.message.split(':')[0], 'error');
     } finally {
       setLoading(false);
