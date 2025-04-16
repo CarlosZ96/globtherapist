@@ -57,14 +57,15 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
           docNumber: String(payer.identification.number).replace(/\D/g, ''),
           ...(paymentMethodId === 'pse' && {
             bank: transactionDetails?.financial_institution,
+            entityType: payer.entity_type,
           }),
         },
-        // Campos específicos para tarjetas
         ...(paymentMethodId !== 'pse' && {
           token: brickData.token,
           installments: brickData.installments,
           issuer_id: brickData.issuer_id,
         }),
+        payment_type_id: 'credit_card',
       };
 
       console.log('Payload al backend:', JSON.stringify(payload, null, 2));
@@ -134,24 +135,29 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         initialization={{
           amount: price,
           payer: {
-            email: '', // Campo obligatorio vacío
+            email: 'correo@temporal.com',
           },
         }}
         customization={{
           paymentMethods: {
             creditCard: 'all',
             debitCard: 'all',
-            bankTransfer: ['pse'], // Solo PSE
+            bankTransfer: ['pse'],
             maxInstallments: 1,
           },
           visual: {
             style: {
-              theme: 'bootstrap',
+              theme: 'dark',
               customVariables: {
-                formBackgroundColor: '#ffffff',
-                baseColor: '#007bff',
+                formBackgroundColor: '#212B42',
+                baseColor: '#4F63C2',
+                successColor: '#212B42',
               },
             },
+          },
+          pse: {
+            entityType: 'individual',
+            showForm: true,
           },
         }}
         onSubmit={handleSubmit}

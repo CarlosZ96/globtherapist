@@ -21,6 +21,7 @@ exports.createPayment = functions.https.onRequest((req, res) => {
         'payerData.email',
         'payerData.docType',
         'payerData.docNumber',
+        ...(req.body.paymentMethodId === 'pse' ? ['payerData.entityType'] : []),
       ];
 
       const missingFields = requiredFields.filter((field) => {
@@ -33,6 +34,15 @@ exports.createPayment = functions.https.onRequest((req, res) => {
         return value === undefined;
       });
 
+      if (req.body.paymentMethodId === 'pse') {
+        if (!['individual', 'association'].includes(req.body.payerData.entityType)) {
+          return res.status(400).json({
+            error: 'entityType debe ser "individual" o "association"',
+            code: 'INVALID_ENTITY_TYPE',
+          });
+        }
+      }
+
       if (missingFields.length > 0) {
         return res.status(400).json({
           error: `Campos faltantes: ${missingFields.join(', ')}`,
@@ -40,7 +50,6 @@ exports.createPayment = functions.https.onRequest((req, res) => {
         });
       }
 
-      // Validación específica para tarjetas
       if (req.body.paymentMethodId !== 'pse' && !req.body.token) {
         return res.status(400).json({
           error: 'Token requerido para pagos con tarjeta',
@@ -64,7 +73,6 @@ exports.createPayment = functions.https.onRequest((req, res) => {
         });
       }
 
-      // Construcción dinámica del pago
       const paymentData = {
         transaction_amount: req.body.amount,
         description: `${therapyType} Terapia`,
@@ -82,7 +90,7 @@ exports.createPayment = functions.https.onRequest((req, res) => {
           payment_method_id: 'pse',
           processing_mode: 'aggregator',
           payer: {
-            ...(req.body.payerData.bank && { entity_type: 'individual' }),
+            entity_type: req.body.payerData.entityType,
           },
           transaction_details: {
             financial_institution: req.body.payerData.bank,
