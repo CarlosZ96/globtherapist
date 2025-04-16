@@ -7,7 +7,9 @@ import '../../stylesheets/MP.css';
 const MP = ({ therapyType, onPaymentSuccess }) => {
   const [price, setPrice] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [sdkReady, setSdkReady] = useState(false);
+  const [availableBanks, setAvailableBanks] = useState([]);
+  // eslint-disable-next-line no-unused-vars
+  const [entityType, setEntityType] = useState('individual');
 
   const therapyPrices = {
     mental: 80000,
@@ -19,33 +21,37 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
   useEffect(() => {
     const initializeMP = async () => {
       try {
-        await initMercadoPago('TEST-91f4cd81-8588-4208-bfad-d68460c6c42b', {
+        await initMercadoPago(process.env.REACT_APP_MP_PUBLIC_KEY, {
           locale: 'es-CO',
           advancedFraudPrevention: true,
         });
 
+        // Obtener bancos disponibles
+        const banksResponse = await fetch(
+          'https://us-central1-globtherapist.cloudfunctions.net/getPaymentMethods',
+        );
+        const { banks } = await banksResponse.json();
+
+        setAvailableBanks(banks);
         setPrice(therapyPrices[therapyType.toLowerCase()]);
-        setSdkReady(true);
       } catch (error) {
         console.error('Error inicializando SDK:', error);
         Swal.fire('Error', 'Error al cargar la pasarela de pago', 'error');
       }
     };
+
     initializeMP();
   }, [therapyType]);
 
   const handleSubmit = async (formData) => {
     setLoading(true);
     try {
-      console.log('Datos del Brick:', JSON.stringify(formData, null, 2));
+      const { paymentMethodId, payer, paymentMethodOption } = formData;
 
-      const brickData = formData.formData || formData;
-      const paymentMethodId = brickData.payment_method_id;
-      const { payer, transactionDetails } = brickData;
-
-      // Validaciones mejoradas
-      if (!payer?.email) throw new Error('El email es requerido');
-      if (!payer.identification?.number) throw new Error('Número de documento es requerido');
+      // Validación básica
+      if (!payer.email || !payer.identification?.number) {
+        throw new Error('Faltan datos requeridos');
+      }
 
       const payload = {
         therapyType: therapyType.toLowerCase(),
@@ -56,19 +62,11 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
           docType: payer.identification.type || 'CC',
           docNumber: String(payer.identification.number).replace(/\D/g, ''),
           ...(paymentMethodId === 'pse' && {
-            bank: transactionDetails?.financial_institution,
-            entityType: payer.entity_type,
+            bank: paymentMethodOption?.id,
+            entityType,
           }),
         },
-        ...(paymentMethodId !== 'pse' && {
-          token: brickData.token,
-          installments: brickData.installments,
-          issuer_id: brickData.issuer_id,
-        }),
-        payment_type_id: 'credit_card',
       };
-
-      console.log('Payload al backend:', JSON.stringify(payload, null, 2));
 
       const response = await fetch(
         'https://us-central1-globtherapist.cloudfunctions.net/createPayment',
@@ -79,48 +77,32 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         },
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error en la transacción');
-      }
       const result = await response.json();
-      if (result.redirect_url) {
-        onPaymentSuccess();
-        // Manejo mejorado para PSE
-        // eslint-disable-next-line no-unused-vars
-        const bankWindow = window.open(result.redirect_url, '_blank');
-        const checkPayment = setInterval(async () => {
-          try {
-            const statusResponse = await fetch(`/check-payment/${result.id}`);
-            const statusData = await statusResponse.json();
-            if (statusData.status === 'approved') {
-              clearInterval(checkPayment);
-              Swal.fire('Éxito', 'Pago aprobado', 'success');
-            }
-          } catch (error) {
-            console.error('Error verificando estado:', error);
-          }
-        }, 5000);
-      } else {
-        Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
-        onPaymentSuccess();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error procesando el pago');
       }
+
+      if (result.redirect_url) {
+        window.open(result.redirect_url, '_blank');
+      }
+
+      Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
+      onPaymentSuccess();
     } catch (error) {
       console.error('Error completo:', error);
-      Swal.fire('Error', error.message.split(':')[0], 'error');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error en el pago',
+        html: `<div style="text-align:left;">
+          <strong>Error:</strong> ${error.message.split(':')[0]}<br>
+          ${error.code ? `<strong>Código:</strong> ${error.code}` : ''}
+        </div>`,
+      });
     } finally {
       setLoading(false);
     }
   };
-
-  if (!sdkReady) {
-    return (
-      <div className="loading-screen">
-        <div className="spinner" />
-        <p>Cargando pasarela de pago...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="payment-container">
@@ -131,41 +113,39 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         </div>
       )}
 
-      <Payment
-        initialization={{
-          amount: price,
-          payer: {
-            email: 'correo@temporal.com',
-          },
-        }}
-        customization={{
-          paymentMethods: {
-            creditCard: 'all',
-            debitCard: 'all',
-            bankTransfer: ['pse'],
-            maxInstallments: 1,
-          },
-          visual: {
-            style: {
-              theme: 'dark',
-              customVariables: {
-                formBackgroundColor: '#212B42',
-                baseColor: '#4F63C2',
-                successColor: '#212B42',
+      {availableBanks.length > 0 && (
+        <Payment
+          initialization={{
+            amount: price,
+            payer: { email: 'correo@temporal.com' },
+          }}
+          customization={{
+            paymentMethods: {
+              bankTransfer: ['pse'],
+              creditCard: 'all',
+              debitCard: 'all',
+              maxInstallments: 1,
+            },
+            pse: {
+              financialInstitutions: availableBanks,
+              entityType: {
+                required: true,
+                options: ['individual', 'association'],
               },
             },
-          },
-          pse: {
-            entityType: 'individual',
-            showForm: true,
-          },
-        }}
-        onSubmit={handleSubmit}
-        onError={(error) => {
-          console.error('Error en Brick:', error);
-          Swal.fire('Error', error.message, 'error');
-        }}
-      />
+            visual: {
+              style: {
+                theme: 'dark',
+                customVariables: {
+                  formBackgroundColor: '#212B42',
+                  baseColor: '#4F63C2',
+                },
+              },
+            },
+          }}
+          onSubmit={handleSubmit}
+        />
+      )}
     </div>
   );
 };

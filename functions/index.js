@@ -64,4 +64,7 @@ app.get('/', (req, res) => {
 
 exports.createAgoraToken = functions.https.onRequest(app);
 exports.createAgoraChatToken = chatToken.createAgoraChatToken;
+
+// Exportar todas las funciones de Mercado Pago
 exports.createPayment = mercadopagoFunctions.createPayment;
+exports.getPaymentMethods = mercadopagoFunctions.getPaymentMethods;
