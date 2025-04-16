@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
@@ -8,7 +9,6 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
   const [price, setPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [availableBanks, setAvailableBanks] = useState([]);
-  // eslint-disable-next-line no-unused-vars
   const [entityType, setEntityType] = useState('individual');
 
   const therapyPrices = {
@@ -26,13 +26,18 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
           advancedFraudPrevention: true,
         });
 
-        // Obtener bancos disponibles
         const banksResponse = await fetch(
           'https://us-central1-globtherapist.cloudfunctions.net/getPaymentMethods',
         );
-        const { banks } = await banksResponse.json();
 
-        setAvailableBanks(banks);
+        if (!banksResponse.ok) throw new Error('Error obteniendo bancos');
+
+        const { banks } = await banksResponse.json();
+        setAvailableBanks(banks.map((bank) => ({
+          id: bank.id,
+          name: bank.description,
+        })));
+
         setPrice(therapyPrices[therapyType.toLowerCase()]);
       } catch (error) {
         console.error('Error inicializando SDK:', error);
@@ -48,9 +53,9 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
     try {
       const { paymentMethodId, payer, paymentMethodOption } = formData;
 
-      // Validación básica
-      if (!payer.email || !payer.identification?.number) {
-        throw new Error('Faltan datos requeridos');
+      // Validación reforzada
+      if (!payer?.email || !payer?.identification?.number) {
+        throw new Error('Email y documento son requeridos');
       }
 
       const payload = {
@@ -72,7 +77,10 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         'https://us-central1-globtherapist.cloudfunctions.net/createPayment',
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.REACT_APP_API_KEY}`,
+          },
           body: JSON.stringify(payload),
         },
       );
@@ -84,19 +92,19 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
       }
 
       if (result.redirect_url) {
-        window.open(result.redirect_url, '_blank');
+        window.open(result.redirect_url, '_blank', 'noopener,noreferrer');
       }
 
-      Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
       onPaymentSuccess();
+      Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
     } catch (error) {
       console.error('Error completo:', error);
       Swal.fire({
         icon: 'error',
         title: 'Error en el pago',
         html: `<div style="text-align:left;">
-          <strong>Error:</strong> ${error.message.split(':')[0]}<br>
-          ${error.code ? `<strong>Código:</strong> ${error.code}` : ''}
+          <strong>${error.message.split(':')[0]}</strong><br>
+          ${error.code ? `Código: ${error.code}` : ''}
         </div>`,
       });
     } finally {
@@ -112,6 +120,18 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
           <p>Procesando tu pago...</p>
         </div>
       )}
+
+      <div className="entity-type-selector">
+        <label>Tipo de entidad:</label>
+        <select
+          value={entityType}
+          onChange={(e) => setEntityType(e.target.value)}
+          disabled={loading}
+        >
+          <option value="individual">Persona Natural</option>
+          <option value="association">Empresa</option>
+        </select>
+      </div>
 
       {availableBanks.length > 0 && (
         <Payment

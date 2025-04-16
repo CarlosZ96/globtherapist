@@ -8,15 +8,16 @@ const client = new MercadoPagoConfig({
 });
 
 const payment = new Payment(client);
-const paymentMethod = new PaymentMethod(client);
+const paymentMethodClient = new PaymentMethod(client);
 
+// Helper para obtener bancos válidos con manejo de errores
 const getValidBanks = async () => {
   try {
-    const methods = await paymentMethod.get();
+    const methods = await paymentMethodClient.get();
     const pseMethod = methods.find((m) => m.id === 'pse');
     return pseMethod?.financial_institutions?.map((b) => b.id) || [];
   } catch (error) {
-    console.error('Error obteniendo bancos:', error);
+    functions.logger.error('Error obteniendo bancos:', error);
     return [];
   }
 };
@@ -24,16 +25,18 @@ const getValidBanks = async () => {
 exports.getPaymentMethods = functions.https.onRequest(async (req, res) => {
   cors(req, res, async () => {
     try {
-      const methods = await paymentMethod.get();
+      const methods = await paymentMethodClient.get();
       const pseMethod = methods.find((m) => m.id === 'pse');
 
+      if (!pseMethod) throw new Error('Método PSE no encontrado');
+
       res.status(200).json({
-        banks: pseMethod?.financial_institutions || [],
-        minAmount: pseMethod?.min_allowed_amount || 0,
-        maxAmount: pseMethod?.max_allowed_amount || 0,
+        banks: pseMethod.financial_institutions,
+        minAmount: pseMethod.min_allowed_amount,
+        maxAmount: pseMethod.max_allowed_amount,
       });
     } catch (error) {
-      console.error('Error obteniendo métodos:', error);
+      functions.logger.error('Error en getPaymentMethods:', error);
       res.status(500).json({
         error: 'Error obteniendo métodos de pago',
         details: error.message,
@@ -45,6 +48,7 @@ exports.getPaymentMethods = functions.https.onRequest(async (req, res) => {
 exports.createPayment = functions.https.onRequest(async (req, res) => {
   cors(req, res, async () => {
     try {
+      // Validación mejorada
       const requiredFields = [
         'therapyType',
         'amount',
@@ -54,7 +58,6 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         'payerData.docNumber',
       ];
 
-      // Validación de campos requeridos
       const missingFields = requiredFields.filter((field) => {
         const parts = field.split('.');
         return !parts.reduce((obj, part) => obj?.[part], req.body);
@@ -70,16 +73,17 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
       // Validación específica para PSE
       if (req.body.paymentMethodId === 'pse') {
         const validBanks = await getValidBanks();
+        const bank = String(req.body.payerData?.bank || '').padStart(4, '0');
 
-        if (!validBanks.includes(req.body.payerData.bank)) {
+        if (!validBanks.includes(bank)) {
           return res.status(400).json({
-            error: 'Banco no válido',
+            error: `Banco no válido: ${bank}`,
             code: 'INVALID_BANK',
             validBanks,
           });
         }
 
-        if (!['individual', 'association'].includes(req.body.payerData.entityType)) {
+        if (!['individual', 'association'].includes(req.body.payerData?.entityType)) {
           return res.status(400).json({
             error: 'Tipo de entidad inválido',
             code: 'INVALID_ENTITY_TYPE',
@@ -108,7 +112,7 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
             entity_type: req.body.payerData.entityType,
           },
           callback_url: process.env.NODE_ENV === 'production'
-            ? 'https://globtherapist.vercel.app/'
+            ? 'https://tudominio.com/confirmacion'
             : 'https://localhost:3000/confirmacion',
         }),
       };
@@ -122,23 +126,22 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         redirect_url: result.transaction_details?.external_resource_url,
       });
     } catch (error) {
-      console.error('Error en MP:', {
-        request: req.body,
-        error: error.response?.data || error.message,
+      functions.logger.error('Error en createPayment:', {
+        error: error.message,
         stack: error.stack,
+        requestBody: req.body,
       });
 
-      const errorResponse = {
+      const errorData = error.response?.data || {};
+
+      res.status(500).json({
         error: 'Error procesando el pago',
-        code: error.response?.status || 'MP_ERROR',
-        message: error.message,
-      };
-
-      if (error.response?.data?.error === 'financial_institution must be a valid value') {
-        errorResponse.validBanks = await getValidBanks();
-      }
-
-      res.status(500).json(errorResponse);
+        code: errorData.error || 'MP_ERROR',
+        message: errorData.message || error.message,
+        ...(errorData.error === 'financial_institution must be a valid value' && {
+          validBanks: await getValidBanks(),
+        }),
+      });
     }
   });
 });
