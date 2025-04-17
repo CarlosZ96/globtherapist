@@ -28,6 +28,13 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
 
         const banksResponse = await fetch(
           'https://us-central1-globtherapist.cloudfunctions.net/getPaymentMethods',
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            },
+          },
         );
 
         if (!banksResponse.ok) throw new Error('Error obteniendo bancos');
@@ -48,31 +55,47 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
     initializeMP();
   }, [therapyType]);
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (rawFormData) => {
     setLoading(true);
     try {
-      const { paymentMethodId, payer, paymentMethodOption } = formData;
+      // 1. Extraer datos del Brick
+      const { formData: brickData } = rawFormData;
+      const {
+        payment_method_id: paymentMethodId,
+        payer,
+        transaction_details: transactionDetails,
+      } = brickData;
 
-      // Validación reforzada
-      if (!payer?.email || !payer?.identification?.number) {
-        throw new Error('Email y documento son requeridos');
+      // 2. Validar estructura básica
+      if (!paymentMethodId || !payer?.email || !payer?.identification?.number) {
+        throw new Error('Datos incompletos del formulario');
       }
 
-      const payload = {
+      // 3. Procesar datos para PSE
+      const psePayload = {
         therapyType: therapyType.toLowerCase(),
         amount: price,
-        paymentMethodId,
+        paymentMethodId: 'pse',
         payerData: {
-          email: payer.email,
+          email: payer.email.trim(),
           docType: payer.identification.type || 'CC',
           docNumber: String(payer.identification.number).replace(/\D/g, ''),
-          ...(paymentMethodId === 'pse' && {
-            bank: paymentMethodOption?.id,
-            entityType,
-          }),
+          bank: String(transactionDetails?.financial_institution || '').padStart(4, '0'),
+          entityType, // Asegurar valor válido
         },
       };
 
+      // 4. Validación específica
+      if (paymentMethodId === 'pse') {
+        if (psePayload.payerData.bank.length !== 4) {
+          throw new Error('Código de banco inválido');
+        }
+        if (!['individual', 'association'].includes(entityType)) {
+          throw new Error('Tipo de entidad no válido');
+        }
+      }
+
+      // 5. Enviar al backend
       const response = await fetch(
         'https://us-central1-globtherapist.cloudfunctions.net/createPayment',
         {
@@ -81,37 +104,35 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.REACT_APP_API_KEY}`,
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(psePayload),
         },
       );
 
       const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Error procesando el pago');
-      }
+      if (!response.ok) throw new Error(result.error || 'Error en el pago');
 
+      // 6. Manejar redirección
       if (result.redirect_url) {
-        window.open(result.redirect_url, '_blank', 'noopener,noreferrer');
+        window.location.href = result.redirect_url;
+      } else {
+        onPaymentSuccess();
+        Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
       }
-
-      onPaymentSuccess();
-      Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
     } catch (error) {
       console.error('Error completo:', error);
       Swal.fire({
         icon: 'error',
         title: 'Error en el pago',
-        html: `<div style="text-align:left;">
+        html: `<div class="text-left">
           <strong>${error.message.split(':')[0]}</strong><br>
-          ${error.code ? `Código: ${error.code}` : ''}
+          <small>${error.message.split(':')[1] || ''}</small>
         </div>`,
       });
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="payment-container">
       {loading && (
@@ -137,7 +158,13 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         <Payment
           initialization={{
             amount: price,
-            payer: { email: 'correo@temporal.com' },
+            payer: {
+              email: '', // Campo vacío para entrada del usuario
+              identification: {
+                type: 'CC', // Tipo por defecto
+                number: '', // Número vacío para entrada
+              },
+            },
           }}
           customization={{
             paymentMethods: {
@@ -153,7 +180,13 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
                 options: ['individual', 'association'],
               },
             },
+            payer: {
+              requiredIdentification: true, // Obligar identificación
+              defaultIdentificationType: 'CC', // Tipo por defecto
+              identificationTypes: ['CC', 'CE', 'NIT'], // Tipos permitidos
+            },
             visual: {
+              hidePaymentButton: false, // Asegurar visibilidad del botón
               style: {
                 theme: 'dark',
                 customVariables: {
@@ -163,7 +196,11 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
               },
             },
           }}
-          onSubmit={handleSubmit}
+          onSubmit={async (formData) => {
+            // Verificar estructura completa de los datos
+            console.log('Datos del Brick:', formData);
+            await handleSubmit(formData);
+          }}
         />
       )}
     </div>

@@ -1,7 +1,4 @@
 /* eslint-disable global-require */
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
 
 const functions = require('firebase-functions');
 const express = require('express');

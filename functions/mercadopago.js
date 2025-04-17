@@ -10,18 +10,6 @@ const client = new MercadoPagoConfig({
 const payment = new Payment(client);
 const paymentMethodClient = new PaymentMethod(client);
 
-// Helper para obtener bancos válidos con manejo de errores
-const getValidBanks = async () => {
-  try {
-    const methods = await paymentMethodClient.get();
-    const pseMethod = methods.find((m) => m.id === 'pse');
-    return pseMethod?.financial_institutions?.map((b) => b.id) || [];
-  } catch (error) {
-    functions.logger.error('Error obteniendo bancos:', error);
-    return [];
-  }
-};
-
 exports.getPaymentMethods = functions.https.onRequest(async (req, res) => {
   cors(req, res, async () => {
     try {
@@ -31,7 +19,10 @@ exports.getPaymentMethods = functions.https.onRequest(async (req, res) => {
       if (!pseMethod) throw new Error('Método PSE no encontrado');
 
       res.status(200).json({
-        banks: pseMethod.financial_institutions,
+        banks: pseMethod.financial_institutions.map((b) => ({
+          id: String(b.id).padStart(4, '0'),
+          name: b.description,
+        })),
         minAmount: pseMethod.min_allowed_amount,
         maxAmount: pseMethod.max_allowed_amount,
       });
@@ -45,17 +36,24 @@ exports.getPaymentMethods = functions.https.onRequest(async (req, res) => {
   });
 });
 
+const getValidBanks = async () => {
+  try {
+    const methods = await paymentMethodClient.get();
+    const pseMethod = methods.find((m) => m.id === 'pse');
+    return pseMethod?.financial_institutions?.map((b) => String(b.id).padStart(4, '0')) || [];
+  } catch (error) {
+    functions.logger.error('Error obteniendo bancos:', error);
+    return [];
+  }
+};
+
 exports.createPayment = functions.https.onRequest(async (req, res) => {
   cors(req, res, async () => {
     try {
-      // Validación mejorada
+      // Validación de campos requeridos
       const requiredFields = [
-        'therapyType',
-        'amount',
-        'paymentMethodId',
-        'payerData.email',
-        'payerData.docType',
-        'payerData.docNumber',
+        'therapyType', 'amount', 'paymentMethodId',
+        'payerData.email', 'payerData.docType', 'payerData.docNumber',
       ];
 
       const missingFields = requiredFields.filter((field) => {
@@ -70,10 +68,32 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         });
       }
 
-      // Validación específica para PSE
+      // Construcción del payload
+      const paymentData = {
+        transaction_amount: Number(req.body.amount),
+        description: `Terapia ${req.body.therapyType}`,
+        payment_method_id: 'pse', // Forzar PSE para pruebas
+        payer: {
+          email: req.body.payerData.email,
+          entity_type: req.body.payerData.entityType, // Campo requerido en raíz
+          identification: {
+            type: req.body.payerData.docType,
+            number: String(req.body.payerData.docNumber).replace(/\D/g, ''),
+          },
+        },
+        transaction_details: {
+          financial_institution: String(req.body.payerData.bank).padStart(4, '0'),
+        },
+        additional_info: {
+          ip_address: req.headers['x-forwarded-for'] || '127.0.0.1',
+        },
+        callback_url: 'http://localhost:3000/confirmacion-pago', // URL válida
+        processing_mode: 'aggregator',
+      };
+
       if (req.body.paymentMethodId === 'pse') {
         const validBanks = await getValidBanks();
-        const bank = String(req.body.payerData?.bank || '').padStart(4, '0');
+        const bank = paymentData.transaction_details.financial_institution;
 
         if (!validBanks.includes(bank)) {
           return res.status(400).json({
@@ -82,43 +102,12 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
             validBanks,
           });
         }
-
-        if (!['individual', 'association'].includes(req.body.payerData?.entityType)) {
-          return res.status(400).json({
-            error: 'Tipo de entidad inválido',
-            code: 'INVALID_ENTITY_TYPE',
-          });
-        }
       }
 
-      // Construcción del pago
-      const paymentData = {
-        transaction_amount: Number(req.body.amount),
-        description: `${req.body.therapyType} Terapia`,
-        payment_method_id: req.body.paymentMethodId,
-        payer: {
-          email: req.body.payerData.email,
-          identification: {
-            type: req.body.payerData.docType,
-            number: String(req.body.payerData.docNumber).replace(/\D/g, ''),
-          },
-        },
-        ...(req.body.paymentMethodId === 'pse' && {
-          processing_mode: 'aggregator',
-          transaction_details: {
-            financial_institution: String(req.body.payerData.bank).padStart(4, '0'),
-          },
-          payer: {
-            entity_type: req.body.payerData.entityType,
-          },
-          callback_url: process.env.NODE_ENV === 'production'
-            ? 'https://tudominio.com/confirmacion'
-            : 'https://localhost:3000/confirmacion',
-        }),
-      };
-
-      // Crear pago en MP
-      const result = await payment.create({ body: paymentData });
+      const result = await payment.create({
+        body: paymentData,
+        requestOptions: { idempotencyKey: crypto.randomUUID() },
+      });
 
       res.status(200).json({
         id: result.id,
@@ -126,21 +115,18 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         redirect_url: result.transaction_details?.external_resource_url,
       });
     } catch (error) {
-      functions.logger.error('Error en createPayment:', {
-        error: error.message,
-        stack: error.stack,
+      functions.logger.error('Error detallado:', {
+        errorData: error.response?.data,
         requestBody: req.body,
       });
 
-      const errorData = error.response?.data || {};
+      const errorMessage = error.response?.data?.cause?.[0]?.description
+        || error.message;
 
       res.status(500).json({
         error: 'Error procesando el pago',
-        code: errorData.error || 'MP_ERROR',
-        message: errorData.message || error.message,
-        ...(errorData.error === 'financial_institution must be a valid value' && {
-          validBanks: await getValidBanks(),
-        }),
+        code: error.response?.data?.error || 'MP_ERROR',
+        message: errorMessage,
       });
     }
   });
