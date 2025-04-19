@@ -87,7 +87,7 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         additional_info: {
           ip_address: req.headers['x-forwarded-for'] || '127.0.0.1',
         },
-        callback_url: 'http://localhost:3000/confirmacion-pago', // URL válida
+        callback_url: 'https://globtherapist.vercel.app/',
         processing_mode: 'aggregator',
       };
 
@@ -103,7 +103,7 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
           });
         }
       }
-
+      console.log('→ callback_url enviado:', paymentData.callback_url);
       const result = await payment.create({
         body: paymentData,
         requestOptions: { idempotencyKey: crypto.randomUUID() },
