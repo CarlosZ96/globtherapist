@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
 const functions = require('firebase-functions');
-const { MercadoPagoConfig, Payment, PaymentMethod } = require('mercadopago');
+const { MercadoPagoConfig, Payment, paymentMethods } = require('mercadopago');
 const cors = require('cors')({ origin: true });
 
 const client = new MercadoPagoConfig({
@@ -8,12 +8,10 @@ const client = new MercadoPagoConfig({
 });
 
 const paymentClient = new Payment(client);
-const paymentMethodClient = new PaymentMethod(client);
 
 const allowedOrigins = [
   'http://localhost:3000',
   'https://globtherapist.vercel.app',
-  'https://www.globtherapist.vercel.app',
 ];
 
 const validateOrigin = (origin) => allowedOrigins.some((allowed) => origin?.startsWith(allowed));
@@ -25,8 +23,9 @@ exports.getPaymentMethods = functions.https.onRequest(async (req, res) => {
         return res.status(403).json({ error: 'Origen no permitido' });
       }
 
-      const { results } = await paymentMethodClient.list();
-      const pseMethod = results.find((m) => m.id === 'pse');
+      // Corregido: Usar el método get() directamente
+      const methods = await paymentMethods.get({ client });
+      const pseMethod = methods.find((m) => m.id === 'pse');
 
       if (!pseMethod) throw new Error('Método PSE no encontrado');
 
