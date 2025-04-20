@@ -1,5 +1,4 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-/* eslint-disable no-unused-expressions */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
@@ -11,7 +10,6 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [availableBanks, setAvailableBanks] = useState([]);
   const [entityType, setEntityType] = useState('individual');
-  const [paymentMethodsConfig, setPaymentMethodsConfig] = useState({});
 
   const therapyPrices = {
     mental: 80000,
@@ -23,28 +21,31 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
   useEffect(() => {
     const initializeMP = async () => {
       try {
-        await initMercadoPago(process.env.REACT_APP_MP_PUBLIC_KEY, {
+        await initMercadoPago(process.env.MP_ACCESS_TOKEN, {
           locale: 'es-CO',
           advancedFraudPrevention: true,
         });
 
-        const response = await fetch(
+        const banksResponse = await fetch(
           'https://us-central1-globtherapist.cloudfunctions.net/getPaymentMethods',
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            },
+          },
         );
 
-        if (!response.ok) throw new Error('Error obteniendo métodos de pago');
-        const { banks } = await response.json();
+        if (!banksResponse.ok) throw new Error('Error obteniendo bancos');
 
-        setAvailableBanks(banks);
+        const { banks } = await banksResponse.json();
+        setAvailableBanks(banks.map((bank) => ({
+          id: bank.id,
+          name: bank.description,
+        })));
+
         setPrice(therapyPrices[therapyType.toLowerCase()]);
-
-        // Configuración dinámica de métodos de pago
-        setPaymentMethodsConfig({
-          bankTransfer: banks.length > 0 ? ['pse'] : [],
-          creditCard: 'all',
-          debitCard: 'all',
-          maxInstallments: 3,
-        });
       } catch (error) {
         console.error('Error inicializando SDK:', error);
         Swal.fire('Error', 'Error al cargar la pasarela de pago', 'error');
@@ -57,24 +58,44 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
   const handleSubmit = async (rawFormData) => {
     setLoading(true);
     try {
+      // 1. Extraer datos del Brick
       const { formData: brickData } = rawFormData;
-      const { payment_method_id: paymentMethodId, payer } = brickData;
+      const {
+        payment_method_id: paymentMethodId,
+        payer,
+        transaction_details: transactionDetails,
+      } = brickData;
 
-      const basePayload = {
+      // 2. Validar estructura básica
+      if (!paymentMethodId || !payer?.email || !payer?.identification?.number) {
+        throw new Error('Datos incompletos del formulario');
+      }
+
+      // 3. Procesar datos para PSE
+      const psePayload = {
         therapyType: therapyType.toLowerCase(),
         amount: price,
-        paymentMethodId,
+        paymentMethodId: 'pse',
         payerData: {
           email: payer.email.trim(),
           docType: payer.identification.type || 'CC',
           docNumber: String(payer.identification.number).replace(/\D/g, ''),
-          entityType: paymentMethodId === 'pse' ? entityType : undefined,
-          ...(paymentMethodId === 'pse' && {
-            bank: String(brickData.transaction_details?.financial_institution).padStart(4, '0'),
-          }),
+          bank: String(transactionDetails?.financial_institution || '').padStart(4, '0'),
+          entityType, // Asegurar valor válido
         },
       };
 
+      // 4. Validación específica
+      if (paymentMethodId === 'pse') {
+        if (psePayload.payerData.bank.length !== 4) {
+          throw new Error('Código de banco inválido');
+        }
+        if (!['individual', 'association'].includes(entityType)) {
+          throw new Error('Tipo de entidad no válido');
+        }
+      }
+
+      // 5. Enviar al backend
       const response = await fetch(
         'https://us-central1-globtherapist.cloudfunctions.net/createPayment',
         {
@@ -83,18 +104,21 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.REACT_APP_API_KEY}`,
           },
-          body: JSON.stringify(basePayload),
+          body: JSON.stringify(psePayload),
         },
       );
 
       const result = await response.json();
+
       if (!response.ok) throw new Error(result.error || 'Error en el pago');
 
-      result.redirect_url
-        ? window.location.href = result.redirect_url
-        : onPaymentSuccess();
-
-      Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
+      // 6. Manejar redirección
+      if (result.redirect_url) {
+        window.location.href = result.redirect_url;
+      } else {
+        onPaymentSuccess();
+        Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
+      }
     } catch (error) {
       console.error('Error completo:', error);
       Swal.fire({
@@ -109,7 +133,6 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
       setLoading(false);
     }
   };
-
   return (
     <div className="payment-container">
       {loading && (
@@ -119,63 +142,66 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         </div>
       )}
 
-      {availableBanks.length > 0 && (
-        <>
-          {availableBanks.some((b) => b.id === 'pse') && (
-            <div className="entity-type-selector">
-              <label>Tipo de entidad:</label>
-              <select
-                value={entityType}
-                onChange={(e) => setEntityType(e.target.value)}
-                disabled={loading}
-              >
-                <option value="individual">Persona Natural</option>
-                <option value="association">Empresa</option>
-              </select>
-            </div>
-          )}
+      <div className="entity-type-selector">
+        <label>Tipo de entidad:</label>
+        <select
+          value={entityType}
+          onChange={(e) => setEntityType(e.target.value)}
+          disabled={loading}
+        >
+          <option value="individual">Persona Natural</option>
+          <option value="association">Empresa</option>
+        </select>
+      </div>
 
-          <Payment
-            initialization={{
-              amount: price,
-              payer: {
-                email: '',
-                identification: {
-                  type: 'CC',
-                  number: '',
+      {availableBanks.length > 0 && (
+        <Payment
+          initialization={{
+            amount: price,
+            payer: {
+              email: '', // Campo vacío para entrada del usuario
+              identification: {
+                type: 'CC', // Tipo por defecto
+                number: '', // Número vacío para entrada
+              },
+            },
+          }}
+          customization={{
+            paymentMethods: {
+              bankTransfer: ['pse'],
+              creditCard: 'all',
+              debitCard: 'all',
+              maxInstallments: 1,
+            },
+            pse: {
+              financialInstitutions: availableBanks,
+              entityType: {
+                required: true,
+                options: ['individual', 'association'],
+              },
+            },
+            payer: {
+              requiredIdentification: true, // Obligar identificación
+              defaultIdentificationType: 'CC', // Tipo por defecto
+              identificationTypes: ['CC', 'CE', 'NIT'], // Tipos permitidos
+            },
+            visual: {
+              hidePaymentButton: false, // Asegurar visibilidad del botón
+              style: {
+                theme: 'dark',
+                customVariables: {
+                  formBackgroundColor: '#212B42',
+                  baseColor: '#4F63C2',
                 },
               },
-            }}
-            customization={{
-              paymentMethods: paymentMethodsConfig,
-              ...(availableBanks.some((b) => b.id === 'pse') && {
-                pse: {
-                  financialInstitutions: availableBanks,
-                  entityType: {
-                    required: true,
-                    options: ['individual', 'association'],
-                  },
-                },
-              }),
-              payer: {
-                requiredIdentification: true,
-                defaultIdentificationType: 'CC',
-                identificationTypes: ['CC', 'CE', 'NIT'],
-              },
-              visual: {
-                hidePaymentButton: false,
-                style: {
-                  theme: 'dark',
-                  customVariables: {
-                    formBackgroundColor: '#212B42',
-                    baseColor: '#4F63C2',
-                  },
-                },
-              },
-            }}
-            onSubmit={handleSubmit}
-          />
-        </>
+            },
+          }}
+          onSubmit={async (formData) => {
+            // Verificar estructura completa de los datos
+            console.log('Datos del Brick:', formData);
+            await handleSubmit(formData);
+          }}
+        />
       )}
     </div>
   );

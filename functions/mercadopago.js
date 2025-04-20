@@ -1,37 +1,26 @@
 /* eslint-disable consistent-return */
 const functions = require('firebase-functions');
-const { MercadoPagoConfig, Payment, paymentMethods } = require('mercadopago');
+const { MercadoPagoConfig, Payment, PaymentMethod } = require('mercadopago');
 const cors = require('cors')({ origin: true });
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
 });
 
-const paymentClient = new Payment(client);
-
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://globtherapist.vercel.app',
-];
-
-const validateOrigin = (origin) => allowedOrigins.some((allowed) => origin?.startsWith(allowed));
+const payment = new Payment(client);
+const paymentMethodClient = new PaymentMethod(client);
 
 exports.getPaymentMethods = functions.https.onRequest(async (req, res) => {
   cors(req, res, async () => {
     try {
-      if (!validateOrigin(req.get('origin'))) {
-        return res.status(403).json({ error: 'Origen no permitido' });
-      }
-
-      // Corregido: Usar el método get() directamente
-      const methods = await paymentMethods.get({ client });
+      const methods = await paymentMethodClient.get();
       const pseMethod = methods.find((m) => m.id === 'pse');
 
       if (!pseMethod) throw new Error('Método PSE no encontrado');
 
       res.status(200).json({
         banks: pseMethod.financial_institutions.map((b) => ({
-          id: b.id.toString(),
+          id: String(b.id).padStart(4, '0'),
           name: b.description,
         })),
         minAmount: pseMethod.min_allowed_amount,
@@ -42,19 +31,26 @@ exports.getPaymentMethods = functions.https.onRequest(async (req, res) => {
       res.status(500).json({
         error: 'Error obteniendo métodos de pago',
         details: error.message,
-        code: error.code || 'MP_API_ERROR',
       });
     }
   });
 });
 
+const getValidBanks = async () => {
+  try {
+    const methods = await paymentMethodClient.get();
+    const pseMethod = methods.find((m) => m.id === 'pse');
+    return pseMethod?.financial_institutions?.map((b) => String(b.id).padStart(4, '0')) || [];
+  } catch (error) {
+    functions.logger.error('Error obteniendo bancos:', error);
+    return [];
+  }
+};
+
 exports.createPayment = functions.https.onRequest(async (req, res) => {
   cors(req, res, async () => {
     try {
-      if (!validateOrigin(req.get('origin'))) {
-        return res.status(403).json({ error: 'Origen no permitido' });
-      }
-
+      // Validación de campos requeridos
       const requiredFields = [
         'therapyType', 'amount', 'paymentMethodId',
         'payerData.email', 'payerData.docType', 'payerData.docNumber',
@@ -72,33 +68,43 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         });
       }
 
+      // Construcción del payload
       const paymentData = {
         transaction_amount: Number(req.body.amount),
         description: `Terapia ${req.body.therapyType}`,
-        payment_method_id: req.body.paymentMethodId,
+        payment_method_id: 'pse', // Forzar PSE para pruebas
         payer: {
           email: req.body.payerData.email,
+          entity_type: req.body.payerData.entityType, // Campo requerido en raíz
           identification: {
             type: req.body.payerData.docType,
             number: String(req.body.payerData.docNumber).replace(/\D/g, ''),
           },
-          ...(req.body.paymentMethodId === 'pse' && {
-            entity_type: req.body.payerData.entityType,
-          }),
         },
-        ...(req.body.paymentMethodId === 'pse' && {
-          transaction_details: {
-            financial_institution: req.body.payerData.bank,
-          },
-        }),
+        transaction_details: {
+          financial_institution: String(req.body.payerData.bank).padStart(4, '0'),
+        },
         additional_info: {
-          ip_address: req.headers['x-forwarded-for'] || req.ip,
+          ip_address: req.headers['x-forwarded-for'] || '127.0.0.1',
         },
-        callback_url: 'https://globtherapist.vercel.app/payment-callback',
+        callback_url: 'http://localhost:3000/',
         processing_mode: 'aggregator',
       };
 
-      const result = await paymentClient.create({
+      if (req.body.paymentMethodId === 'pse') {
+        const validBanks = await getValidBanks();
+        const bank = paymentData.transaction_details.financial_institution;
+
+        if (!validBanks.includes(bank)) {
+          return res.status(400).json({
+            error: `Banco no válido: ${bank}`,
+            code: 'INVALID_BANK',
+            validBanks,
+          });
+        }
+      }
+      console.log('→ callback_url enviado:', paymentData.callback_url);
+      const result = await payment.create({
         body: paymentData,
         requestOptions: { idempotencyKey: crypto.randomUUID() },
       });
@@ -109,20 +115,18 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         redirect_url: result.transaction_details?.external_resource_url,
       });
     } catch (error) {
-      functions.logger.error('Error en createPayment:', {
-        error: error.message,
-        stack: error.stack,
-        responseData: error.response?.data,
+      functions.logger.error('Error detallado:', {
+        errorData: error.response?.data,
+        requestBody: req.body,
       });
 
-      const errorDetails = error.response?.data?.cause?.[0]?.description
-        || error.response?.data?.message
+      const errorMessage = error.response?.data?.cause?.[0]?.description
         || error.message;
 
       res.status(500).json({
         error: 'Error procesando el pago',
-        code: error.response?.data?.error || 'MP_API_ERROR',
-        details: errorDetails,
+        code: error.response?.data?.error || 'MP_ERROR',
+        message: errorMessage,
       });
     }
   });
