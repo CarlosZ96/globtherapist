@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable no-unused-expressions */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
@@ -10,6 +11,7 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [availableBanks, setAvailableBanks] = useState([]);
   const [entityType, setEntityType] = useState('individual');
+  const [paymentMethodsConfig, setPaymentMethodsConfig] = useState({});
 
   const therapyPrices = {
     mental: 80000,
@@ -26,24 +28,23 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
           advancedFraudPrevention: true,
         });
 
-        const banksResponse = await fetch(
+        const response = await fetch(
           'https://us-central1-globtherapist.cloudfunctions.net/getPaymentMethods',
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          },
         );
 
-        if (!banksResponse.ok) throw new Error('Error obteniendo bancos');
-        const { banks } = await banksResponse.json();
-        setAvailableBanks(banks.map((bank) => ({
-          id: bank.id,
-          name: bank.name,
-        })));
+        if (!response.ok) throw new Error('Error obteniendo métodos de pago');
+        const { banks } = await response.json();
 
+        setAvailableBanks(banks);
         setPrice(therapyPrices[therapyType.toLowerCase()]);
+
+        // Configuración dinámica de métodos de pago
+        setPaymentMethodsConfig({
+          bankTransfer: banks.length > 0 ? ['pse'] : [],
+          creditCard: 'all',
+          debitCard: 'all',
+          maxInstallments: 3,
+        });
       } catch (error) {
         console.error('Error inicializando SDK:', error);
         Swal.fire('Error', 'Error al cargar la pasarela de pago', 'error');
@@ -57,18 +58,7 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
     setLoading(true);
     try {
       const { formData: brickData } = rawFormData;
-      const {
-        payment_method_id: paymentMethodId,
-        payer,
-        token,
-        installments,
-        issuerId,
-        transaction_details: transactionDetails,
-      } = brickData;
-
-      if (!paymentMethodId || !payer?.email || !payer?.identification?.number) {
-        throw new Error('Datos incompletos del formulario');
-      }
+      const { payment_method_id: paymentMethodId, payer } = brickData;
 
       const basePayload = {
         therapyType: therapyType.toLowerCase(),
@@ -78,36 +68,12 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
           email: payer.email.trim(),
           docType: payer.identification.type || 'CC',
           docNumber: String(payer.identification.number).replace(/\D/g, ''),
+          entityType: paymentMethodId === 'pse' ? entityType : undefined,
+          ...(paymentMethodId === 'pse' && {
+            bank: String(brickData.transaction_details?.financial_institution).padStart(4, '0'),
+          }),
         },
       };
-
-      let paymentPayload;
-      if (paymentMethodId === 'pse') {
-        paymentPayload = {
-          ...basePayload,
-          payerData: {
-            ...basePayload.payerData,
-            bank: String(transactionDetails?.financial_institution || '').padStart(4, '0'),
-            entityType,
-          },
-        };
-
-        if (paymentPayload.payerData.bank.length !== 4) {
-          throw new Error('Código de banco inválido');
-        }
-        if (!['individual', 'association'].includes(entityType)) {
-          throw new Error('Tipo de entidad no válido');
-        }
-      } else {
-        paymentPayload = {
-          ...basePayload,
-          cardData: {
-            token,
-            installments: installments || 1,
-            issuerId,
-          },
-        };
-      }
 
       const response = await fetch(
         'https://us-central1-globtherapist.cloudfunctions.net/createPayment',
@@ -117,19 +83,18 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.REACT_APP_API_KEY}`,
           },
-          body: JSON.stringify(paymentPayload),
+          body: JSON.stringify(basePayload),
         },
       );
 
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Error en el pago');
 
-      if (result.redirect_url) {
-        window.location.href = result.redirect_url;
-      } else {
-        onPaymentSuccess();
-        Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
-      }
+      result.redirect_url
+        ? window.location.href = result.redirect_url
+        : onPaymentSuccess();
+
+      Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
     } catch (error) {
       console.error('Error completo:', error);
       Swal.fire({
@@ -182,19 +147,16 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
               },
             }}
             customization={{
-              paymentMethods: {
-                bankTransfer: ['pse'],
-                creditCard: 'all',
-                debitCard: 'all',
-                maxInstallments: 3,
-              },
-              pse: {
-                financialInstitutions: availableBanks,
-                entityType: {
-                  required: true,
-                  options: ['individual', 'association'],
+              paymentMethods: paymentMethodsConfig,
+              ...(availableBanks.some((b) => b.id === 'pse') && {
+                pse: {
+                  financialInstitutions: availableBanks,
+                  entityType: {
+                    required: true,
+                    options: ['individual', 'association'],
+                  },
                 },
-              },
+              }),
               payer: {
                 requiredIdentification: true,
                 defaultIdentificationType: 'CC',
@@ -211,9 +173,7 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
                 },
               },
             }}
-            onSubmit={async (formData) => {
-              await handleSubmit(formData);
-            }}
+            onSubmit={handleSubmit}
           />
         </>
       )}

@@ -5,26 +5,57 @@ const cors = require('cors')({ origin: true });
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
-  options: { timeout: 15000 },
 });
 
-const payment = new Payment(client);
+const paymentClient = new Payment(client);
 const paymentMethodClient = new PaymentMethod(client);
 
-const getValidBanks = async () => {
-  try {
-    const methods = await paymentMethodClient.get();
-    const pseMethod = methods.find((m) => m.id === 'pse');
-    return pseMethod?.financial_institutions?.map((b) => String(b.id).padStart(4, '0')) || [];
-  } catch (error) {
-    functions.logger.error('Error obteniendo bancos:', error);
-    return [];
-  }
-};
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://globtherapist.vercel.app',
+  'https://www.globtherapist.vercel.app',
+];
+
+const validateOrigin = (origin) => allowedOrigins.some((allowed) => origin?.startsWith(allowed));
+
+exports.getPaymentMethods = functions.https.onRequest(async (req, res) => {
+  cors(req, res, async () => {
+    try {
+      if (!validateOrigin(req.get('origin'))) {
+        return res.status(403).json({ error: 'Origen no permitido' });
+      }
+
+      const { results } = await paymentMethodClient.list();
+      const pseMethod = results.find((m) => m.id === 'pse');
+
+      if (!pseMethod) throw new Error('Método PSE no encontrado');
+
+      res.status(200).json({
+        banks: pseMethod.financial_institutions.map((b) => ({
+          id: b.id.toString(),
+          name: b.description,
+        })),
+        minAmount: pseMethod.min_allowed_amount,
+        maxAmount: pseMethod.max_allowed_amount,
+      });
+    } catch (error) {
+      functions.logger.error('Error en getPaymentMethods:', error);
+      res.status(500).json({
+        error: 'Error obteniendo métodos de pago',
+        details: error.message,
+        code: error.code || 'MP_API_ERROR',
+      });
+    }
+  });
+});
 
 exports.createPayment = functions.https.onRequest(async (req, res) => {
   cors(req, res, async () => {
     try {
+      if (!validateOrigin(req.get('origin'))) {
+        return res.status(403).json({ error: 'Origen no permitido' });
+      }
+
       const requiredFields = [
         'therapyType', 'amount', 'paymentMethodId',
         'payerData.email', 'payerData.docType', 'payerData.docNumber',
@@ -42,7 +73,7 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         });
       }
 
-      const basePaymentData = {
+      const paymentData = {
         transaction_amount: Number(req.body.amount),
         description: `Terapia ${req.body.therapyType}`,
         payment_method_id: req.body.paymentMethodId,
@@ -52,43 +83,24 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
             type: req.body.payerData.docType,
             number: String(req.body.payerData.docNumber).replace(/\D/g, ''),
           },
+          ...(req.body.paymentMethodId === 'pse' && {
+            entity_type: req.body.payerData.entityType,
+          }),
         },
+        ...(req.body.paymentMethodId === 'pse' && {
+          transaction_details: {
+            financial_institution: req.body.payerData.bank,
+          },
+        }),
         additional_info: {
-          ip_address: req.headers['x-forwarded-for'] || '127.0.0.1',
+          ip_address: req.headers['x-forwarded-for'] || req.ip,
         },
+        callback_url: 'https://globtherapist.vercel.app/payment-callback',
         processing_mode: 'aggregator',
       };
 
-      if (req.body.paymentMethodId === 'pse') {
-        basePaymentData.payer.entity_type = req.body.payerData.entityType;
-        basePaymentData.transaction_details = {
-          financial_institution: String(req.body.payerData.bank).padStart(4, '0'),
-        };
-        basePaymentData.callback_url = 'https://tu-dominio.com/callback';
-
-        const validBanks = await getValidBanks();
-        const bank = basePaymentData.transaction_details.financial_institution;
-        if (!validBanks.includes(bank)) {
-          return res.status(400).json({
-            error: `Banco no válido: ${bank}`,
-            code: 'INVALID_BANK',
-          });
-        }
-      } else {
-        if (!req.body.cardData?.token) {
-          return res.status(400).json({
-            error: 'Token de tarjeta requerido',
-            code: 'MISSING_CARD_TOKEN',
-          });
-        }
-
-        basePaymentData.token = req.body.cardData.token;
-        basePaymentData.installments = Number(req.body.cardData.installments) || 1;
-        basePaymentData.issuer_id = req.body.cardData.issuerId;
-      }
-
-      const result = await payment.create({
-        body: basePaymentData,
+      const result = await paymentClient.create({
+        body: paymentData,
         requestOptions: { idempotencyKey: crypto.randomUUID() },
       });
 
@@ -98,44 +110,20 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         redirect_url: result.transaction_details?.external_resource_url,
       });
     } catch (error) {
-      functions.logger.error('Error detallado:', {
-        errorData: error.response?.data,
-        requestBody: req.body,
+      functions.logger.error('Error en createPayment:', {
+        error: error.message,
+        stack: error.stack,
+        responseData: error.response?.data,
       });
 
-      const errorMessage = error.response?.data?.cause?.[0]?.description || error.message;
-      const errorCode = error.response?.data?.error || 'MP_ERROR';
+      const errorDetails = error.response?.data?.cause?.[0]?.description
+        || error.response?.data?.message
+        || error.message;
 
-      res.status(error.response?.status || 500).json({
-        error: 'Error procesando el pago',
-        code: errorCode,
-        message: errorMessage,
-      });
-    }
-  });
-});
-
-exports.getPaymentMethods = functions.https.onRequest(async (req, res) => {
-  cors(req, res, async () => {
-    try {
-      const methods = await paymentMethodClient.get();
-      const pseMethod = methods.find((m) => m.id === 'pse');
-
-      if (!pseMethod) throw new Error('Método PSE no encontrado');
-
-      res.status(200).json({
-        banks: pseMethod.financial_institutions.map((b) => ({
-          id: String(b.id).padStart(4, '0'),
-          name: b.description,
-        })),
-        minAmount: pseMethod.min_allowed_amount,
-        maxAmount: pseMethod.max_allowed_amount,
-      });
-    } catch (error) {
-      functions.logger.error('Error en getPaymentMethods:', error);
       res.status(500).json({
-        error: 'Error obteniendo métodos de pago',
-        details: error.message,
+        error: 'Error procesando el pago',
+        code: error.response?.data?.error || 'MP_API_ERROR',
+        details: errorDetails,
       });
     }
   });
