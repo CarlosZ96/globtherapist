@@ -14,8 +14,12 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
   cors(req, res, async () => {
     try {
       const requiredFields = [
-        'therapyType', 'amount',
-        'payerData.email', 'payerData.docType', 'payerData.docNumber', 'payerData.bank',
+        'therapyType',
+        'amount',
+        'payerData.email',
+        'payerData.docType',
+        'payerData.docNumber',
+        'payerData.bank',
       ];
 
       const missingFields = requiredFields.filter((field) => {

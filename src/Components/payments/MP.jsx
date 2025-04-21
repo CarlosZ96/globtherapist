@@ -53,6 +53,7 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
       const psePayload = {
         therapyType: therapyType.toLowerCase(),
         amount: price,
+        paymentMethodId: ['pse'],
         payerData: {
           email: payer.email.trim(),
           docType: payer.identification.type || 'CC',
