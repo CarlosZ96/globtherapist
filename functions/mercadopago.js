@@ -4,7 +4,7 @@ const { MercadoPagoConfig, Payment, PaymentMethod } = require('mercadopago');
 const cors = require('cors')({ origin: true });
 
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN,
+  accessToken: functions.config().mp.access_token,
 });
 
 const payment = new Payment(client);
