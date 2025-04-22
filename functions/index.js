@@ -64,3 +64,4 @@ exports.createAgoraChatToken = chatToken.createAgoraChatToken;
 
 // Exportar todas las funciones de Mercado Pago
 exports.createPayment = mercadopagoFunctions.createPayment;
+exports.getPaymentMethods = mercadopagoFunctions.getPaymentMethods;
