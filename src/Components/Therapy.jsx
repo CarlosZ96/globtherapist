@@ -286,7 +286,15 @@ const Therapy = () => {
       const proDoc = await getDoc(proDocRef);
       const proData = proDoc.data();
 
-      // Crear objeto de cita para usuario
+      // Obtener día de la semana en español
+      const dateParts = citaGlobal.date.split(' ');
+      const dayNumber = parseInt(dateParts[0], 10);
+      const month = citaGlobal.month.toLowerCase();
+      const year = new Date().getFullYear();
+      const dateObj = new Date(`${month} ${dayNumber}, ${year}`);
+      const dayOfWeek = dateObj.toLocaleDateString('es-CO', { weekday: 'short' });
+
+      // Crear objeto de cita
       const userCita = {
         date: citaGlobal.date,
         month: citaGlobal.month,
@@ -296,19 +304,21 @@ const Therapy = () => {
         duration: 40,
         therapyType: normalizeText(formData.therapyType),
         description: formData.description,
-        status: 'paid', // Cambiado a 'paid' tras pago exitoso
+        status: 'paid',
         uid: citaGlobal.uid,
-        proName: proData.username || 'Profesional no encontrado',
+        proName: proData.Nombre || 'Profesional no encontrado',
         proUid: selectedPro,
+        dayOfWeek: dayOfWeek.replace('.', ''),
+        fullDate: `de ${citaGlobal.month} a las ${citaGlobal.time}`,
       };
 
-      // Actualizar datos del usuario
+      // Actualizar usuario
       const userRef = doc(db, 'users', currentUser.uid);
       await updateDoc(userRef, {
         Citas: [...(currentUser.Citas || []), userCita],
       });
 
-      // Crear objeto de cita para profesional
+      // Actualizar profesional
       const proCita = {
         ...userCita,
         userEmail: currentUser.email,
@@ -316,39 +326,48 @@ const Therapy = () => {
         userPhone: formData.phone,
         userId: currentUser.uid,
       };
-
-      // Actualizar datos del profesional
       await updateDoc(proDocRef, {
         MisCitas: [...(proData.MisCitas || []), proCita],
       });
 
-      // Enviar emails de confirmación
+      // Enviar correos
       const emailData = {
         therapyType: formData.therapyType,
-        date: `${citaGlobal.date} de ${citaGlobal.month}`,
-        time: citaGlobal.time,
+        date: dayNumber,
+        dayOfWeek,
+        fullDate: `de ${citaGlobal.month} a las ${citaGlobal.time}`,
         userName: formData.name,
-        proName: proData.username,
-        userEmail: formData.email,
+        proName: proData.Nombre,
+        userEmail: currentUser.email,
+        userProfession: proData.especialidad || 'Profesional de la salud',
+        userTel: proData.telefono || 'Sin teléfono registrado',
       };
 
+      // Correo para usuario
       await addDoc(collection(db, 'mail'), {
-        to: formData.email,
+        to: currentUser.email,
         message: {
           subject: 'Confirmación de cita - GLOBTHERAPIST',
-          html: getEmailHtml({ ...emailData, type: 'user' }),
+          html: getEmailHtml({
+            ...emailData,
+            collection: 'users',
+          }),
         },
       });
 
+      // Correo para profesional
       await addDoc(collection(db, 'mail'), {
         to: proData.email,
         message: {
           subject: 'Nueva cita agendada - GLOBTHERAPIST',
-          html: getEmailHtml({ ...emailData, type: 'pro' }),
+          html: getEmailHtml({
+            ...emailData,
+            collection: 'pros',
+            userTel: formData.phone,
+          }),
         },
       });
 
-      // Limpiar estados y mostrar confirmación
       setShowPayment(false);
       Swal.fire({
         icon: 'success',

@@ -42,7 +42,6 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
       const { body } = req;
       const isPSE = body.paymentMethodId === 'pse';
 
-      // Construcción dinámica del payload
       const basePaymentData = {
         transaction_amount: Number(body.amount),
         description: `Terapia ${body.therapyType}`,
@@ -59,16 +58,14 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         },
       };
 
-      // Campos específicos para PSE
       if (isPSE) {
         basePaymentData.payer.entity_type = body.pseData.entityType;
         basePaymentData.transaction_details = {
           financial_institution: body.pseData.bank,
         };
-        basePaymentData.callback_url = 'https://globtherapist.vercel.app/';
+        basePaymentData.callback_url = 'https://globtherapist.vercel.app';
       }
 
-      // Campos específicos para tarjetas
       if (!isPSE) {
         basePaymentData.token = body.cardData.token;
         basePaymentData.installments = Number(body.cardData.installments);
