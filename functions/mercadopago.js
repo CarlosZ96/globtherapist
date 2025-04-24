@@ -36,76 +36,47 @@ exports.getPaymentMethods = functions.https.onRequest(async (req, res) => {
   });
 });
 
-const getValidBanks = async () => {
-  try {
-    const methods = await paymentMethodClient.get();
-    const pseMethod = methods.find((m) => m.id === 'pse');
-    return pseMethod?.financial_institutions?.map((b) => String(b.id).padStart(4, '0')) || [];
-  } catch (error) {
-    functions.logger.error('Error obteniendo bancos:', error);
-    return [];
-  }
-};
-
 exports.createPayment = functions.https.onRequest(async (req, res) => {
   cors(req, res, async () => {
     try {
-      // Validación de campos requeridos
-      const requiredFields = [
-        'therapyType', 'amount', 'paymentMethodId',
-        'payerData.email', 'payerData.docType', 'payerData.docNumber',
-      ];
+      const { body } = req;
+      const isPSE = body.paymentMethodId === 'pse';
 
-      const missingFields = requiredFields.filter((field) => {
-        const parts = field.split('.');
-        return !parts.reduce((obj, part) => obj?.[part], req.body);
-      });
-
-      if (missingFields.length > 0) {
-        return res.status(400).json({
-          error: `Campos faltantes: ${missingFields.join(', ')}`,
-          code: 'MISSING_FIELDS',
-        });
-      }
-
-      // Construcción del payload
-      const paymentData = {
-        transaction_amount: Number(req.body.amount),
-        description: `Terapia ${req.body.therapyType}`,
-        payment_method_id: 'pse', // Forzar PSE para pruebas
+      // Construcción dinámica del payload
+      const basePaymentData = {
+        transaction_amount: Number(body.amount),
+        description: `Terapia ${body.therapyType}`,
+        payment_method_id: body.paymentMethodId,
         payer: {
-          email: req.body.payerData.email,
-          entity_type: req.body.payerData.entityType, // Campo requerido en raíz
+          email: body.payerData.email,
           identification: {
-            type: req.body.payerData.docType,
-            number: String(req.body.payerData.docNumber).replace(/\D/g, ''),
+            type: body.payerData.docType,
+            number: String(body.payerData.docNumber).replace(/\D/g, ''),
           },
-        },
-        transaction_details: {
-          financial_institution: String(req.body.payerData.bank).padStart(4, '0'),
         },
         additional_info: {
           ip_address: req.headers['x-forwarded-for'] || '127.0.0.1',
         },
-        callback_url: 'https://globtherapist.vercel.app/',
-        processing_mode: 'aggregator',
       };
 
-      if (req.body.paymentMethodId === 'pse') {
-        const validBanks = await getValidBanks();
-        const bank = paymentData.transaction_details.financial_institution;
-
-        if (!validBanks.includes(bank)) {
-          return res.status(400).json({
-            error: `Banco no válido: ${bank}`,
-            code: 'INVALID_BANK',
-            validBanks,
-          });
-        }
+      // Campos específicos para PSE
+      if (isPSE) {
+        basePaymentData.payer.entity_type = body.pseData.entityType;
+        basePaymentData.transaction_details = {
+          financial_institution: body.pseData.bank,
+        };
+        basePaymentData.callback_url = 'https://globtherapist.vercel.app/';
       }
-      console.log('→ callback_url enviado:', paymentData.callback_url);
+
+      // Campos específicos para tarjetas
+      if (!isPSE) {
+        basePaymentData.token = body.cardData.token;
+        basePaymentData.installments = Number(body.cardData.installments);
+        basePaymentData.issuer_id = body.cardData.issuerId;
+      }
+
       const result = await payment.create({
-        body: paymentData,
+        body: basePaymentData,
         requestOptions: { idempotencyKey: crypto.randomUUID() },
       });
 

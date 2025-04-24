@@ -62,40 +62,66 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
       const { formData: brickData } = rawFormData;
       const {
         payment_method_id: paymentMethodId,
+        token, // Token generado para tarjetas
+        issuer_id: issuerId, // Emisor (solo tarjetas)
+        installments, // Cuotas (solo tarjetas)
         payer,
         transaction_details: transactionDetails,
       } = brickData;
 
-      // 2. Validar estructura básica
+      // 2. Validaciones comunes
       if (!paymentMethodId || !payer?.email || !payer?.identification?.number) {
-        throw new Error('Datos incompletos del formulario');
+        throw new Error('Datos incompletos: Verifica la información del pago');
       }
 
-      // 3. Procesar datos para PSE
-      const psePayload = {
+      // 3. Estructura base del payload
+      const payload = {
         therapyType: therapyType.toLowerCase(),
         amount: price,
-        paymentMethodId: 'pse',
+        paymentMethodId,
         payerData: {
           email: payer.email.trim(),
           docType: payer.identification.type || 'CC',
           docNumber: String(payer.identification.number).replace(/\D/g, ''),
-          bank: String(transactionDetails?.financial_institution || '').padStart(4, '0'),
-          entityType, // Asegurar valor válido
         },
+        // Campos específicos para tarjetas
+        ...(paymentMethodId !== 'pse' && {
+          cardData: {
+            token,
+            installments: installments || 1,
+            issuerId: issuerId?.toString() || '',
+          },
+        }),
+        // Campos específicos para PSE
+        ...(paymentMethodId === 'pse' && {
+          pseData: {
+            bank: String(transactionDetails?.financial_institution || '').padStart(4, '0'),
+            entityType,
+          },
+        }),
       };
 
-      // 4. Validación específica
+      // 4. Validaciones específicas para PSE
       if (paymentMethodId === 'pse') {
-        if (psePayload.payerData.bank.length !== 4) {
-          throw new Error('Código de banco inválido');
+        if (!payload.pseData?.bank || payload.pseData.bank.length !== 4) {
+          throw new Error('Banco inválido: Selecciona un banco válido');
         }
         if (!['individual', 'association'].includes(entityType)) {
-          throw new Error('Tipo de entidad no válido');
+          throw new Error('Tipo de entidad: Selecciona un tipo válido');
         }
       }
 
-      // 5. Enviar al backend
+      // 5. Validaciones específicas para tarjetas
+      if (paymentMethodId !== 'pse') {
+        if (!token || typeof token !== 'string') {
+          throw new Error('Tarjeta inválida: Verifica los datos de la tarjeta');
+        }
+        if (!installments || installments < 1) {
+          throw new Error('Cuotas inválidas: Selecciona un número válido');
+        }
+      }
+
+      // 6. Enviar al backend
       const response = await fetch(
         'https://us-central1-globtherapist.cloudfunctions.net/createPayment',
         {
@@ -104,30 +130,38 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.REACT_APP_API_KEY}`,
           },
-          body: JSON.stringify(psePayload),
+          body: JSON.stringify(payload),
         },
       );
 
       const result = await response.json();
 
-      if (!response.ok) throw new Error(result.error || 'Error en el pago');
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al procesar el pago');
+      }
 
-      // 6. Manejar redirección
+      // 7. Manejar respuesta
       if (result.redirect_url) {
         window.location.href = result.redirect_url;
       } else {
         onPaymentSuccess();
-        Swal.fire('Éxito', 'Pago procesado correctamente', 'success');
+        Swal.fire({
+          icon: 'success',
+          title: '¡Pago exitoso!',
+          text: 'Tu sesión ha sido agendada correctamente',
+          confirmButtonColor: '#4F63C2',
+        });
       }
     } catch (error) {
-      console.error('Error completo:', error);
+      console.error('Error en el pago:', error);
       Swal.fire({
         icon: 'error',
         title: 'Error en el pago',
         html: `<div class="text-left">
           <strong>${error.message.split(':')[0]}</strong><br>
-          <small>${error.message.split(':')[1] || ''}</small>
+          <small>${error.message.split(':')[1] || 'Intenta nuevamente o usa otro método'}</small>
         </div>`,
+        confirmButtonColor: '#FF4B4B',
       });
     } finally {
       setLoading(false);
