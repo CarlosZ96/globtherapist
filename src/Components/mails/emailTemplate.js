@@ -1,5 +1,3 @@
-// emailTemplate.js
-
 function getEmailHtml({
   collection, // 'users' o 'pros'
   therapyType, // 'fisica', 'lenguaje', 'mental', 'ocupacional'
