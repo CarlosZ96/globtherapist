@@ -286,7 +286,33 @@ const Therapy = () => {
       const proDoc = await getDoc(proDocRef);
       const proData = proDoc.data();
 
-      // Crear objeto de cita para usuario
+      // Función para obtener el día de la semana desde citaGlobal
+      const getDayOfWeek = () => {
+        const monthMap = {
+          enero: 0,
+          febrero: 1,
+          marzo: 2,
+          abril: 3,
+          mayo: 4,
+          junio: 5,
+          julio: 6,
+          agosto: 7,
+          septiembre: 8,
+          octubre: 9,
+          noviembre: 10,
+          diciembre: 11,
+        };
+
+        const year = new Date().getFullYear();
+        const month = monthMap[citaGlobal.month.toLowerCase()];
+        const dateObj = new Date(year, month, citaGlobal.date);
+
+        return dateObj.toLocaleDateString('es-ES', { weekday: 'short' })
+          .replace('.', '')
+          .toLowerCase(); // ej: "lun"
+      };
+
+      // Construir objeto de cita con todos los datos necesarios
       const userCita = {
         date: citaGlobal.date,
         month: citaGlobal.month,
@@ -298,70 +324,83 @@ const Therapy = () => {
         description: formData.description,
         status: 'paid',
         uid: citaGlobal.uid,
-        proName: proData.username || 'Profesional no encontrado',
+        proName: proData.username || 'Profesional',
         proUid: selectedPro,
+        dayOfWeek: getDayOfWeek(), // Nuevo campo calculado
       };
 
-      // Actualizar datos del usuario
+      // Actualizar usuario
       const userRef = doc(db, 'users', currentUser.uid);
       await updateDoc(userRef, {
         Citas: [...(currentUser.Citas || []), userCita],
       });
 
-      // Crear objeto de cita para profesional
+      // Actualizar profesional
       const proCita = {
         ...userCita,
-        userEmail: currentUser.email,
+        userEmail: formData.email,
         userName: formData.name,
         userPhone: formData.phone,
         userId: currentUser.uid,
       };
 
-      // Actualizar datos del profesional
       await updateDoc(proDocRef, {
         MisCitas: [...(proData.MisCitas || []), proCita],
       });
 
-      // Enviar emails de confirmación
+      // Construir datos para emails
       const emailData = {
-        therapyType: formData.therapyType,
-        date: `${citaGlobal.date} de ${citaGlobal.month}`,
-        time: citaGlobal.time,
+        therapyType: formData.therapyType.toLowerCase(), // Asegurar minúsculas
+        date: citaGlobal.date.toString(),
+        dayOfWeek: userCita.dayOfWeek,
+        fullDate: `de ${citaGlobal.month} a las ${citaGlobal.time}`,
         userName: formData.name,
-        proName: proData.username,
-        userEmail: formData.email,
+        proName: proData.username || 'Profesional',
+        userEmail: proData.email, // Para email de usuario
+        userProfession: proData.profesion || 'Profesional de salud', // Campo de Firestore
+        userTel: formData.phone,
       };
 
+      // Email para USUARIO
       await addDoc(collection(db, 'mail'), {
         to: formData.email,
         message: {
           subject: 'Confirmación de cita - GLOBTHERAPIST',
-          html: getEmailHtml({ ...emailData, type: 'user' }),
+          html: getEmailHtml({
+            ...emailData,
+            collection: 'users', // Template para usuario
+          }),
         },
       });
 
+      // Email para PROFESIONAL
       await addDoc(collection(db, 'mail'), {
         to: proData.email,
         message: {
           subject: 'Nueva cita agendada - GLOBTHERAPIST',
-          html: getEmailHtml({ ...emailData, type: 'pro' }),
+          html: getEmailHtml({
+            ...emailData,
+            collection: 'pros', // Template para pro
+            userEmail: formData.email, // Invertir email
+            userTel: formData.phone, // Teléfono del usuario
+          }),
         },
       });
 
-      // Limpiar estados y mostrar confirmación
+      // Cierre del proceso
       setShowPayment(false);
       Swal.fire({
         icon: 'success',
         title: '¡Cita agendada!',
-        text: 'Hemos enviado la confirmación a tu correo electrónico.',
+        text: 'Confirmación enviada a tu correo',
         willClose: () => window.location.reload(),
       });
     } catch (error) {
       console.error('Error en el proceso de pago:', error);
       Swal.fire({
         icon: 'error',
-        title: 'Error en el pago',
-        text: 'Hubo un problema procesando tu pago. Por favor intenta nuevamente.',
+        title: 'Error',
+        text: `Error al procesar el pago: ${error.message}`,
       });
     }
   };
