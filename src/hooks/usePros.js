@@ -41,22 +41,29 @@ const usePros = () => {
 
       prosQuerySnapshot.forEach((proDoc) => {
         const proData = proDoc.data();
-        const { horarios, terapias, Nombre } = proData;
+        const {
+          horarios, terapias, Nombre, status,
+        } = proData;
         console.log('Profesional:', Nombre);
         console.log('Terapias del profesional:', terapias);
         console.log('Horarios del profesional:', horarios);
-        const normalizedTerapias = terapias?.map((t) => {
-          const norm = normalizeText(t);
-          return norm;
-        });
+
+        // Solo sigue si el status es 'aprobado'
+        if (status !== 'aprobado') {
+          console.log(`El profesional ${Nombre} no tiene status aprobado.`);
+          return;
+        }
+
+        const normalizedTerapias = terapias?.map((t) => normalizeText(t));
         console.log('Terapias del profesional normalizadas:', normalizedTerapias);
+
         if (normalizedTerapias && normalizedTerapias.includes(normalizedTherapyType)) {
           console.log('El profesional ofrece la terapia:', therapyType);
           const monthHorarios = horarios?.[month];
           if (monthHorarios) {
             const dayHorario = monthHorarios.find((d) => d.date === date);
             if (dayHorario) {
-              console.log(`Encontrado horario para el día ${date} en el mes ${month}`);
+              console.log(`Encontrado horario para el día ${date} en el mes ${month} para ${Nombre}`);
               const hasMatchingTime = dayHorario.Timeslots.some((timeSlot) => {
                 const [startTimeStr] = timeSlot.split('-');
                 console.log(`Comparando timeSlot: "${startTimeStr}" con time: "${time}"`);

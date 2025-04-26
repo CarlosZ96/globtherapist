@@ -28,6 +28,7 @@ const Globody = () => {
           </div>
         </div>
       </div>
+      <div className="Theras-title">Terapias:</div>
       <div className="Theras-cont">
         <div className="Therapy">
           <h3 className="Therapy-title">Lenguaje</h3>

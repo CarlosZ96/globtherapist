@@ -2,10 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { getAuth } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import {
+  doc, getDoc, updateDoc, addDoc, collection,
+} from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
 import Calendar from './Calendar/CalendarWithToggle';
+import Mp from './payments/MP';
+import getEmailHtml from './mails/emailTemplate';
 import '../stylesheets/Therapy.css';
 
 const Therapy = () => {
@@ -15,7 +19,6 @@ const Therapy = () => {
     currentUser, updateUserCitas, updateProMisCitas, pros, citaGlobal, setCitaGlobal,
   } = useAuth();
 
-  // Función para normalizar textos
   const normalizeText = (text) => {
     return text
       .normalize('NFD')
@@ -23,7 +26,6 @@ const Therapy = () => {
       .toLowerCase();
   };
 
-  // Función para sumar 40 minutos al startTime y calcular el endTime
   const calculateEndTime = (start, minutesToAdd) => {
     const [hours, minutes] = start.split(':').map(Number);
     const totalMinutes = hours * 60 + minutes + minutesToAdd;
@@ -35,6 +37,7 @@ const Therapy = () => {
   const [selectedAppointments, setSelectedAppointments] = useState([]);
   const [showAppointmentError, setShowAppointmentError] = useState(false);
   const [selectedPro, setSelectedPro] = useState(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   const handleDateSelection = (appointments) => {
     console.log('Citas seleccionadas recibidas:', appointments);
@@ -50,7 +53,6 @@ const Therapy = () => {
     description: '',
   });
 
-  // Función para normalizar la hora a formato "HH:mm"
   const normalizeTime = (time) => {
     const timeLower = time.toLowerCase();
     const [hour, minute] = timeLower.replace(/[^0-9:]/g, '').split(':');
@@ -64,7 +66,6 @@ const Therapy = () => {
     return `${String(normalizedHour).padStart(2, '0')}:${minute}`;
   };
 
-  // Validaciones del formulario
   const [errors, setErrors] = useState({
     name: '',
     phone: '',
@@ -232,172 +233,174 @@ const Therapy = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Validar formulario
     if (!validateForm()) {
       console.error('El formulario no es válido.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Campos incompletos',
+        text: 'Por favor completa todos los campos requeridos.',
+      });
       return;
     }
 
+    // Validar usuario autenticado
     if (!currentUser) {
-      console.error('Usuario no autenticado.');
       Swal.fire({
         icon: 'error',
-        title: 'Error',
+        title: 'Error de autenticación',
         text: 'Debes iniciar sesión para agendar una cita.',
       });
       return;
     }
 
-    if (!citaGlobal) {
+    // Validar cita seleccionada
+    if (!citaGlobal?.date || !citaGlobal?.time) {
       Swal.fire({
         icon: 'warning',
         title: 'Cita no seleccionada',
-        text: 'Por favor, selecciona una cita antes de confirmar.',
+        text: 'Por favor selecciona una fecha y hora para la cita.',
       });
       return;
     }
 
+    // Validar profesional seleccionado
     if (!selectedPro) {
       Swal.fire({
         icon: 'warning',
-        title: 'Selección incompleta',
-        text: 'Por favor, selecciona un profesional.',
+        title: 'Profesional no seleccionado',
+        text: 'Por favor selecciona un profesional para la cita.',
       });
       return;
     }
 
+    // Mostrar modal de pago si todo está correcto
+    setShowPayment(true);
+  };
+
+  // Función que se ejecuta tras el pago exitoso
+  const handlePaymentSuccess = async () => {
     try {
       const proDocRef = doc(db, 'pros', selectedPro);
       const proDoc = await getDoc(proDocRef);
-      const proName = proDoc.data()?.Nombre || 'Profesional no encontrado';
-
-      // Eliminar el rango de horas seleccionado del array Timeslots
       const proData = proDoc.data();
-      const horarios = proData.horarios || {};
-      const monthHorarios = horarios[citaGlobal.month] || [];
 
-      const updatedMonthHorarios = monthHorarios.map((day) => {
-        if (day.date === citaGlobal.date) {
-          const updatedTimeslots = day.Timeslots.filter((timeslot) => {
-            const [startTimeSlot] = timeslot.split('-');
-            return normalizeTime(startTimeSlot) !== normalizeTime(citaGlobal.time);
-          });
-          return { ...day, Timeslots: updatedTimeslots };
-        }
-        return day;
-      });
+      // Función para obtener el día de la semana desde citaGlobal
+      const getDayOfWeek = () => {
+        const monthMap = {
+          enero: 0,
+          febrero: 1,
+          marzo: 2,
+          abril: 3,
+          mayo: 4,
+          junio: 5,
+          julio: 6,
+          agosto: 7,
+          septiembre: 8,
+          octubre: 9,
+          noviembre: 10,
+          diciembre: 11,
+        };
 
-      await updateDoc(proDocRef, {
-        horarios: {
-          ...horarios, [citaGlobal.month]: updatedMonthHorarios,
-        },
-      });
+        const year = new Date().getFullYear();
+        const month = monthMap[citaGlobal.month.toLowerCase()];
+        const dateObj = new Date(year, month, citaGlobal.date);
 
-      // Conversión de datos para Agora:
-      // Se normaliza la hora de inicio,
-      // se calcula la hora de fin y se establece la duración de 40 minutos.
-      const normalizedSelectedTime = normalizeTime(citaGlobal.time);
-      const startTime = normalizedSelectedTime;
-      const endTime = calculateEndTime(normalizedSelectedTime, 40);
-      const duration = 40;
+        return dateObj.toLocaleDateString('es-ES', { weekday: 'short' })
+          .replace('.', '')
+          .toLowerCase(); // ej: "lun"
+      };
 
-      // Para el usuario: se agrega el id del profesional (proUid)
+      // Construir objeto de cita con todos los datos necesarios
       const userCita = {
         date: citaGlobal.date,
         month: citaGlobal.month,
         time: citaGlobal.time,
-        startTime, // Hora de inicio en formato "HH:mm"
-        endTime, // Hora de fin calculada (startTime + 40 minutos)
-        duration, // Duración en minutos (40)
+        startTime: normalizeTime(citaGlobal.time),
+        endTime: calculateEndTime(normalizeTime(citaGlobal.time), 40),
+        duration: 40,
         therapyType: normalizeText(formData.therapyType),
         description: formData.description,
-        status: 'pending',
+        status: 'paid',
         uid: citaGlobal.uid,
-        proName,
+        proName: proData.username || 'Profesional',
         proUid: selectedPro,
+        dayOfWeek: getDayOfWeek(), // Nuevo campo calculado
       };
 
+      // Actualizar usuario
       const userRef = doc(db, 'users', currentUser.uid);
-      const userSnap = await getDoc(userRef);
+      await updateDoc(userRef, {
+        Citas: [...(currentUser.Citas || []), userCita],
+      });
 
-      if (!userSnap.exists()) {
-        console.error('El usuario no existe en Firestore.');
-        return;
-      }
-
-      const userData = userSnap.data();
-      const prevCitas = userData.Citas || [];
-      const updatedCitas = [...prevCitas, userCita];
-
-      await updateDoc(userRef, { Citas: updatedCitas });
-      console.log('Cita guardada en Firestore para el usuario:', userCita);
-
-      // Para el profesional: se agrega el id del usuario (userId)
+      // Actualizar profesional
       const proCita = {
-        date: citaGlobal.date,
-        month: citaGlobal.month,
-        time: citaGlobal.time,
-        startTime,
-        endTime,
-        duration,
-        therapyType: normalizeText(formData.therapyType),
-        description: formData.description,
-        status: 'pending',
-        userEmail: currentUser.email,
+        ...userCita,
+        userEmail: formData.email,
         userName: formData.name,
         userPhone: formData.phone,
-        uid: citaGlobal.uid,
         userId: currentUser.uid,
       };
 
-      const proMisCitasRef = doc(db, 'pros', selectedPro);
-      const proMisCitasSnap = await getDoc(proMisCitasRef);
-      if (!proMisCitasSnap.exists()) {
-        console.error('El profesional no existe en Firestore.');
-        return;
-      }
+      await updateDoc(proDocRef, {
+        MisCitas: [...(proData.MisCitas || []), proCita],
+      });
 
-      const proMisCitasData = proMisCitasSnap.data();
-      const prevMisCitas = proMisCitasData.MisCitas || [];
-      const updatedMisCitas = [...prevMisCitas, proCita];
+      // Construir datos para emails
+      const emailData = {
+        therapyType: formData.therapyType.toLowerCase(), // Asegurar minúsculas
+        date: citaGlobal.date.toString(),
+        dayOfWeek: userCita.dayOfWeek,
+        fullDate: `de ${citaGlobal.month} a las ${citaGlobal.time}`,
+        userName: formData.name,
+        proName: proData.username || 'Profesional',
+        userEmail: proData.email, // Para email de usuario
+        userProfession: proData.profesion || 'Profesional de salud', // Campo de Firestore
+        userTel: formData.phone,
+      };
 
-      await updateDoc(proMisCitasRef, { MisCitas: updatedMisCitas });
-      console.log('Cita guardada en Firestore para el profesional:', proCita);
+      // Email para USUARIO
+      await addDoc(collection(db, 'mail'), {
+        to: formData.email,
+        message: {
+          subject: 'Confirmación de cita - GLOBTHERAPIST',
+          html: getEmailHtml({
+            ...emailData,
+            collection: 'users', // Template para usuario
+          }),
+        },
+      });
 
+      // Email para PROFESIONAL
+      await addDoc(collection(db, 'mail'), {
+        to: proData.email,
+        message: {
+          subject: 'Nueva cita agendada - GLOBTHERAPIST',
+          html: getEmailHtml({
+            ...emailData,
+            collection: 'pros', // Template para pro
+            userEmail: formData.email, // Invertir email
+            userTel: formData.phone, // Teléfono del usuario
+          }),
+        },
+      });
+
+      // Cierre del proceso
+      setShowPayment(false);
       Swal.fire({
         icon: 'success',
-        title: '¡Éxito!',
-        text: 'La cita ha sido agendada correctamente.',
-      }).then(() => {
-        window.location.reload();
+        title: '¡Cita agendada!',
+        text: 'Confirmación enviada a tu correo',
+        willClose: () => window.location.reload(),
       });
-
-      // Resetear estados y datos del formulario
-      setFormData({
-        name: '',
-        phone: '',
-        email: user?.email || '',
-        therapyType: '',
-        description: '',
-      });
-      setSelectedPro(null);
-      setCitaGlobal({
-        date: '',
-        month: '',
-        time: '',
-        therapyType: '',
-        description: '',
-        status: 'pending',
-        uid: '',
-        proName: '',
-      });
-      setSelectedAppointments([]);
-      setShowAppointmentError(false);
     } catch (error) {
-      console.error('Error al agendar la cita:', error);
+      console.error('Error en el proceso de pago:', error);
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Hubo un error al agendar la cita. Por favor, inténtalo de nuevo.',
+        text: `Error al procesar el pago: ${error.message}`,
       });
     }
   };
@@ -545,6 +548,25 @@ const Therapy = () => {
                   <p>No hay una cita seleccionada.</p>
                 )}
               </div>
+            </div>
+          )}
+          {showPayment && (
+            <div className="payment-modal">
+              <button
+                type="button"
+                className="close-payment-btn"
+                onClick={() => setShowPayment(false)}
+              >
+                X
+              </button>
+              <Mp
+                therapyType={formData.therapyType}
+                onPaymentSuccess={handlePaymentSuccess}
+                currentUser={currentUser}
+                selectedPro={selectedPro}
+                citaGlobal={citaGlobal}
+                formData={formData}
+              />
             </div>
           )}
           <button type="submit" className="DynamiCanlendar-btn">

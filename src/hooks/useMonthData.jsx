@@ -25,7 +25,10 @@ const useMonthData = () => {
       active: false,
     }));
 
-    const paddedDays = Array(startDay).fill(null).concat(emptyDays);
+    const adjustedStartDay = (startDay + 6) % 7;
+
+    const paddedDays = Array(adjustedStartDay).fill(null).concat(emptyDays);
+
     setDays(paddedDays);
     const formattedMonthName = format(currentDate, 'MMMM yyyy', { locale: es });
     setMonthName(formattedMonthName.toLowerCase());

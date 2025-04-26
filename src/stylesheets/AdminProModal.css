@@ -1,0 +1,157 @@
+.adminProModal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adminProModal-content {
+  background: #2F3C66;
+  width: 400px;
+  max-width: 90%;
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+  color: #fff;
+  font-family: sans-serif;
+}
+
+.adminProModal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.adminProModal-title {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.adminProModal-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.adminProModal-row label {
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.adminProModal-row-textarea {
+  margin-bottom: 0.5rem;
+}
+
+.adminProModal-row-textarea label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.adminProModal-row-textarea textarea {
+  width: 100%;
+  height: 60px;
+  resize: none;
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  color: #333;
+  font-family: sans-serif;
+}
+
+.adminProModal-row-certificates {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+}
+
+.adminProModal-cert-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.adminProModal-cert-item {
+  background-color: #4b5c88;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  text-decoration: none;
+  color: #fff;
+  font-size: 0.8rem;
+}
+
+
+.adminProModal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+
+.reject-btn {
+  background-color: #EA3E3E;
+  border: none;
+  color: #fff;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.approve-btn {
+  background-color: #4ECB71;
+  border: none;
+  color: #fff;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.reject-btn:hover {
+  background-color: #c02d2d;
+}
+
+.approve-btn:hover {
+  background-color: #3cad5b;
+}
+
+.adminProModal-therapies {
+  height: 10vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  place-items: center center;
+}
+
+.proModal-terapie {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #43507e;
+  width: 98%;
+  height: 96%;
+}
+
+.proModal-terapie-act {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 98%;
+  height: 96%;
+  background-color: #13235a;
+  color: #fff;
+}

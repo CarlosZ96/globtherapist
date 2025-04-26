@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
@@ -14,6 +16,7 @@ import ProModal from '../Hdvwindow';
 import User from '../../img/user.png';
 import up from '../../img/up-arrow.png';
 import dwn from '../../img/dwn-arrow.png';
+import edit from '../../img/editar.png';
 import '../../stylesheets/month.css';
 
 const Calendar = ({
@@ -339,7 +342,7 @@ const Calendar = ({
         <div className="Confirm-button">
           <button
             type="button"
-            className="See-Hours"
+            className={`See-Hours ${isConfirmed ? 'disable' : ''}`}
             onClick={handleConfirmHours}
             disabled={isConfirmed}
           >
@@ -348,7 +351,7 @@ const Calendar = ({
           {isConfirmed && (
             <>
               <button type="button" className="Edit-Hours" onClick={handleEditClick}>
-                <h3>Editar</h3>
+                <img src={edit} className="edit-btn" alt="" onClick={handleEditClick} />
               </button>
               <button
                 type="button"
@@ -441,6 +444,11 @@ const Calendar = ({
                   </button>
                 </div>
               ))}
+              {availablePros.length === 0 && (
+                <div className="no-pros-message">
+                  <h3>No hay pros disponibles para esta fecha</h3>
+                </div>
+              )}
               {selectedProId && (
                 <ProModal proId={selectedProId} onClose={handleCloseModal} />
               )}

@@ -1,0 +1,230 @@
+.admin-cont {
+    height: 100vh;
+    width: 100vw;
+    background-color: #fff;
+}
+
+.admin-body {
+    height: max-content;
+    overflow-y: auto;
+}
+
+.admin-header {
+    height: 10%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background-color: #041B5E;
+    justify-content: center;
+}
+
+.admin-header h1 {
+    width: 93%;
+    text-align: center;
+    color: #ffffff59;
+    font-size: 5.4vw;
+    font-family: Itim, serif;
+    font-weight: 300;
+}
+
+.admin-header-butons-cont {
+    width: 7%;
+}
+
+.adim-options-cont {
+    height: 55vh;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    place-items: center center;
+    background-color: #fff;
+    margin-top: 5%;
+    margin-bottom: 10vh;
+}
+
+.admin-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    height: 90%;
+    background-color: #2B3E9D;
+    border-radius: 5px;
+}
+
+.plus-cont {
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    width: 20%;
+}
+
+.plus-img {
+    height: 35px;
+    margin-top: 20%;
+}
+
+.admin-option-img-cont {
+    display: flex;
+    align-items: center;
+    height: 75%;
+    width: 100%;
+}
+
+.admin-option-img {
+    height: 120px;
+    margin-left: 10%;
+}
+
+.admin-txt-cont {
+    height: 25%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-txt-cont h2 {
+    color: #fff;
+    font-size: 4.2vw;
+    font-family: Itim, serif;
+    font-weight: 100;
+}
+
+.Admin-pros-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 80vh;
+    background-color: #2b3e9d;
+}
+
+.Admin-pros-cont-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 10%;
+    color: #ffffff79;
+    font-size: 3vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.Admin-pros-body {
+    width: 96%;
+    height: 88%;
+    background-color: #4f63c2;
+}
+
+.Admin-pros-number-cont {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 15%;
+}
+
+.Admin-pros-number-cont h3 {
+    font-size: 3vw;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.Admin-pros-pending-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 85%;
+}
+
+.Admin-pros-pending-cont h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    height: 10%;
+    background-color: #041B5E;
+    font-size: 3vw;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    margin-bottom: 3%;
+}
+
+.Admin-pros-pending-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 86%;
+    height: 82%;
+}
+
+.Admin-pros-pending-grid-title-cont {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-items: center;
+    align-items: center;
+    height: 15%;
+    width: 100%;
+    background-color: #3a50c0;
+    padding: 0 1%;
+    column-gap: 1%;
+}
+
+.Admin-pros-pending-grid-title-cont h4 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 85%;
+    font-size: 2.8vw;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    background-color: #2b3e9d;
+}
+
+.Admin-pros-pending-grid-pro-cont {
+    width: 100%;
+    height: 85%;
+    overflow-x: auto;
+    background-color: #fff;
+}
+
+.Admin-pros-pending-grid-pros-cont {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-items: center;
+    align-items: center;
+    height: 15%;
+    background-color: #fff;
+    padding: 0 1%;
+    column-gap: 1%;
+}
+
+.Admin-pros-pending-grid-pros-cont h4 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 85%;
+    font-size: 2.4vw;
+    color: #000;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    background-color: #c5c5c5;
+}
+
+.why-cont {
+    width: 100%;
+}
+
+.why-cont h2 {
+    font-size: 5vw;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: 100;
+    text-align: center;
+}

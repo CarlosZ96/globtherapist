@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ref, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db, storage } from '../firebase';
+import '../stylesheets/prospace.css';
 import User from '../img/user.png';
+import { getValidationEmailHtml } from './mails/emailTemplate';
 
 const Hdv = () => {
   const [profileImage, setProfileImage] = useState(User);
@@ -47,12 +49,23 @@ const Hdv = () => {
       try {
         await setDoc(proRef, { Hdv: hdvData }, { merge: true });
         console.log('Datos guardados correctamente en Firestore');
-
+        await updateDoc(proRef, { status: 'pendiente' });
+        console.log('Status actualizado a pendiente');
+        const emailContent = getValidationEmailHtml();
+        await setDoc(doc(db, 'mail', user.uid), {
+          to: user.email,
+          message: {
+            subject: 'Estamos revisando tus datos',
+            html: emailContent,
+          },
+        });
+        console.log('Correo de validación enviado al pro:', user.email);
         setProfession('');
         setSpecialization('');
         setYearsOfExperience(0);
         setUniversity('');
         setProfessionalHistory('');
+        window.location.reload();
       } catch (error) {
         console.error('Error guardando datos en Firestore:', error);
       }
@@ -60,16 +73,16 @@ const Hdv = () => {
   };
 
   return (
-    <div>
-      <header>
+    <div id="pp-cont" className="pp-cont">
+      <header className="PP-Title">
         <h1>Mi perfil público</h1>
       </header>
-      <form className="hdv-cont" onSubmit={handleSubmit}>
+      <form className="pp-form-cont" onSubmit={handleSubmit}>
         <div className="hdv-name-cont">
           <div className="hdv-button-cont">
             <img src={profileImage} alt="user" className="pro-img" />
-            <button type="button">x</button>
           </div>
+          <button type="button">x</button>
           <h2>Pro name</h2>
         </div>
         <div className="fields-cont">
@@ -77,7 +90,7 @@ const Hdv = () => {
             <h3>Profesional en:</h3>
             <input
               type="text"
-              className="profession"
+              className="specialization"
               value={profession}
               onChange={(e) => setProfession(e.target.value)}
             />
@@ -91,30 +104,28 @@ const Hdv = () => {
               onChange={(e) => setSpecialization(e.target.value)}
             />
           </div>
-          <div className="hdv-years-cont">
-            <div className="hdv-years-title-cont">
-              <h3>Años de experiencia:</h3>
-              <input
-                type="number"
-                name="hdv-year"
-                className="hdv-year"
-                value={yearsOfExperience}
-                onChange={(e) => setYearsOfExperience(parseInt(e.target.value, 10))}
-                min="0"
-              />
-            </div>
-          </div>
           <div className="hdv-field-cont">
             <h3>Egresado en:</h3>
             <input
               type="text"
-              className="university"
+              className="specialization"
               value={university}
               onChange={(e) => setUniversity(e.target.value)}
             />
           </div>
+          <div className="hdv-years-cont">
+            <h3>Años de experiencia:</h3>
+            <input
+              type="number"
+              name="hdv-year"
+              className="hdv-year"
+              value={yearsOfExperience}
+              onChange={(e) => setYearsOfExperience(parseInt(e.target.value, 10))}
+              min="0"
+            />
+          </div>
           <div className="hdv-desc-cont">
-            <h3>Cuenta brevemente tu historia profesional:</h3>
+            <h3>Cuéntanos brevemente tu historia profesional:</h3>
             <textarea
               className="hdv-desc"
               value={professionalHistory}
@@ -122,7 +133,7 @@ const Hdv = () => {
             />
           </div>
         </div>
-        <div>
+        <div className="pp-submit">
           <button type="submit">Confirmar</button>
         </div>
       </form>

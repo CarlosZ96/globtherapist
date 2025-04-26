@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import '../stylesheets/homepage.css';
 import '../stylesheets/windo.css';
 import Globody from './Globody';
-import Admin from './admin';
+import Admin from './glob/admin';
 import ProSpace from './ProSpace';
 import Login from './windows/login';
 import close from '../img/Closegt.png';
@@ -20,24 +20,27 @@ const Homepage = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [showCreatePro, setShowCreatePro] = useState(false);
   const [showDates, setShowDates] = useState(false);
+  const [showNotification, setShowNotification] = useState(true);
 
   const toggleDates = () => setShowDates((prev) => !prev);
   const toggleLogin = () => setShowLogin((prev) => !prev);
   const toggleCreate = () => setShowCreate((prev) => !prev);
   const toggleCreatePro = () => setShowCreatePro((prev) => !prev);
 
-  // Estilos para cuando NO hay usuario logueado
   const noUserStyles = {
     homeWindows: { width: '70%' },
-    logBtnCont: { width: '20%' },
+    logBtnCont: { width: '20%', position: 'relative' },
     logBtn: { width: '50%' },
   };
 
-  // Estilos para cuando HAY usuario logueado
   const userStyles = {
     homeWindows: { width: '78%' },
-    logBtnCont: { width: '12%' },
+    logBtnCont: { width: '12%', position: 'relative' },
   };
+
+  const pendingAppointmentsCount = currentPro
+    ? (currentPro.MisCitas?.filter((cita) => cita.status === 'pending').length || 0)
+    : (userData?.Citas?.filter((cita) => cita.status === 'pending').length || 0);
 
   const renderContent = () => {
     if (currentPro) return <ProSpace />;
@@ -79,18 +82,35 @@ const Homepage = () => {
           </div>
         ) : (
           <div className="Log-Btn-Cont" style={userStyles.logBtnCont}>
+            {showNotification && (
+              <span
+                className="pending-dates"
+              >
+                {pendingAppointmentsCount}
+              </span>
+            )}
             <div className="Log-Btn-Cont-User">
               <button
                 type="button"
                 className="Log-Btn-user"
-                onClick={toggleDates}
+                onClick={() => {
+                  toggleDates();
+                  setShowNotification(false);
+                }}
               >
                 <h3 className="User-Name">
                   {currentPro?.username || userData?.username || 'Usuario'}
                 </h3>
               </button>
             </div>
-            <button type="button" className="Log-Btn" onClick={logout}>
+            <button
+              type="button"
+              className="Log-Btn"
+              onClick={() => {
+                setShowNotification(false);
+                logout().then(() => window.location.reload());
+              }}
+            >
               <img src={close} alt="" />
             </button>
           </div>

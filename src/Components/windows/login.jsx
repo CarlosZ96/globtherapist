@@ -34,7 +34,7 @@ const Login = ({ toggleLogin }) => {
 
   return (
     <div className="Login-overlay">
-      <div className="Log-cont" ref={formRef}>
+      <div className="Login-cont" ref={formRef}>
         <form className="Login-body" onSubmit={handleSubmit}>
           <div className="Login-title-cont">
             <h1>Iniciar sesión</h1>
@@ -45,8 +45,8 @@ const Login = ({ toggleLogin }) => {
               &times;
             </div>
           </div>
-          <div className="Log-input-cont">
-            <h3>Correo:</h3>
+          <div className="Login-input-cont">
+            <h3 className="log-txt-h">Correo:</h3>
             <input
               type="email"
               name="email"
@@ -56,8 +56,8 @@ const Login = ({ toggleLogin }) => {
               required
             />
           </div>
-          <div className="Log-input-cont">
-            <h3>Contraseña:</h3>
+          <div className="Login-input-cont">
+            <h3 className="log-txt-h">Contraseña:</h3>
             <input
               type="password"
               name="password"
