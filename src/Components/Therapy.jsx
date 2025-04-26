@@ -562,6 +562,10 @@ const Therapy = () => {
               <Mp
                 therapyType={formData.therapyType}
                 onPaymentSuccess={handlePaymentSuccess}
+                currentUser={currentUser}
+                selectedPro={selectedPro}
+                citaGlobal={citaGlobal}
+                formData={formData}
               />
             </div>
           )}

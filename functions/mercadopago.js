@@ -1,7 +1,12 @@
 /* eslint-disable consistent-return */
 const functions = require('firebase-functions');
+const admin = require('firebase-admin');
 const { MercadoPagoConfig, Payment, PaymentMethod } = require('mercadopago');
 const cors = require('cors')({ origin: true });
+const getEmailHtml = require('../src/Components/mails/emailTemplate');
+
+admin.initializeApp();
+const db = admin.firestore();
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN || 'TEST-2400667744553776-031717-f3674df0979637213ae96babb278b9e9-313341255',
@@ -56,6 +61,7 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         additional_info: {
           ip_address: req.headers['x-forwarded-for'] || '127.0.0.1',
         },
+        metadata: body.metadata,
       };
 
       if (isPSE) {
@@ -63,7 +69,7 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         basePaymentData.transaction_details = {
           financial_institution: body.pseData.bank,
         };
-        basePaymentData.callback_url = 'https://globtherapist.vercel.app';
+        basePaymentData.callback_url = 'https://globtherapist.vercel.app/';
       }
 
       if (!isPSE) {
@@ -77,6 +83,14 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         requestOptions: { idempotencyKey: crypto.randomUUID() },
       });
 
+      if (isPSE) {
+        await db.collection('pendingPayments').doc(result.id).set({
+          status: 'pending',
+          created: admin.firestore.FieldValue.serverTimestamp(),
+          ...body.metadata.citaData,
+        });
+      }
+
       res.status(200).json({
         id: result.id,
         status: result.status,
@@ -88,8 +102,7 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         requestBody: req.body,
       });
 
-      const errorMessage = error.response?.data?.cause?.[0]?.description
-        || error.message;
+      const errorMessage = error.response?.data?.cause?.[0]?.description || error.message;
 
       res.status(500).json({
         error: 'Error procesando el pago',
@@ -98,4 +111,95 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
       });
     }
   });
+});
+
+exports.mpWebhook = functions.https.onRequest(async (req, res) => {
+  try {
+    const { type, data } = req.body;
+
+    if (type === 'payment' && data.id) {
+      const paymentId = data.id;
+      const paymentInfo = await payment.get({ id: paymentId });
+
+      if (paymentInfo.status === 'approved') {
+        const paymentRef = db.collection('pendingPayments').doc(paymentId);
+        const snapshot = await paymentRef.get();
+
+        if (!snapshot.exists) {
+          return res.status(404).send('Cita no encontrada');
+        }
+
+        const citaData = snapshot.data();
+
+        // Crear cita para usuario
+        const userRef = db.collection('users').doc(citaData.userId);
+        await userRef.update({
+          Citas: admin.firestore.FieldValue.arrayUnion({
+            date: citaData.date,
+            month: citaData.month,
+            time: citaData.time,
+            therapyType: citaData.therapyType,
+            status: 'paid',
+            proName: citaData.proName,
+            proUid: citaData.proId,
+            description: citaData.description,
+          }),
+        });
+
+        // Crear cita para profesional
+        const proRef = db.collection('pros').doc(citaData.proId);
+        await proRef.update({
+          MisCitas: admin.firestore.FieldValue.arrayUnion({
+            date: citaData.date,
+            month: citaData.month,
+            time: citaData.time,
+            therapyType: citaData.therapyType,
+            userName: citaData.userName,
+            userEmail: citaData.userEmail,
+            userPhone: citaData.userPhone,
+            status: 'paid',
+            userId: citaData.userId,
+          }),
+        });
+
+        // Enviar correos
+        const emailData = {
+          therapyType: citaData.therapyType,
+          date: citaData.date.toString(),
+          dayOfWeek: citaData.dayOfWeek,
+          fullDate: `de ${citaData.month} a las ${citaData.time}`,
+          userName: citaData.userName,
+          proName: citaData.proName,
+          userEmail: citaData.userEmail,
+          userProfession: citaData.userProfession,
+          userTel: citaData.userPhone,
+        };
+
+        // Email para usuario
+        await db.collection('mail').add({
+          to: citaData.userEmail,
+          message: {
+            subject: 'Confirmación de cita - GLOBTHERAPIST',
+            html: getEmailHtml({ ...emailData, collection: 'users' }),
+          },
+        });
+
+        // Email para profesional
+        await db.collection('mail').add({
+          to: citaData.proEmail,
+          message: {
+            subject: 'Nueva cita agendada - GLOBTHERAPIST',
+            html: getEmailHtml({ ...emailData, collection: 'pros' }),
+          },
+        });
+
+        await paymentRef.delete();
+      }
+    }
+
+    res.status(200).send('OK');
+  } catch (error) {
+    functions.logger.error('Error en webhook:', error);
+    res.status(500).send('Error procesando webhook');
+  }
 });

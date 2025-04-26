@@ -3,13 +3,22 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 import '../../stylesheets/MP.css';
 
-const MP = ({ therapyType, onPaymentSuccess }) => {
+const MP = ({
+  therapyType,
+  onPaymentSuccess,
+  currentUser,
+  selectedPro,
+  citaGlobal,
+  formData,
+}) => {
   const [price, setPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [availableBanks, setAvailableBanks] = useState([]);
   const [entityType, setEntityType] = useState('individual');
+  const navigate = useNavigate();
 
   const therapyPrices = {
     mental: 80000,
@@ -17,6 +26,29 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
     lenguaje: 55000,
     ocupacional: 41000,
   };
+
+  // Verificar parámetros de URL al montar el componente
+  useEffect(() => {
+    const checkPaymentStatus = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentStatus = urlParams.get('status');
+      const paymentId = urlParams.get('payment_id');
+
+      if (paymentStatus === 'approved' && paymentId) {
+        Swal.fire({
+          title: '¡Pago exitoso!',
+          text: 'Estamos procesando tu cita...',
+          icon: 'success',
+          willClose: () => {
+            onPaymentSuccess();
+            navigate(window.location.pathname, { replace: true }); // Limpiar URL
+          },
+        });
+      }
+    };
+
+    checkPaymentStatus();
+  }, [navigate, onPaymentSuccess]);
 
   useEffect(() => {
     const initializeMP = async () => {
@@ -55,16 +87,26 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
     initializeMP();
   }, [therapyType]);
 
+  const validateMetadata = () => {
+    if (!currentUser?.uid) throw new Error('Usuario no autenticado');
+    if (!selectedPro) throw new Error('Profesional no seleccionado');
+    if (!citaGlobal?.date || !citaGlobal?.time) throw new Error('Cita incompleta');
+    if (!formData?.name || !formData?.email) throw new Error('Datos de usuario incompletos');
+  };
+
   const handleSubmit = async (rawFormData) => {
     setLoading(true);
     try {
+      // Validar metadata antes de procesar el pago
+      validateMetadata();
+
       // 1. Extraer datos del Brick
       const { formData: brickData } = rawFormData;
       const {
         payment_method_id: paymentMethodId,
-        token, // Token generado para tarjetas
-        issuer_id: issuerId, // Emisor (solo tarjetas)
-        installments, // Cuotas (solo tarjetas)
+        token,
+        issuer_id: issuerId,
+        installments,
         payer,
         transaction_details: transactionDetails,
       } = brickData;
@@ -74,11 +116,28 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         throw new Error('Datos incompletos: Verifica la información del pago');
       }
 
-      // 3. Estructura base del payload
+      // 3. Construir metadata
+      const metadata = {
+        citaData: {
+          userId: currentUser.uid,
+          proId: selectedPro,
+          date: citaGlobal.date,
+          month: citaGlobal.month,
+          time: citaGlobal.time,
+          therapyType: therapyType.toLowerCase(),
+          userName: formData.name,
+          userEmail: formData.email,
+          userPhone: formData.phone,
+          description: formData.description,
+        },
+      };
+
+      // 4. Estructura base del payload
       const payload = {
         therapyType: therapyType.toLowerCase(),
         amount: price,
         paymentMethodId,
+        metadata,
         payerData: {
           email: payer.email.trim(),
           docType: payer.identification.type || 'CC',
@@ -101,7 +160,7 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         }),
       };
 
-      // 4. Validaciones específicas para PSE
+      // 5. Validaciones específicas para PSE
       if (paymentMethodId === 'pse') {
         if (!payload.pseData?.bank || payload.pseData.bank.length !== 4) {
           throw new Error('Banco inválido: Selecciona un banco válido');
@@ -111,7 +170,7 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         }
       }
 
-      // 5. Validaciones específicas para tarjetas
+      // 6. Validaciones específicas para tarjetas
       if (paymentMethodId !== 'pse') {
         if (!token || typeof token !== 'string') {
           throw new Error('Tarjeta inválida: Verifica los datos de la tarjeta');
@@ -121,7 +180,7 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         }
       }
 
-      // 6. Enviar al backend
+      // 7. Enviar al backend
       const response = await fetch(
         'https://us-central1-globtherapist.cloudfunctions.net/createPayment',
         {
@@ -140,7 +199,7 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
         throw new Error(result.error || 'Error al procesar el pago');
       }
 
-      // 7. Manejar respuesta
+      // 8. Manejar respuesta
       if (result.redirect_url) {
         window.location.href = result.redirect_url;
       } else {
@@ -167,6 +226,7 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
       setLoading(false);
     }
   };
+
   return (
     <div className="payment-container">
       {loading && (
@@ -193,10 +253,10 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
           initialization={{
             amount: price,
             payer: {
-              email: '', // Campo vacío para entrada del usuario
+              email: formData?.email || '',
               identification: {
-                type: 'CC', // Tipo por defecto
-                number: '', // Número vacío para entrada
+                type: 'CC',
+                number: '',
               },
             },
           }}
@@ -215,12 +275,12 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
               },
             },
             payer: {
-              requiredIdentification: true, // Obligar identificación
-              defaultIdentificationType: 'CC', // Tipo por defecto
-              identificationTypes: ['CC', 'CE', 'NIT'], // Tipos permitidos
+              requiredIdentification: true,
+              defaultIdentificationType: 'CC',
+              identificationTypes: ['CC', 'CE', 'NIT'],
             },
             visual: {
-              hidePaymentButton: false, // Asegurar visibilidad del botón
+              hidePaymentButton: false,
               style: {
                 theme: 'dark',
                 customVariables: {
@@ -230,10 +290,8 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
               },
             },
           }}
-          onSubmit={async (formData) => {
-            // Verificar estructura completa de los datos
-            console.log('Datos del Brick:', formData);
-            await handleSubmit(formData);
+          onSubmit={async (brickFormData) => {
+            await handleSubmit(brickFormData);
           }}
         />
       )}
@@ -244,6 +302,28 @@ const MP = ({ therapyType, onPaymentSuccess }) => {
 MP.propTypes = {
   therapyType: PropTypes.oneOf(['Mental', 'Fisica', 'Lenguaje', 'Ocupacional']).isRequired,
   onPaymentSuccess: PropTypes.func.isRequired,
+  currentUser: PropTypes.shape({
+    uid: PropTypes.string,
+  }),
+  selectedPro: PropTypes.string,
+  citaGlobal: PropTypes.shape({
+    date: PropTypes.string,
+    month: PropTypes.string,
+    time: PropTypes.string,
+  }),
+  formData: PropTypes.shape({
+    name: PropTypes.string,
+    email: PropTypes.string,
+    phone: PropTypes.string,
+    description: PropTypes.string,
+  }),
+};
+
+MP.defaultProps = {
+  currentUser: null,
+  selectedPro: '',
+  citaGlobal: {},
+  formData: {},
 };
 
 export default MP;
