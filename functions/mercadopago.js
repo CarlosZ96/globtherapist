@@ -9,7 +9,7 @@ admin.initializeApp();
 const db = admin.firestore();
 
 const client = new MercadoPagoConfig({
-  accessToken: process.env.REACT_APP_MP_ACCESS_TOKEN,
+  accessToken: process.env.REACT_APP_MERCADOPAGO_ACCESS_TOKEN,
 });
 
 const payment = new Payment(client);
