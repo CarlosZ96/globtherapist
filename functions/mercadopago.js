@@ -9,7 +9,7 @@ admin.initializeApp();
 const db = admin.firestore();
 
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN || 'TEST-2400667744553776-031717-f3674df0979637213ae96babb278b9e9-313341255',
+  accessToken: process.env.REACT_APP_MP_ACCESS_TOKEN,
 });
 
 const payment = new Payment(client);
@@ -69,7 +69,7 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         basePaymentData.transaction_details = {
           financial_institution: body.pseData.bank,
         };
-        basePaymentData.callback_url = 'https://globtherapist.vercel.app/';
+        basePaymentData.callback_url = 'https://globtherapist.vercel.app';
       }
 
       if (!isPSE) {
