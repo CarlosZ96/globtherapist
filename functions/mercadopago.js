@@ -69,7 +69,7 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         basePaymentData.transaction_details = {
           financial_institution: body.pseData.bank,
         };
-        basePaymentData.callback_url = 'https://globtherapist.vercel.app';
+        basePaymentData.callback_url = 'https://globtherapist.vercel.app/payment-callback';
       }
 
       if (!isPSE) {
@@ -83,6 +83,13 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         requestOptions: { idempotencyKey: crypto.randomUUID() },
       });
 
+      const responseData = {
+        id: result.id,
+        status: result.status,
+        payment_method: body.paymentMethodId,
+        redirect_url: result.transaction_details?.external_resource_url,
+      };
+
       if (isPSE) {
         await db.collection('pendingPayments').doc(result.id).set({
           status: 'pending',
@@ -91,23 +98,13 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         });
       }
 
-      res.status(200).json({
-        id: result.id,
-        status: result.status,
-        redirect_url: result.transaction_details?.external_resource_url,
-      });
+      res.status(200).json(responseData);
     } catch (error) {
-      functions.logger.error('Error detallado:', {
-        errorData: error.response?.data,
-        requestBody: req.body,
-      });
-
-      const errorMessage = error.response?.data?.cause?.[0]?.description || error.message;
-
+      functions.logger.error('Error detallado:', error);
       res.status(500).json({
         error: 'Error procesando el pago',
         code: error.response?.data?.error || 'MP_ERROR',
-        message: errorMessage,
+        message: error.message,
       });
     }
   });
