@@ -266,6 +266,7 @@ const MP = ({
               creditCard: 'all',
               debitCard: 'all',
               maxInstallments: 1,
+              autoRedirect: false,
             },
             pse: {
               financialInstitutions: availableBanks,
