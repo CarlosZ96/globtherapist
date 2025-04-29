@@ -21,10 +21,10 @@ const MP = ({
   const navigate = useNavigate();
 
   const therapyPrices = {
-    mental: 80000,
-    fisica: 70000,
-    lenguaje: 55000,
-    ocupacional: 41000,
+    mental: 1800,
+    fisica: 700,
+    lenguaje: 500,
+    ocupacional: 1000,
   };
 
   // Verificar parámetros de URL al montar el componente
