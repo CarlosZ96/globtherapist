@@ -72,12 +72,6 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         basePaymentData.callback_url = 'https://globtherapist.vercel.app/payment-callback';
       }
 
-      if (!isPSE) {
-        basePaymentData.token = body.cardData.token;
-        basePaymentData.installments = Number(body.cardData.installments);
-        basePaymentData.issuer_id = body.cardData.issuerId;
-      }
-
       const result = await payment.create({
         body: basePaymentData,
         requestOptions: { idempotencyKey: crypto.randomUUID() },
@@ -87,7 +81,9 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         id: result.id,
         status: result.status,
         payment_method: body.paymentMethodId,
-        redirect_url: result.transaction_details?.external_resource_url,
+        redirect_url: isPSE
+          ? result.transaction_details.external_resource_url
+          : result.point_of_interaction.transaction_data.ticket_url,
       };
 
       if (isPSE) {

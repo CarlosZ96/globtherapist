@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
 import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../../stylesheets/MP.css';
 
 const MP = ({
@@ -18,9 +18,8 @@ const MP = ({
   const [loading, setLoading] = useState(false);
   const [availableBanks, setAvailableBanks] = useState([]);
   const [entityType, setEntityType] = useState('individual');
-  const [paymentId, setPaymentId] = useState(null);
-  const [showStatusBrick, setShowStatusBrick] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const therapyPrices = {
     mental: 1800,
@@ -29,9 +28,10 @@ const MP = ({
     ocupacional: 1000,
   };
 
+  // Verificar parámetros de URL al cargar el componente
   useEffect(() => {
     const checkPaymentStatus = () => {
-      const urlParams = new URLSearchParams(window.location.search);
+      const urlParams = new URLSearchParams(location.search);
       const paymentStatus = urlParams.get('status');
       const urlPaymentId = urlParams.get('payment_id');
 
@@ -49,7 +49,7 @@ const MP = ({
     };
 
     checkPaymentStatus();
-  }, [navigate, onPaymentSuccess]);
+  }, [location, navigate, onPaymentSuccess]);
 
   useEffect(() => {
     const initializeMP = async () => {
@@ -93,44 +93,6 @@ const MP = ({
     if (!selectedPro) throw new Error('Profesional no seleccionado');
     if (!citaGlobal?.date || !citaGlobal?.time) throw new Error('Cita incompleta');
     if (!formData?.name || !formData?.email) throw new Error('Datos de usuario incompletos');
-  };
-
-  const renderStatusBrick = () => {
-    const mp = new window.MercadoPago(process.env.REACT_APP_MERCADOPAGO_PUBLIC_KEY, {
-      locale: 'es-CO',
-    });
-
-    const bricksBuilder = mp.bricks();
-
-    const settings = {
-      initialization: {
-        paymentId,
-      },
-      customization: {
-        visual: {
-          hidePaymentButton: true,
-          hideStatusDetails: false,
-          style: {
-            theme: 'dark',
-          },
-        },
-        backUrls: {
-          return: window.location.href,
-          error: window.location.href,
-        },
-      },
-      callbacks: {
-        onReady: () => {
-          console.log('Status Screen Brick listo');
-        },
-        onError: (error) => {
-          console.error('Error en Brick:', error);
-          Swal.fire('Error', 'Hubo un problema al cargar el proceso de pago', 'error');
-        },
-      },
-    };
-
-    bricksBuilder.create('statusScreen', 'statusBrick_container', settings);
   };
 
   const handleSubmit = async (rawFormData) => {
@@ -201,15 +163,6 @@ const MP = ({
         }
       }
 
-      if (paymentMethodId !== 'pse') {
-        if (!token || typeof token !== 'string') {
-          throw new Error('Tarjeta inválida: Verifica los datos de la tarjeta');
-        }
-        if (!installments || installments < 1) {
-          throw new Error('Cuotas inválidas: Selecciona un número válido');
-        }
-      }
-
       const response = await fetch(
         'https://us-central1-globtherapist.cloudfunctions.net/createPayment',
         {
@@ -228,9 +181,9 @@ const MP = ({
         throw new Error(result.error || 'Error al procesar el pago');
       }
 
+      // Manejo de redirección
       if (result.payment_method === 'pse') {
-        setPaymentId(result.id);
-        setShowStatusBrick(true);
+        window.location.href = result.redirect_url; // Redirige directamente al banco
       } else if (result.redirect_url) {
         window.location.href = result.redirect_url;
       } else {
@@ -267,72 +220,64 @@ const MP = ({
         </div>
       )}
 
-      {showStatusBrick ? (
-        <div id="statusBrick_container">
-          {paymentId && renderStatusBrick()}
-        </div>
-      ) : (
-        <>
-          <div className="entity-type-selector">
-            <label>Tipo de entidad:</label>
-            <select
-              value={entityType}
-              onChange={(e) => setEntityType(e.target.value)}
-              disabled={loading}
-            >
-              <option value="individual">Persona Natural</option>
-              <option value="association">Empresa</option>
-            </select>
-          </div>
+      <div className="entity-type-selector">
+        <label>Tipo de entidad:</label>
+        <select
+          value={entityType}
+          onChange={(e) => setEntityType(e.target.value)}
+          disabled={loading}
+        >
+          <option value="individual">Persona Natural</option>
+          <option value="association">Empresa</option>
+        </select>
+      </div>
 
-          {availableBanks.length > 0 && (
-            <Payment
-              initialization={{
-                amount: price,
-                payer: {
-                  email: formData?.email || '',
-                  identification: {
-                    type: 'CC',
-                    number: '',
-                  },
+      {availableBanks.length > 0 && (
+        <Payment
+          initialization={{
+            amount: price,
+            payer: {
+              email: formData?.email || '',
+              identification: {
+                type: 'CC',
+                number: '',
+              },
+            },
+          }}
+          customization={{
+            paymentMethods: {
+              bankTransfer: ['pse'],
+              creditCard: 'all',
+              debitCard: 'all',
+              maxInstallments: 1,
+            },
+            pse: {
+              financialInstitutions: availableBanks,
+              entityType: {
+                required: true,
+                options: ['individual', 'association'],
+              },
+            },
+            payer: {
+              requiredIdentification: true,
+              defaultIdentificationType: 'CC',
+              identificationTypes: ['CC', 'CE', 'NIT'],
+            },
+            visual: {
+              hidePaymentButton: false,
+              style: {
+                theme: 'dark',
+                customVariables: {
+                  formBackgroundColor: '#212B42',
+                  baseColor: '#4F63C2',
                 },
-              }}
-              customization={{
-                paymentMethods: {
-                  bankTransfer: ['pse'],
-                  creditCard: 'all',
-                  debitCard: 'all',
-                  maxInstallments: 1,
-                },
-                pse: {
-                  financialInstitutions: availableBanks,
-                  entityType: {
-                    required: true,
-                    options: ['individual', 'association'],
-                  },
-                },
-                payer: {
-                  requiredIdentification: true,
-                  defaultIdentificationType: 'CC',
-                  identificationTypes: ['CC', 'CE', 'NIT'],
-                },
-                visual: {
-                  hidePaymentButton: false,
-                  style: {
-                    theme: 'dark',
-                    customVariables: {
-                      formBackgroundColor: '#212B42',
-                      baseColor: '#4F63C2',
-                    },
-                  },
-                },
-              }}
-              onSubmit={async (brickFormData) => {
-                await handleSubmit(brickFormData);
-              }}
-            />
-          )}
-        </>
+              },
+            },
+          }}
+          onSubmit={async (brickFormData) => {
+            await handleSubmit(brickFormData);
+          }}
+        />
       )}
     </div>
   );
