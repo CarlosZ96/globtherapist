@@ -61,13 +61,6 @@ const MP = ({
 
         const banksResponse = await fetch(
           'https://us-central1-globtherapist.cloudfunctions.net/getPaymentMethods',
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*',
-            },
-          },
         );
 
         if (!banksResponse.ok) throw new Error('Error obteniendo bancos');

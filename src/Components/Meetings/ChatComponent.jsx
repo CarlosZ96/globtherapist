@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/control-has-associated-label */
-/* eslint-disable react/button-has-type */
 import React, { useEffect, useRef, useState } from 'react';
 import AgoraRTM from 'agora-rtm-sdk';
 import PropTypes from 'prop-types';
@@ -15,89 +13,74 @@ const ChatComponent = ({ clientId, channelId }) => {
   const [isConnected, setIsConnected] = useState(false);
   const rtmClient = useRef(null);
   const channel = useRef(null);
-  const { getUsername } = useAuth(); // Función que obtiene el nombre desde Firebase
+  const { getUsername } = useAuth();
   const [usernames, setUsernames] = useState({});
 
-  const fetchUsername = async (uid) => {
-    if (!usernames[uid]) {
-      const name = await getUsername(uid); // Implementa esta función en AuthContext
-      setUsernames((prev) => ({ ...prev, [uid]: name }));
-    }
-  };
-
-  useEffect(() => {
-    if (clientId) {
-      fetchUsername(clientId); // Precarga el nombre del usuario actual (quien envía mensajes)
-    }
-  }, [clientId]); // Se ejecuta cuando clientId cambia
-
-  // Inicializar RTM (useEffect existente)
-  useEffect(() => {
-    const initRTM = async () => { /* ... */ };
-    if (clientId && channelId) initRTM();
-    return () => { /* ... */ };
-  }, [clientId, channelId]);
-  // Obtener token RTM desde Firebase
   const getRtmToken = async (uid) => {
-    const response = await fetch(
-      `${functionsBaseUrl}/createAgoraChatToken?userId=${uid}&channelId=${channelId}`,
-    );
-    const data = await response.json();
-    return data.token;
+    try {
+      const response = await fetch(
+        `${functionsBaseUrl}/createAgoraChatToken?userId=${uid}&channelId=${channelId}`,
+      );
+      const data = await response.json();
+      return data.token;
+    } catch (error) {
+      console.error('Error fetching RTM token:', error);
+      throw error;
+    }
   };
 
-  // Inicializar RTM
   useEffect(() => {
     const initRTM = async () => {
       try {
-        // Inicializa el cliente RTM con modo "rtm"
         rtmClient.current = AgoraRTM.createInstance(APP_ID, {
           enableLogUpload: false,
           logFilter: AgoraRTM.LOG_FILTER_OFF,
         });
 
-        // Autenticación con token (usando tu función getRtmToken)
         const token = await getRtmToken(clientId);
         await rtmClient.current.login({ uid: clientId, token });
 
-        // Únete al canal (mismo que la videollamada)
         channel.current = rtmClient.current.createChannel(channelId);
         await channel.current.join();
 
-        // Escucha mensajes
         channel.current.on('ChannelMessage', async (msg, memberId) => {
-          const username = await getUsername(memberId); // Obtén el nombre primero
+          const username = await getUsername(memberId);
           setUsernames((prev) => ({ ...prev, [memberId]: username }));
-          setMessages((prev) => [...prev, { senderId: memberId, text: msg.text }]);
+          // eslint-disable-next-line max-len
+          setMessages((prev) => [...prev, { id: crypto.randomUUID(), senderId: memberId, text: msg.text }]);
         });
 
         setIsConnected(true);
       } catch (error) {
-        if (!error.message.includes('webcollector-rtm.agora.io')) {
-          console.error('Error RTM:', error);
-        }
+        console.error('RTM Error:', error);
       }
     };
 
     if (clientId && channelId) initRTM();
 
-    // Limpiar al desmontar
     return () => {
-      if (channel.current) channel.current.leave();
-      if (rtmClient.current) rtmClient.current.logout();
+      if (channel.current) {
+        channel.current.leave();
+        channel.current = null;
+      }
+      if (rtmClient.current) {
+        rtmClient.current.logout();
+        rtmClient.current = null;
+      }
+      setIsConnected(false);
     };
   }, [clientId, channelId]);
 
-  // Enviar mensaje
   const sendMessage = async () => {
     if (!message.trim() || !isConnected) return;
 
     try {
       await channel.current.sendMessage({ text: message });
-      setMessages((prev) => [...prev, { senderId: clientId, text: message }]);
+      // eslint-disable-next-line max-len
+      setMessages((prev) => [...prev, { id: crypto.randomUUID(), senderId: clientId, text: message }]);
       setMessage('');
     } catch (error) {
-      console.error('Error enviando mensaje:', error);
+      console.error('Error sending message:', error);
     }
   };
 
@@ -107,16 +90,15 @@ const ChatComponent = ({ clientId, channelId }) => {
         <div className="chat-room-users-txt">
           {messages.map((msg) => (
             <div
+              key={msg.id}
               className="user-msg-cont"
-              key={`${msg.senderId}-${msg.text}-${Date.now()}`}
             >
               <strong>
-                {`${usernames[msg.senderId] || 'Cargando...'}:`}
+                {usernames[msg.senderId] || 'Usuario'}
+                :
                 {' '}
               </strong>
-              <p>
-                {msg.text}
-              </p>
+              <p>{msg.text}</p>
             </div>
           ))}
         </div>
@@ -127,8 +109,14 @@ const ChatComponent = ({ clientId, channelId }) => {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Escribe un mensaje..."
+            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
           />
-          <button className="chat-btn" onClick={sendMessage} disabled={!isConnected}>
+          <button
+            type="button"
+            className="chat-btn"
+            onClick={sendMessage}
+            disabled={!isConnected}
+          >
             <img src={sub} alt="Enviar mensaje" />
           </button>
         </div>
