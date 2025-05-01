@@ -54,13 +54,13 @@ const MP = ({
   useEffect(() => {
     const initializeMP = async () => {
       try {
-        await initMercadoPago(process.env.REACT_APP_MERCADOPAGO_PUBLIC_KEY, {
+        await initMercadoPago(process.env.REACT_APP_MERCADOPAGO_PUBLIC_KEY || 'TEST-2400667744553776-031717-f3674df0979637213ae96babb278b9e9-313341255', {
           locale: 'es-CO',
           advancedFraudPrevention: true,
         });
 
         const banksResponse = await fetch(
-          'https://us-central1-globtherapist.cloudfunctions.net/getPaymentMethods',
+          'https://us-central1-globtherapist.cloudfunctions.net/mercadopago/getPaymentMethods',
         );
 
         if (!banksResponse.ok) throw new Error('Error obteniendo bancos');
