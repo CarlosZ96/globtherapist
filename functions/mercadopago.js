@@ -14,23 +14,17 @@ const mercadopagoApp = express();
 const corsOptions = {
   origin: [
     'http://localhost:3000',
-    'https://globtherapist.vercel.app',
+    'https://globtherapist.vercel.app'
   ],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 };
 
 // Middleware orden correcto
 mercadopagoApp.use(cors(corsOptions));
 mercadopagoApp.use(express.json());
 mercadopagoApp.options('*', cors(corsOptions));
-
-// Headers manuales
-mercadopagoApp.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-});
 
 mercadopagoApp.get('/health', (req, res) => {
   res.status(200).json({ status: 'MercadoPago API Ready', timestamp: Date.now() });
