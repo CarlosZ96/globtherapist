@@ -1,39 +1,35 @@
-/* eslint-disable consistent-return */
 /* eslint-disable global-require */
+
 const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
 const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
+const chatToken = require('./chatToken');
+const mercadopagoFunctions = require('./mercadopago');
 
-// Configuración general CORS
+const app = express();
+
 const allowedOrigins = [
   'http://localhost:3000',
   'https://globtherapist.vercel.app',
 ];
 
-functions.config({
-  timeoutSeconds: 120,
-  memory: '1GB',
-});
-
 const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
     }
-    return callback(new Error('Bloqueado por CORS'));
+    return callback(new Error('Not allowed by CORS'));
   },
   optionsSuccessStatus: 200,
 };
 
-// Configuración para Agora Token
-const agoraApp = express();
-agoraApp.use(cors(corsOptions));
-agoraApp.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
-agoraApp.get('/health', (req, res) => res.status(200).json({ status: 'Agora API Ready' }));
-
-agoraApp.get('/generate-token', (req, res) => {
+app.get('/', (req, res) => {
+  res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
   const { channelId, role, uid } = req.query;
 
   if (!channelId || !role) {
@@ -45,22 +41,28 @@ agoraApp.get('/generate-token', (req, res) => {
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const privilegeExpireTime = currentTimestamp + expireTime;
 
+  const agoraRole = RtcRole.PUBLISHER;
+
   try {
     const token = RtcTokenBuilder.buildTokenWithUid(
       process.env.AGORA_APP_ID,
       process.env.AGORA_APP_CERTIFICATE,
       channelId,
       numericUid,
-      RtcRole.PUBLISHER,
+      agoraRole,
       privilegeExpireTime,
     );
-    res.status(200).json({ token });
+    return res.status(200).json({ token });
   } catch (error) {
     console.error('Error generating RTC token:', error);
-    res.status(500).json({ error: error.toString() });
+    return res.status(500).json({ error: error.toString() });
   }
 });
 
-exports.createAgoraToken = functions.https.onRequest(agoraApp);
-exports.createAgoraChatToken = require('./chatToken').createAgoraChatToken;
-exports.mercadopago = require('./mercadopago').handler;
+exports.createAgoraToken = functions.https.onRequest(app);
+exports.createAgoraChatToken = chatToken.createAgoraChatToken;
+
+// Exportar todas las funciones de Mercado Pago
+exports.createPayment = mercadopagoFunctions.createPayment;
+exports.getPaymentMethods = mercadopagoFunctions.getPaymentMethods;
+exports.mpWebhook = mercadopagoFunctions.mpWebhook;

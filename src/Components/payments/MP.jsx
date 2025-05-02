@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
 import Swal from 'sweetalert2';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import '../../stylesheets/MP.css';
 
 const MP = ({
@@ -19,7 +19,6 @@ const MP = ({
   const [availableBanks, setAvailableBanks] = useState([]);
   const [entityType, setEntityType] = useState('individual');
   const navigate = useNavigate();
-  const location = useLocation();
 
   const therapyPrices = {
     mental: 80000,
@@ -28,39 +27,46 @@ const MP = ({
     ocupacional: 41000,
   };
 
-  // Verificar parámetros de URL al cargar el componente
+  // Verificar parámetros de URL al montar el componente
   useEffect(() => {
     const checkPaymentStatus = () => {
-      const urlParams = new URLSearchParams(location.search);
+      const urlParams = new URLSearchParams(window.location.search);
       const paymentStatus = urlParams.get('status');
-      const urlPaymentId = urlParams.get('payment_id');
+      const paymentId = urlParams.get('payment_id');
 
-      if (paymentStatus === 'approved' && urlPaymentId) {
+      if (paymentStatus === 'approved' && paymentId) {
         Swal.fire({
           title: '¡Pago exitoso!',
           text: 'Estamos procesando tu cita...',
           icon: 'success',
           willClose: () => {
             onPaymentSuccess();
-            navigate(window.location.pathname, { replace: true });
+            navigate(window.location.pathname, { replace: true }); // Limpiar URL
           },
         });
       }
     };
 
     checkPaymentStatus();
-  }, [location, navigate, onPaymentSuccess]);
+  }, [navigate, onPaymentSuccess]);
 
   useEffect(() => {
     const initializeMP = async () => {
       try {
-        await initMercadoPago(process.env.REACT_APP_MERCADOPAGO_PUBLIC_KEY || 'TEST-2400667744553776-031717-f3674df0979637213ae96babb278b9e9-313341255', {
+        await initMercadoPago(process.env.REACT_APP_MERCADOPAGO_PUBLIC_KEY, {
           locale: 'es-CO',
           advancedFraudPrevention: true,
         });
 
         const banksResponse = await fetch(
-          'https://us-central1-globtherapist.cloudfunctions.net/mercadopago/getPaymentMethods',
+          'https://us-central1-globtherapist.cloudfunctions.net/getPaymentMethods',
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            },
+          },
         );
 
         if (!banksResponse.ok) throw new Error('Error obteniendo bancos');
@@ -91,8 +97,10 @@ const MP = ({
   const handleSubmit = async (rawFormData) => {
     setLoading(true);
     try {
+      // Validar metadata antes de procesar el pago
       validateMetadata();
 
+      // 1. Extraer datos del Brick
       const { formData: brickData } = rawFormData;
       const {
         payment_method_id: paymentMethodId,
@@ -103,10 +111,12 @@ const MP = ({
         transaction_details: transactionDetails,
       } = brickData;
 
+      // 2. Validaciones comunes
       if (!paymentMethodId || !payer?.email || !payer?.identification?.number) {
         throw new Error('Datos incompletos: Verifica la información del pago');
       }
 
+      // 3. Construir metadata
       const metadata = {
         citaData: {
           userId: currentUser.uid,
@@ -122,6 +132,7 @@ const MP = ({
         },
       };
 
+      // 4. Estructura base del payload
       const payload = {
         therapyType: therapyType.toLowerCase(),
         amount: price,
@@ -132,6 +143,7 @@ const MP = ({
           docType: payer.identification.type || 'CC',
           docNumber: String(payer.identification.number).replace(/\D/g, ''),
         },
+        // Campos específicos para tarjetas
         ...(paymentMethodId !== 'pse' && {
           cardData: {
             token,
@@ -139,6 +151,7 @@ const MP = ({
             issuerId: issuerId?.toString() || '',
           },
         }),
+        // Campos específicos para PSE
         ...(paymentMethodId === 'pse' && {
           pseData: {
             bank: String(transactionDetails?.financial_institution || '').padStart(4, '0'),
@@ -147,6 +160,7 @@ const MP = ({
         }),
       };
 
+      // 5. Validaciones específicas para PSE
       if (paymentMethodId === 'pse') {
         if (!payload.pseData?.bank || payload.pseData.bank.length !== 4) {
           throw new Error('Banco inválido: Selecciona un banco válido');
@@ -156,6 +170,17 @@ const MP = ({
         }
       }
 
+      // 6. Validaciones específicas para tarjetas
+      if (paymentMethodId !== 'pse') {
+        if (!token || typeof token !== 'string') {
+          throw new Error('Tarjeta inválida: Verifica los datos de la tarjeta');
+        }
+        if (!installments || installments < 1) {
+          throw new Error('Cuotas inválidas: Selecciona un número válido');
+        }
+      }
+
+      // 7. Enviar al backend
       const response = await fetch(
         'https://us-central1-globtherapist.cloudfunctions.net/createPayment',
         {
@@ -174,10 +199,8 @@ const MP = ({
         throw new Error(result.error || 'Error al procesar el pago');
       }
 
-      // Manejo de redirección
-      if (result.payment_method === 'pse') {
-        window.location.href = result.redirect_url; // Redirige directamente al banco
-      } else if (result.redirect_url) {
+      // 8. Manejar respuesta
+      if (result.redirect_url) {
         window.location.href = result.redirect_url;
       } else {
         onPaymentSuccess();
