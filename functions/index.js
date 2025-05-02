@@ -4,8 +4,6 @@ const functions = require('firebase-functions');
 const express = require('express');
 const cors = require('cors');
 const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
-const chatToken = require('./chatToken');
-const mercadopago = require('./mercadopago');
 
 // Configuración general CORS
 const allowedOrigins = [
@@ -13,10 +11,17 @@ const allowedOrigins = [
   'https://globtherapist.vercel.app',
 ];
 
+functions.config({
+  timeoutSeconds: 120,
+  memory: '1GB',
+});
+
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error('Not allowed by CORS'));
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Bloqueado por CORS'));
   },
   optionsSuccessStatus: 200,
 };
@@ -57,5 +62,5 @@ agoraApp.get('/generate-token', (req, res) => {
 });
 
 exports.createAgoraToken = functions.https.onRequest(agoraApp);
-exports.createAgoraChatToken = chatToken.createAgoraChatToken;
-exports.mercadopago = mercadopago.handler;
+exports.createAgoraChatToken = require('./chatToken').createAgoraChatToken;
+exports.mercadopago = require('./mercadopago').handler;

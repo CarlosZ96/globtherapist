@@ -5,44 +5,52 @@ const { MercadoPagoConfig, Payment, PaymentMethod } = require('mercadopago');
 const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
-const getEmailHtml = require('./emailTemplate');
+const { getEmailHtml } = require('./emailTemplate');
 
 admin.initializeApp();
 const db = admin.firestore();
 
 const mercadopagoApp = express();
+
+// Configuración CORS mejorada
 const corsOptions = {
   origin: [
     'http://localhost:3000',
-    'https://globtherapist.vercel.app'
+    'https://globtherapist.vercel.app',
   ],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
 
-// Middleware orden correcto
+functions.config({
+  timeoutSeconds: 120,
+  memory: '1GB',
+});
+
+// Middleware optimizado
 mercadopagoApp.use(cors(corsOptions));
 mercadopagoApp.use(express.json());
 mercadopagoApp.options('*', cors(corsOptions));
 
+// Endpoint de salud
 mercadopagoApp.get('/health', (req, res) => {
-  res.status(200).json({ status: 'MercadoPago API Ready', timestamp: Date.now() });
+  res.status(200).json({ status: 'OK', timestamp: Date.now() });
 });
 
+// Cliente MercadoPago
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
+  accessToken: process.env.REACT_APP_MP_ACCESS_TOKEN,
 });
 
-const payment = new Payment(client);
-const paymentMethodClient = new PaymentMethod(client);
-
+// Controlador de métodos de pago
 mercadopagoApp.get('/getPaymentMethods', async (req, res) => {
   try {
-    const methods = await paymentMethodClient.get();
+    const paymentMethod = new PaymentMethod(client);
+    const methods = await paymentMethod.get();
     const pseMethod = methods.find((m) => m.id === 'pse');
 
-    if (!pseMethod) throw new Error('Método PSE no encontrado');
+    if (!pseMethod) return res.status(404).json({ error: 'Método PSE no disponible' });
 
     res.status(200).json({
       banks: pseMethod.financial_institutions.map((b) => ({
@@ -53,13 +61,14 @@ mercadopagoApp.get('/getPaymentMethods', async (req, res) => {
       maxAmount: pseMethod.max_allowed_amount,
     });
   } catch (error) {
-    functions.logger.error('Error en getPaymentMethods:', error);
+    functions.logger.error('Error en métodos de pago:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 mercadopagoApp.post('/createPayment', async (req, res) => {
   try {
+    const payment = new Payment(client);
     const { body } = req;
     const isPSE = body.paymentMethodId === 'pse';
 
@@ -83,7 +92,7 @@ mercadopagoApp.post('/createPayment', async (req, res) => {
     if (isPSE) {
       basePaymentData.payer.entity_type = body.pseData.entityType;
       basePaymentData.transaction_details = { financial_institution: body.pseData.bank };
-      basePaymentData.callback_url = 'https://globtherapist.vercel.app/payment-callback';
+      basePaymentData.callback_url = 'http://localhost:3000/payment-callback';
     }
 
     const result = await payment.create({
@@ -124,6 +133,7 @@ mercadopagoApp.post('/mpWebhook', async (req, res) => {
     const { type, data } = req.body;
 
     if (type === 'payment' && data.id) {
+      const payment = new Payment(client);
       const paymentId = data.id;
       const paymentInfo = await payment.get({ id: paymentId });
 
