@@ -163,7 +163,7 @@ function getEmailHtml({
   return emailHtml;
 }
 
-function getSuccessEmailHtml(terapias = []) {
+export function getSuccessEmailHtml(terapias = []) {
   const therapyConfigs = {
     fisica: {
       color: '#EF5557',
@@ -263,7 +263,8 @@ function getSuccessEmailHtml(terapias = []) {
   `;
 }
 
-function getValidationEmailHtml() {
+// Exportamos la función principal y las adicionales
+export function getValidationEmailHtml() {
   return `
 <center>    
   <table width="420" align="center" cellpadding="0" cellspacing="0" border="0" 
@@ -307,7 +308,7 @@ function getValidationEmailHtml() {
   `;
 }
 
-function getRejectionEmailHtml({ reason, attemptsLeft = 1 }) {
+export function getRejectionEmailHtml({ reason, attemptsLeft = 1 }) {
   return `
 <center>
   <table width="420" align="center" cellpadding="0" cellspacing="0" border="0"
@@ -358,9 +359,4 @@ function getRejectionEmailHtml({ reason, attemptsLeft = 1 }) {
   `;
 }
 
-module.exports = {
-  getEmailHtml,
-  getSuccessEmailHtml,
-  getValidationEmailHtml,
-  getRejectionEmailHtml,
-};
+export default getEmailHtml;
