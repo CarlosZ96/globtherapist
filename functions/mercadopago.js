@@ -3,7 +3,6 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { MercadoPagoConfig, Payment, PaymentMethod } = require('mercadopago');
 const cors = require('cors')({ origin: true });
-const getEmailHtml = require('../src/Components/mails/emailTemplate');
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -46,7 +45,9 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
     try {
       const { body } = req;
       const isPSE = body.paymentMethodId === 'pse';
-
+      if (isPSE && (!body.pseData || !body.pseData.bank)) {
+        throw new Error('Datos de PSE incompletos');
+      }
       const basePaymentData = {
         transaction_amount: Number(body.amount),
         description: `Terapia ${body.therapyType}`,
@@ -69,7 +70,7 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         basePaymentData.transaction_details = {
           financial_institution: body.pseData.bank,
         };
-        basePaymentData.callback_url = 'https://globtherapist.vercel.app/';
+        basePaymentData.callback_url = 'https://globtherapist.vercel.app';
       }
 
       if (!isPSE) {
@@ -160,37 +161,6 @@ exports.mpWebhook = functions.https.onRequest(async (req, res) => {
             status: 'paid',
             userId: citaData.userId,
           }),
-        });
-
-        // Enviar correos
-        const emailData = {
-          therapyType: citaData.therapyType,
-          date: citaData.date.toString(),
-          dayOfWeek: citaData.dayOfWeek,
-          fullDate: `de ${citaData.month} a las ${citaData.time}`,
-          userName: citaData.userName,
-          proName: citaData.proName,
-          userEmail: citaData.userEmail,
-          userProfession: citaData.userProfession,
-          userTel: citaData.userPhone,
-        };
-
-        // Email para usuario
-        await db.collection('mail').add({
-          to: citaData.userEmail,
-          message: {
-            subject: 'Confirmación de cita - GLOBTHERAPIST',
-            html: getEmailHtml({ ...emailData, collection: 'users' }),
-          },
-        });
-
-        // Email para profesional
-        await db.collection('mail').add({
-          to: citaData.proEmail,
-          message: {
-            subject: 'Nueva cita agendada - GLOBTHERAPIST',
-            html: getEmailHtml({ ...emailData, collection: 'pros' }),
-          },
         });
 
         await paymentRef.delete();

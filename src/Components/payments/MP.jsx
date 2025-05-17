@@ -17,7 +17,6 @@ const MP = ({
   const [price, setPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [availableBanks, setAvailableBanks] = useState([]);
-  const [entityType, setEntityType] = useState('individual');
   const navigate = useNavigate();
 
   const therapyPrices = {
@@ -27,7 +26,6 @@ const MP = ({
     ocupacional: 41000,
   };
 
-  // Verificar parámetros de URL al montar el componente
   useEffect(() => {
     const checkPaymentStatus = () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -41,7 +39,7 @@ const MP = ({
           icon: 'success',
           willClose: () => {
             onPaymentSuccess();
-            navigate(window.location.pathname, { replace: true }); // Limpiar URL
+            navigate(window.location.pathname, { replace: true });
           },
         });
       }
@@ -64,7 +62,6 @@ const MP = ({
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*',
             },
           },
         );
@@ -74,7 +71,7 @@ const MP = ({
         const { banks } = await banksResponse.json();
         setAvailableBanks(banks.map((bank) => ({
           id: bank.id,
-          name: bank.description,
+          name: bank.name,
         })));
 
         setPrice(therapyPrices[therapyType.toLowerCase()]);
@@ -97,26 +94,19 @@ const MP = ({
   const handleSubmit = async (rawFormData) => {
     setLoading(true);
     try {
-      // Validar metadata antes de procesar el pago
       validateMetadata();
 
-      // 1. Extraer datos del Brick
       const { formData: brickData } = rawFormData;
       const {
         payment_method_id: paymentMethodId,
-        token,
-        issuer_id: issuerId,
-        installments,
-        payer,
         transaction_details: transactionDetails,
+        payer,
       } = brickData;
 
-      // 2. Validaciones comunes
       if (!paymentMethodId || !payer?.email || !payer?.identification?.number) {
         throw new Error('Datos incompletos: Verifica la información del pago');
       }
 
-      // 3. Construir metadata
       const metadata = {
         citaData: {
           userId: currentUser.uid,
@@ -132,7 +122,6 @@ const MP = ({
         },
       };
 
-      // 4. Estructura base del payload
       const payload = {
         therapyType: therapyType.toLowerCase(),
         amount: price,
@@ -143,44 +132,33 @@ const MP = ({
           docType: payer.identification.type || 'CC',
           docNumber: String(payer.identification.number).replace(/\D/g, ''),
         },
-        // Campos específicos para tarjetas
-        ...(paymentMethodId !== 'pse' && {
-          cardData: {
-            token,
-            installments: installments || 1,
-            issuerId: issuerId?.toString() || '',
-          },
-        }),
-        // Campos específicos para PSE
-        ...(paymentMethodId === 'pse' && {
-          pseData: {
-            bank: String(transactionDetails?.financial_institution || '').padStart(4, '0'),
-            entityType,
-          },
-        }),
       };
 
-      // 5. Validaciones específicas para PSE
+      // Manejo específico para PSE
       if (paymentMethodId === 'pse') {
-        if (!payload.pseData?.bank || payload.pseData.bank.length !== 4) {
+        payload.pseData = {
+          bank: String(transactionDetails?.financial_institution || '').padStart(4, '0'),
+          entityType: payer.entity_type || 'individual',
+        };
+
+        if (!payload.pseData.bank || payload.pseData.bank.length !== 4) {
           throw new Error('Banco inválido: Selecciona un banco válido');
         }
-        if (!['individual', 'association'].includes(entityType)) {
-          throw new Error('Tipo de entidad: Selecciona un tipo válido');
-        }
       }
 
-      // 6. Validaciones específicas para tarjetas
+      // Manejo para tarjetas
       if (paymentMethodId !== 'pse') {
-        if (!token || typeof token !== 'string') {
+        payload.cardData = {
+          token: brickData.token,
+          installments: brickData.installments || 1,
+          issuerId: brickData.issuer_id?.toString() || '',
+        };
+
+        if (!payload.cardData.token) {
           throw new Error('Tarjeta inválida: Verifica los datos de la tarjeta');
         }
-        if (!installments || installments < 1) {
-          throw new Error('Cuotas inválidas: Selecciona un número válido');
-        }
       }
 
-      // 7. Enviar al backend
       const response = await fetch(
         'https://us-central1-globtherapist.cloudfunctions.net/createPayment',
         {
@@ -195,11 +173,8 @@ const MP = ({
 
       const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Error al procesar el pago');
-      }
+      if (!response.ok) throw new Error(result.error || 'Error al procesar el pago');
 
-      // 8. Manejar respuesta
       if (result.redirect_url) {
         window.location.href = result.redirect_url;
       } else {
@@ -235,18 +210,6 @@ const MP = ({
           <p>Procesando tu pago...</p>
         </div>
       )}
-
-      <div className="entity-type-selector">
-        <label>Tipo de entidad:</label>
-        <select
-          value={entityType}
-          onChange={(e) => setEntityType(e.target.value)}
-          disabled={loading}
-        >
-          <option value="individual">Persona Natural</option>
-          <option value="association">Empresa</option>
-        </select>
-      </div>
 
       {availableBanks.length > 0 && (
         <Payment
