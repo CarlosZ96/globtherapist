@@ -2,11 +2,23 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { MercadoPagoConfig, Payment, PaymentMethod } = require('mercadopago');
-const cors = require('cors')({ origin: true });
+const cors = require('cors')({
+  origin: true, // Permite cualquier origen
+  methods: ['POST', 'GET'], // Métodos permitidos
+  allowedHeaders: ['Content-Type', 'Authorization'], // Cabeceras permitidas
+});
+const express = require('express');
 
 admin.initializeApp();
 const db = admin.firestore();
 
+// Configuración de Express con manejo CORS mejorado
+const app = express();
+
+// Middleware para parsear JSON
+app.use(express.json());
+
+// Configuración de Mercado Pago
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN || 'TEST-2400667744553776-031717-f3674df0979637213ae96babb278b9e9-313341255',
 });
@@ -14,105 +26,134 @@ const client = new MercadoPagoConfig({
 const payment = new Payment(client);
 const paymentMethodClient = new PaymentMethod(client);
 
-exports.getPaymentMethods = functions.https.onRequest(async (req, res) => {
-  cors(req, res, async () => {
+// Función wrapper para manejar CORS correctamente
+const handleCors = (handler) => (req, res) => {
+  return cors(req, res, async () => {
     try {
-      const methods = await paymentMethodClient.get();
-      const pseMethod = methods.find((m) => m.id === 'pse');
-
-      if (!pseMethod) throw new Error('Método PSE no encontrado');
-
-      res.status(200).json({
-        banks: pseMethod.financial_institutions.map((b) => ({
-          id: String(b.id).padStart(4, '0'),
-          name: b.description,
-        })),
-        minAmount: pseMethod.min_allowed_amount,
-        maxAmount: pseMethod.max_allowed_amount,
-      });
+      await handler(req, res);
     } catch (error) {
-      functions.logger.error('Error en getPaymentMethods:', error);
-      res.status(500).json({
-        error: 'Error obteniendo métodos de pago',
-        details: error.message,
-      });
+      functions.logger.error('Error global:', error);
+      res.status(500).json({ error: error.message });
     }
   });
-});
+};
 
-exports.createPayment = functions.https.onRequest(async (req, res) => {
-  cors(req, res, async () => {
-    try {
-      const { body } = req;
-      const isPSE = body.paymentMethodId === 'pse';
-      if (isPSE && (!body.pseData || !body.pseData.bank)) {
-        throw new Error('Datos de PSE incompletos');
+exports.getPaymentMethods = functions.https.onRequest(handleCors(async (req, res) => {
+  try {
+    const methods = await paymentMethodClient.get();
+    const pseMethod = methods.find((m) => m.id === 'pse');
+
+    if (!pseMethod) throw new Error('Método PSE no encontrado');
+
+    res.status(200).json({
+      banks: pseMethod.financial_institutions.map((b) => ({
+        id: String(b.id).padStart(4, '0'),
+        name: b.description,
+      })),
+      minAmount: pseMethod.min_allowed_amount,
+      maxAmount: pseMethod.max_allowed_amount,
+    });
+  } catch (error) {
+    functions.logger.error('Error en getPaymentMethods:', error);
+    res.status(500).json({
+      error: 'Error obteniendo métodos de pago',
+      details: error.message,
+    });
+  }
+}));
+
+exports.createPayment = functions.https.onRequest(handleCors(async (req, res) => {
+  try {
+    const { body } = req;
+
+    // Validación mejorada
+    if (!body || Object.keys(body).length === 0) {
+      return res.status(400).json({ error: 'Cuerpo de solicitud vacío' });
+    }
+
+    const requiredFields = ['paymentMethodId', 'amount', 'therapyType', 'payerData'];
+    const missingFields = requiredFields.filter((field) => !body[field]);
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        error: 'Campos requeridos faltantes',
+        missing: missingFields,
+      });
+    }
+
+    const isPSE = body.paymentMethodId === 'pse';
+
+    if (isPSE) {
+      if (!body.pseData?.bank || !body.pseData?.entityType) {
+        return res.status(400).json({ error: 'Datos PSE incompletos' });
       }
-      const basePaymentData = {
-        transaction_amount: Number(body.amount),
-        description: `Terapia ${body.therapyType}`,
-        payment_method_id: body.paymentMethodId,
-        payer: {
-          email: body.payerData.email,
-          identification: {
-            type: body.payerData.docType,
-            number: String(body.payerData.docNumber).replace(/\D/g, ''),
-          },
+    }
+
+    // Construcción del payload segura
+    const basePaymentData = {
+      transaction_amount: Number(body.amount),
+      description: `Terapia ${body.therapyType}`,
+      payment_method_id: body.paymentMethodId,
+      payer: {
+        email: body.payerData.email || '',
+        identification: {
+          type: body.payerData.docType || 'CC',
+          number: String(body.payerData.docNumber || '').replace(/\D/g, ''),
         },
-        additional_info: {
-          ip_address: req.headers['x-forwarded-for'] || '127.0.0.1',
-        },
-        metadata: body.metadata,
+      },
+      additional_info: {
+        ip_address: req.headers['x-forwarded-for'] || '127.0.0.1',
+      },
+      metadata: body.metadata || {},
+    };
+
+    if (isPSE) {
+      basePaymentData.payer.entity_type = body.pseData.entityType;
+      basePaymentData.transaction_details = {
+        financial_institution: body.pseData.bank,
       };
-
-      if (isPSE) {
-        basePaymentData.payer.entity_type = body.pseData.entityType;
-        basePaymentData.transaction_details = {
-          financial_institution: body.pseData.bank,
-        };
-        basePaymentData.callback_url = 'https://globtherapist.vercel.app';
+      basePaymentData.callback_url = 'https://globtherapist.vercel.app';
+    } else {
+      if (!body.cardData?.token) {
+        return res.status(400).json({ error: 'Token de tarjeta requerido' });
       }
+      basePaymentData.token = body.cardData.token;
+      basePaymentData.installments = Number(body.cardData.installments) || 1;
+      basePaymentData.issuer_id = body.cardData.issuerId || '';
+    }
 
-      if (!isPSE) {
-        basePaymentData.token = body.cardData.token;
-        basePaymentData.installments = Number(body.cardData.installments);
-        basePaymentData.issuer_id = body.cardData.issuerId;
-      }
+    const result = await payment.create({
+      body: basePaymentData,
+      requestOptions: { idempotencyKey: crypto.randomUUID() },
+    });
 
-      const result = await payment.create({
-        body: basePaymentData,
-        requestOptions: { idempotencyKey: crypto.randomUUID() },
-      });
-
-      if (isPSE) {
-        await db.collection('pendingPayments').doc(result.id).set({
-          status: 'pending',
-          created: admin.firestore.FieldValue.serverTimestamp(),
-          ...body.metadata.citaData,
-        });
-      }
-
-      res.status(200).json({
-        id: result.id,
-        status: result.status,
-        redirect_url: result.transaction_details?.external_resource_url,
-      });
-    } catch (error) {
-      functions.logger.error('Error detallado:', {
-        errorData: error.response?.data,
-        requestBody: req.body,
-      });
-
-      const errorMessage = error.response?.data?.cause?.[0]?.description || error.message;
-
-      res.status(500).json({
-        error: 'Error procesando el pago',
-        code: error.response?.data?.error || 'MP_ERROR',
-        message: errorMessage,
+    if (isPSE) {
+      await db.collection('pendingPayments').doc(result.id).set({
+        status: 'pending',
+        created: admin.firestore.FieldValue.serverTimestamp(),
+        ...(body.metadata?.citaData || {}),
       });
     }
-  });
-});
+
+    res.status(200).json({
+      id: result.id,
+      status: result.status,
+      redirect_url: result.transaction_details?.external_resource_url,
+    });
+  } catch (error) {
+    functions.logger.error('Error detallado:', {
+      error: error.stack,
+      requestBody: req.body,
+    });
+
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      error: 'Error en el proceso de pago',
+      message: error.message,
+      details: error.response?.data || null,
+    });
+  }
+}));
 
 exports.mpWebhook = functions.https.onRequest(async (req, res) => {
   try {

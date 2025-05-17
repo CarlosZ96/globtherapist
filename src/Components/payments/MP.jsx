@@ -102,7 +102,9 @@ const MP = ({
         transaction_details: transactionDetails,
         payer,
       } = brickData;
-
+      if (!payer || typeof payer !== 'object') {
+        throw new Error('Datos del pagador no están disponibles');
+      }
       if (!paymentMethodId || !payer?.email || !payer?.identification?.number) {
         throw new Error('Datos incompletos: Verifica la información del pago');
       }
@@ -128,9 +130,9 @@ const MP = ({
         paymentMethodId,
         metadata,
         payerData: {
-          email: payer.email.trim(),
-          docType: payer.identification.type || 'CC',
-          docNumber: String(payer.identification.number).replace(/\D/g, ''),
+          email: payer.email?.trim() || formData.email,
+          docType: payer.identification?.type || 'CC',
+          docNumber: String(payer.identification?.number || '').replace(/\D/g, ''),
         },
       };
 
