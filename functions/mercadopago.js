@@ -3,9 +3,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { MercadoPagoConfig, Payment, PaymentMethod } = require('mercadopago');
 const cors = require('cors')({
-  origin: true, // Permite cualquier origen
-  methods: ['POST', 'GET'], // Métodos permitidos
-  allowedHeaders: ['Content-Type', 'Authorization'], // Cabeceras permitidas
+  methods: ['POST', 'GET'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 });
 const express = require('express');
 
