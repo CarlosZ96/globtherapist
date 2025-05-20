@@ -127,11 +127,23 @@ exports.createPayment = functions.https.onRequest(handleCors(async (req, res) =>
     });
 
     if (isPSE) {
-      await db.collection('pendingPayments').doc(result.id).set({
+      const transactionId = String(result.id || '').trim();
+      if (!transactionId || transactionId === '') {
+        functions.logger.error('ID de transacción inválido:', { result });
+        throw new Error('ID de transacción no válido recibido de MercadoPago');
+      }
+
+      const docRef = db.collection('pendingPayments').doc(transactionId);
+
+      await docRef.set({
         status: 'pending',
         created: admin.firestore.FieldValue.serverTimestamp(),
         ...(body.metadata?.citaData || {}),
+        transactionId,
+        mpRawId: result.id,
       });
+
+      functions.logger.info('Documento creado con ID:', transactionId);
     }
 
     res.status(200).json({
