@@ -52,7 +52,7 @@ const MP = ({
   useEffect(() => {
     const initializeMP = async () => {
       try {
-        await initMercadoPago(process.env.REACT_APP_MERCADOPAGO_PUBLIC_KEY || 'APP_USR-9fdff4d3-bbc8-4999-b53b-32831ad46395', {
+        await initMercadoPago(process.env.REACT_APP_MERCADOPAGO_PUBLIC_KEY, {
           locale: 'es-CO',
           advancedFraudPrevention: true,
         });

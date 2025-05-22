@@ -19,7 +19,7 @@ app.use(express.json());
 
 // Configuración de Mercado Pago
 const client = new MercadoPagoConfig({
-  accessToken: process.env.REACT_APP_MERCADOPAGO_ACCESS_TOKEN || 'APP_USR-2400667744553776-031717-c71c4ed05467e7ba9372f64b6668606f-313341255',
+  accessToken: process.env.REACT_APP_MERCADOPAGO_ACCESS_TOKEN,
 });
 
 const payment = new Payment(client);
