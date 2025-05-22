@@ -19,7 +19,7 @@ app.use(express.json());
 
 // Configuración de Mercado Pago
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN || 'TEST-2400667744553776-031717-f3674df0979637213ae96babb278b9e9-313341255',
+  accessToken: process.env.REACT_APP_MERCADOPAGO_ACCESS_TOKEN || 'APP_USR-2400667744553776-031717-c71c4ed05467e7ba9372f64b6668606f-313341255',
 });
 
 const payment = new Payment(client);
@@ -111,7 +111,7 @@ exports.createPayment = functions.https.onRequest(handleCors(async (req, res) =>
       basePaymentData.transaction_details = {
         financial_institution: body.pseData.bank,
       };
-      basePaymentData.callback_url = 'https://globtherapist.vercel.app';
+      basePaymentData.callback_url = 'https://globtherapist.vercel.app/';
     } else {
       if (!body.cardData?.token) {
         return res.status(400).json({ error: 'Token de tarjeta requerido' });
