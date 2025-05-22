@@ -4,6 +4,7 @@ import GlobMeeting from './Components/Meetings/GlobMeeting ';
 import './App.css';
 import Mainpage from './Components/Homepage';
 import EmailPreview from './Components/EmailPreview';
+import PaymentStatus from './Components/PaymentStatus';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<Mainpage />} />
         <Route path="/meeting" element={<GlobMeeting />} />
         <Route path="/Admin" element={<EmailPreview userName="CaredTest" />} />
+        <Route path="/payment-status" element={<PaymentStatus />} />
       </Routes>
     </div>
   );

@@ -1,9 +1,8 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
+import { initMercadoPago, Payment, StatusScreen } from '@mercadopago/sdk-react';
 import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import '../../stylesheets/MP.css';
 
 const MP = ({
@@ -17,7 +16,10 @@ const MP = ({
   const [price, setPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [availableBanks, setAvailableBanks] = useState([]);
+  const [paymentId, setPaymentId] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const therapyPrices = {
     mental: 80000,
@@ -27,26 +29,25 @@ const MP = ({
   };
 
   useEffect(() => {
-    const checkPaymentStatus = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const paymentStatus = urlParams.get('status');
-      const paymentId = urlParams.get('payment_id');
+    const paymentIdParam = searchParams.get('payment_id');
+    if (paymentIdParam) {
+      setPaymentId(paymentIdParam);
+    }
+  }, [searchParams]);
 
-      if (paymentStatus === 'approved' && paymentId) {
+  useEffect(() => {
+    const checkPaymentStatus = () => {
+      if (paymentId) {
         Swal.fire({
-          title: '¡Pago exitoso!',
-          text: 'Estamos procesando tu cita...',
-          icon: 'success',
-          willClose: () => {
-            onPaymentSuccess();
-            navigate(window.location.pathname, { replace: true });
-          },
+          title: 'Procesando pago...',
+          text: 'Estamos verificando el estado de tu transacción',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
         });
       }
     };
-
     checkPaymentStatus();
-  }, [navigate, onPaymentSuccess]);
+  }, [paymentId]);
 
   useEffect(() => {
     const initializeMP = async () => {
@@ -71,7 +72,7 @@ const MP = ({
         const { banks } = await banksResponse.json();
         setAvailableBanks(banks.map((bank) => ({
           id: bank.id,
-          name: bank.name,
+          name: bank.description,
         })));
 
         setPrice(therapyPrices[therapyType.toLowerCase()]);
@@ -102,11 +103,9 @@ const MP = ({
         transaction_details: transactionDetails,
         payer,
       } = brickData;
+
       if (!payer || typeof payer !== 'object') {
         throw new Error('Datos del pagador no están disponibles');
-      }
-      if (!paymentMethodId || !payer?.email || !payer?.identification?.number) {
-        throw new Error('Datos incompletos: Verifica la información del pago');
       }
 
       const metadata = {
@@ -136,7 +135,6 @@ const MP = ({
         },
       };
 
-      // Manejo específico para PSE
       if (paymentMethodId === 'pse') {
         payload.pseData = {
           bank: String(transactionDetails?.financial_institution || '').padStart(4, '0'),
@@ -146,10 +144,7 @@ const MP = ({
         if (!payload.pseData.bank || payload.pseData.bank.length !== 4) {
           throw new Error('Banco inválido: Selecciona un banco válido');
         }
-      }
-
-      // Manejo para tarjetas
-      if (paymentMethodId !== 'pse') {
+      } else {
         payload.cardData = {
           token: brickData.token,
           installments: brickData.installments || 1,
@@ -178,7 +173,7 @@ const MP = ({
       if (!response.ok) throw new Error(result.error || 'Error al procesar el pago');
 
       if (result.redirect_url) {
-        window.location.href = result.redirect_url;
+        setPaymentId(result.id);
       } else {
         onPaymentSuccess();
         Swal.fire({
@@ -213,39 +208,11 @@ const MP = ({
         </div>
       )}
 
-      {availableBanks.length > 0 && (
-        <Payment
-          initialization={{
-            amount: price,
-            payer: {
-              email: formData?.email || '',
-              identification: {
-                type: 'CC',
-                number: '',
-              },
-            },
-          }}
+      {paymentId ? (
+        <StatusScreen
+          initialization={{ paymentId }}
           customization={{
-            paymentMethods: {
-              bankTransfer: ['pse'],
-              creditCard: 'all',
-              debitCard: 'all',
-              maxInstallments: 1,
-            },
-            pse: {
-              financialInstitutions: availableBanks,
-              entityType: {
-                required: true,
-                options: ['individual', 'association'],
-              },
-            },
-            payer: {
-              requiredIdentification: true,
-              defaultIdentificationType: 'CC',
-              identificationTypes: ['CC', 'CE', 'NIT'],
-            },
             visual: {
-              hidePaymentButton: false,
               style: {
                 theme: 'dark',
                 customVariables: {
@@ -255,10 +222,60 @@ const MP = ({
               },
             },
           }}
-          onSubmit={async (brickFormData) => {
-            await handleSubmit(brickFormData);
+          onReady={() => Swal.close()}
+          onError={(error) => {
+            console.error('Error en Status Screen:', error);
+            Swal.fire('Error', 'Hubo un problema mostrando el estado del pago', 'error');
           }}
         />
+      ) : (
+        availableBanks.length > 0 && (
+          <Payment
+            initialization={{
+              amount: price,
+              payer: {
+                email: formData?.email || '',
+                identification: {
+                  type: 'CC',
+                  number: '',
+                },
+              },
+            }}
+            customization={{
+              paymentMethods: {
+                bankTransfer: ['pse'],
+                creditCard: 'all',
+                debitCard: 'all',
+                maxInstallments: 1,
+              },
+              pse: {
+                financialInstitutions: availableBanks,
+                entityType: {
+                  required: true,
+                  options: ['individual', 'association'],
+                },
+              },
+              payer: {
+                requiredIdentification: true,
+                defaultIdentificationType: 'CC',
+                identificationTypes: ['CC', 'CE', 'NIT'],
+              },
+              visual: {
+                hidePaymentButton: false,
+                style: {
+                  theme: 'dark',
+                  customVariables: {
+                    formBackgroundColor: '#212B42',
+                    baseColor: '#4F63C2',
+                  },
+                },
+              },
+            }}
+            onSubmit={async (brickFormData) => {
+              await handleSubmit(brickFormData);
+            }}
+          />
+        )
       )}
     </div>
   );
