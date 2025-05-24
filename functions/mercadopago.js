@@ -1,6 +1,7 @@
 /* eslint-disable consistent-return */
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+require('dotenv').config();
 const { MercadoPagoConfig, Payment, PaymentMethod } = require('mercadopago');
 const cors = require('cors')({
   methods: ['POST', 'GET'],
@@ -15,11 +16,10 @@ const app = express();
 app.use(express.json());
 
 const client = new MercadoPagoConfig({
-  accessToken: process.env.REACT_APP_MERCADOPAGO_ACCESS_TOKEN,
+  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
 });
 const payment = new Payment(client);
 const paymentMethodClient = new PaymentMethod(client);
-
 const handleCors = (handler) => (req, res) => {
   return cors(req, res, async () => {
     try {
@@ -37,7 +37,7 @@ exports.getPaymentMethods = functions.https.onRequest(handleCors(async (req, res
     const pseMethod = methods.find((m) => m.id === 'pse');
 
     if (!pseMethod) throw new Error('Método PSE no encontrado');
-
+    console.log('accessToken', process.env.REACT_APP_MERCADOPAGO_ACCESS_TOKEN);
     res.status(200).json({
       banks: pseMethod.financial_institutions.map((b) => ({
         id: String(b.id).padStart(4, '0'),

@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
 
   try {
     const token = RtmTokenBuilder.buildToken(
-      process.env.AGORA_APP_ID, // ¡Usa el mismo nombre de variable que en index.js!
+      process.env.AGORA_APP_ID,
       process.env.AGORA_APP_CERTIFICATE,
       userId,
       RtmRole.Rtm_User,
