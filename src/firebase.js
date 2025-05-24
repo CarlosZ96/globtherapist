@@ -21,8 +21,7 @@ const remoteConfig = getRemoteConfig(app);
 const storage = getStorage(app);
 
 remoteConfig.settings.minimumFetchIntervalMillis = 30000; // 30 segundos para desarrollo
-remoteConfig.settings.fetchTimeoutMillis = 60000; // 60 segundos de timeout
-
+remoteConfig.settings.fetchTimeoutMillis = 60000;
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export { remoteConfig, fetchAndActivate, getValue };

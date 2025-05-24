@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { initMercadoPago, Payment, StatusScreen } from '@mercadopago/sdk-react';
 import Swal from 'sweetalert2';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { remoteConfig, fetchAndActivate, getValue } from '../../firebase';
 import '../../stylesheets/MP.css';
 
 const MP = ({
@@ -21,6 +20,8 @@ const MP = ({
   // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const publicKey = process.env.REACT_APP_MERCADOPAGO_PUBLIC_KEY;
+  console.log('Public Key', publicKey);
 
   const therapyPrices = {
     mental: 80000,
@@ -53,13 +54,10 @@ const MP = ({
   useEffect(() => {
     const initializeMP = async () => {
       try {
-        await fetchAndActivate(remoteConfig);
-        const publicKey = getValue(remoteConfig, 'mercadopago_public_key').asString();
         await initMercadoPago(publicKey, {
           locale: 'es-CO',
           advancedFraudPrevention: true,
         });
-        console.log('publicKey:', publicKey);
         const banksResponse = await fetch(
           'https://us-central1-globtherapist.cloudfunctions.net/getPaymentMethods',
           {
