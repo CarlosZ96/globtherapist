@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getRemoteConfig, fetchAndActivate, getValue } from 'firebase/remote-config';
 import {
   getStorage, ref, uploadBytes, getDownloadURL,
 } from 'firebase/storage';
@@ -16,9 +17,15 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const remoteConfig = getRemoteConfig(app);
 const storage = getStorage(app);
+
+remoteConfig.settings.minimumFetchIntervalMillis = 30000; // 30 segundos para desarrollo
+remoteConfig.settings.fetchTimeoutMillis = 60000; // 60 segundos de timeout
+
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export { remoteConfig, fetchAndActivate, getValue };
 export {
   storage, ref, uploadBytes, getDownloadURL,
 };

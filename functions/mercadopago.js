@@ -11,21 +11,15 @@ const express = require('express');
 admin.initializeApp();
 const db = admin.firestore();
 
-// Configuración de Express con manejo CORS mejorado
 const app = express();
-
-// Middleware para parsear JSON
 app.use(express.json());
 
-// Configuración de Mercado Pago
 const client = new MercadoPagoConfig({
   accessToken: process.env.REACT_APP_MERCADOPAGO_ACCESS_TOKEN,
 });
-
 const payment = new Payment(client);
 const paymentMethodClient = new PaymentMethod(client);
 
-// Función wrapper para manejar CORS correctamente
 const handleCors = (handler) => (req, res) => {
   return cors(req, res, async () => {
     try {
@@ -65,7 +59,6 @@ exports.createPayment = functions.https.onRequest(handleCors(async (req, res) =>
   try {
     const { body } = req;
 
-    // Validación mejorada
     if (!body || Object.keys(body).length === 0) {
       return res.status(400).json({ error: 'Cuerpo de solicitud vacío' });
     }
