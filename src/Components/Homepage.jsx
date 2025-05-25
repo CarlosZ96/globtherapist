@@ -39,8 +39,8 @@ const Homepage = () => {
   };
 
   const pendingAppointmentsCount = currentPro
-    ? (currentPro.MisCitas?.filter((cita) => cita.status === 'pending').length || 0)
-    : (userData?.Citas?.filter((cita) => cita.status === 'pending').length || 0);
+    ? (currentPro.MisCitas?.filter((cita) => cita.status === 'pay_pending').length || 0)
+    : (userData?.Citas?.filter((cita) => cita.status === 'pay_pending').length || 0);
 
   const renderContent = () => {
     if (currentPro) return <ProSpace />;
