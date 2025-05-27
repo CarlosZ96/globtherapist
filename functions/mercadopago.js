@@ -1,6 +1,7 @@
 /* eslint-disable consistent-return */
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+require('dotenv').config();
 const { MercadoPagoConfig, Payment, PaymentMethod } = require('mercadopago');
 const cors = require('cors')({
   methods: ['POST', 'GET'],
@@ -11,21 +12,14 @@ const express = require('express');
 admin.initializeApp();
 const db = admin.firestore();
 
-// Configuración de Express con manejo CORS mejorado
 const app = express();
-
-// Middleware para parsear JSON
 app.use(express.json());
 
-// Configuración de Mercado Pago
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN || 'TEST-2400667744553776-031717-f3674df0979637213ae96babb278b9e9-313341255',
+  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
 });
-
 const payment = new Payment(client);
 const paymentMethodClient = new PaymentMethod(client);
-
-// Función wrapper para manejar CORS correctamente
 const handleCors = (handler) => (req, res) => {
   return cors(req, res, async () => {
     try {
@@ -43,7 +37,7 @@ exports.getPaymentMethods = functions.https.onRequest(handleCors(async (req, res
     const pseMethod = methods.find((m) => m.id === 'pse');
 
     if (!pseMethod) throw new Error('Método PSE no encontrado');
-
+    console.log('accessToken', process.env.REACT_APP_MERCADOPAGO_ACCESS_TOKEN);
     res.status(200).json({
       banks: pseMethod.financial_institutions.map((b) => ({
         id: String(b.id).padStart(4, '0'),
@@ -65,7 +59,6 @@ exports.createPayment = functions.https.onRequest(handleCors(async (req, res) =>
   try {
     const { body } = req;
 
-    // Validación mejorada
     if (!body || Object.keys(body).length === 0) {
       return res.status(400).json({ error: 'Cuerpo de solicitud vacío' });
     }
@@ -111,7 +104,7 @@ exports.createPayment = functions.https.onRequest(handleCors(async (req, res) =>
       basePaymentData.transaction_details = {
         financial_institution: body.pseData.bank,
       };
-      basePaymentData.callback_url = 'https://globtherapist.vercel.app';
+      basePaymentData.callback_url = 'https://globtherapist.vercel.app/';
     } else {
       if (!body.cardData?.token) {
         return res.status(400).json({ error: 'Token de tarjeta requerido' });

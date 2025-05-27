@@ -11,7 +11,7 @@ const HostNotification = () => {
   const { meetingAccess, setMeetingAccess } = useAuth();
   const [showDetails, setShowDetails] = useState(false);
 
-  if (meetingAccess !== 'pending') return null;
+  if (meetingAccess !== 'pay_pending') return null;
 
   return (
     <div

@@ -322,7 +322,7 @@ const Therapy = () => {
         duration: 40,
         therapyType: normalizeText(formData.therapyType),
         description: formData.description,
-        status: 'paid',
+        status: 'pay_pending',
         uid: citaGlobal.uid,
         proName: proData.username || 'Profesional',
         proUid: selectedPro,

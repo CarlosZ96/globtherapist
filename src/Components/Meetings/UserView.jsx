@@ -139,7 +139,7 @@ const UserView = ({ meetingParams }) => {
   };
 
   const requestAccess = () => {
-    setMeetingAccess('pending');
+    setMeetingAccess('pay_pending');
     console.log('Solicitud de acceso enviada');
   };
 
@@ -155,7 +155,7 @@ const UserView = ({ meetingParams }) => {
 
       {meetingAccess !== 'approved' ? (
         <div className="UserView-request-container">
-          {meetingAccess === 'pending' ? (
+          {meetingAccess === 'pay_pending' ? (
             <p>Esperando aprobación del host...</p>
           ) : (
             <div className="waitng-room">
