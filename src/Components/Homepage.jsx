@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState } from 'react';
 import '../stylesheets/homepage.css';
@@ -10,6 +12,7 @@ import close from '../img/Closegt.png';
 import Create from './windows/Create';
 import CreatePro from './CreatePro';
 import Dates from './Mydates/Dates';
+import Who from './windows/Who';
 import { useAuth } from '../AuthContext';
 
 const Homepage = () => {
@@ -21,7 +24,8 @@ const Homepage = () => {
   const [showCreatePro, setShowCreatePro] = useState(false);
   const [showDates, setShowDates] = useState(false);
   const [showNotification, setShowNotification] = useState(true);
-
+  const [showWho, setShowWho] = useState(false);
+  const toggleWho = () => setShowWho((prev) => !prev);
   const toggleDates = () => setShowDates((prev) => !prev);
   const toggleLogin = () => setShowLogin((prev) => !prev);
   const toggleCreate = () => setShowCreate((prev) => !prev);
@@ -59,7 +63,7 @@ const Homepage = () => {
           style={currentUser ? userStyles.homeWindows : noUserStyles.homeWindows}
         >
           <h2>Especialistas</h2>
-          <h2>¿Quiénes somos?</h2>
+          <button type="button" onClick={toggleWho} className="text-button">¿Quiénes somos?</button>
         </div>
         {!currentUser ? (
           <div className="Log-Btn-Cont" style={noUserStyles.logBtnCont}>
@@ -116,7 +120,13 @@ const Homepage = () => {
           </div>
         )}
       </header>
-
+      {showWho && (
+        <div className="modal-overlay" onClick={toggleWho}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <Who onClose={toggleWho} />
+          </div>
+        </div>
+      )}
       {showDates && (
         <div className="modal-overlay">
           <div className="modal-content">
