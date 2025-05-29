@@ -9,35 +9,34 @@ import sub from '../../img/submit.png';
 const ChatComponent = ({ clientId, channelId }) => {
   const APP_ID = process.env.REACT_APP_AGORA_APP_ID;
   const functionsBaseUrl = process.env.REACT_APP_FUNCTIONS_BASE_URL;
-
+  const [connectionState, setConnectionState] = useState('DISCONNECTED');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const rtmClient = useRef(null);
   const channel = useRef(null);
-  const { getUsername } = useAuth(); // Función que obtiene el nombre desde Firebase
+  const { getUsername } = useAuth();
   const [usernames, setUsernames] = useState({});
 
   const fetchUsername = async (uid) => {
     if (!usernames[uid]) {
-      const name = await getUsername(uid); // Implementa esta función en AuthContext
+      const name = await getUsername(uid);
       setUsernames((prev) => ({ ...prev, [uid]: name }));
     }
   };
 
   useEffect(() => {
     if (clientId) {
-      fetchUsername(clientId); // Precarga el nombre del usuario actual (quien envía mensajes)
+      fetchUsername(clientId);
     }
-  }, [clientId]); // Se ejecuta cuando clientId cambia
+  }, [clientId]);
 
-  // Inicializar RTM (useEffect existente)
   useEffect(() => {
     const initRTM = async () => { /* ... */ };
     if (clientId && channelId) initRTM();
     return () => { /* ... */ };
   }, [clientId, channelId]);
-  // Obtener token RTM desde Firebase
+
   const getRtmToken = async (uid) => {
     const response = await fetch(
       `${functionsBaseUrl}/createAgoraChatToken?userId=${uid}&channelId=${channelId}`,
@@ -46,27 +45,31 @@ const ChatComponent = ({ clientId, channelId }) => {
     return data.token;
   };
 
-  // Inicializar RTM
   useEffect(() => {
     const initRTM = async () => {
       try {
-        // Inicializa el cliente RTM con modo "rtm"
         rtmClient.current = AgoraRTM.createInstance(APP_ID, {
           enableLogUpload: false,
           logFilter: AgoraRTM.LOG_FILTER_OFF,
         });
-
-        // Autenticación con token (usando tu función getRtmToken)
         const token = await getRtmToken(clientId);
         await rtmClient.current.login({ uid: clientId, token });
-
-        // Únete al canal (mismo que la videollamada)
         channel.current = rtmClient.current.createChannel(channelId);
         await channel.current.join();
-
-        // Escucha mensajes
+        rtmClient.current.on('ConnectionStateChanged', (newState) => {
+          console.log('Estado conexión RTM:', newState);
+          setConnectionState(newState);
+        });
+        rtmClient.current.on('TokenExpired', async () => {
+          try {
+            const newToken = await getRtmToken(clientId);
+            await rtmClient.current.renewToken(newToken);
+          } catch (renewError) {
+            console.error('Error renovando token:', renewError);
+          }
+        });
         channel.current.on('ChannelMessage', async (msg, memberId) => {
-          const username = await getUsername(memberId); // Obtén el nombre primero
+          const username = await getUsername(memberId);
           setUsernames((prev) => ({ ...prev, [memberId]: username }));
           setMessages((prev) => [...prev, { senderId: memberId, text: msg.text }]);
         });
@@ -81,28 +84,49 @@ const ChatComponent = ({ clientId, channelId }) => {
 
     if (clientId && channelId) initRTM();
 
-    // Limpiar al desmontar
     return () => {
       if (channel.current) channel.current.leave();
       if (rtmClient.current) rtmClient.current.logout();
     };
   }, [clientId, channelId]);
 
-  // Enviar mensaje
   const sendMessage = async () => {
     if (!message.trim() || !isConnected) return;
-
+    if (connectionState !== 'CONNECTED') {
+      console.error('No se puede enviar: Conexión RTM no establecida');
+      return;
+    }
     try {
-      await channel.current.sendMessage({ text: message });
+      await rtmClient.current.sendMessageToChannel(
+        channelId,
+        { text: message },
+        { enableHistoricalMessaging: true },
+      );
       setMessages((prev) => [...prev, { senderId: clientId, text: message }]);
       setMessage('');
     } catch (error) {
       console.error('Error enviando mensaje:', error);
+      if (error.code === 'RTM_CHANNEL_NOT_JOINED') {
+        console.warn('Reintentando unirse al canal...');
+        try {
+          await channel.current.join();
+          await rtmClient.current.sendMessageToChannel(/* ... */);
+        } catch (rejoinError) {
+          console.error('Error al reenviar:', rejoinError);
+        }
+      }
     }
   };
 
   return (
     <div className="chat-room-cont">
+      {connectionState !== 'CONNECTED' && (
+      <div className="connection-warning">
+        Estado conexión:
+        {' '}
+        {connectionState}
+      </div>
+      )}
       <div className="chat-roon-txt-area">
         <div className="chat-room-users-txt">
           {messages.map((msg) => (
