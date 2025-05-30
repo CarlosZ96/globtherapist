@@ -3,12 +3,10 @@ const functions = require('firebase-functions');
 const { RtmTokenBuilder, RtmRole } = require('agora-access-token');
 
 exports.createAgoraChatToken = functions.https.onRequest(async (req, res) => {
-  // Configurar CORS manualmente
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  // Manejar solicitud preflight OPTIONS
   if (req.method === 'OPTIONS') {
     return res.status(204).send();
   }
