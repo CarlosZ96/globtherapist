@@ -34,7 +34,18 @@ const ChatComponent = ({ clientId, channelId }) => {
   const getRtmToken = async (uid) => {
     const response = await fetch(
       `${functionsBaseUrl}/createAgoraChatToken?userId=${uid}&channelId=${channelId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
     );
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
     const data = await response.json();
     return data.token;
   };
@@ -59,7 +70,7 @@ const ChatComponent = ({ clientId, channelId }) => {
           console.log('Estado conexión RTM:', newState, 'Razón:', reason);
           setConnectionState(newState);
 
-          if (newState === 'DISCONNECTED' && reason === 'REMOTE_LOGIN') {
+          if (newState === 'DISCONNECTED') {
             console.log('Reconectando...');
             setTimeout(initRTM, 5000);
           }
@@ -92,7 +103,6 @@ const ChatComponent = ({ clientId, channelId }) => {
         console.log('Conexión RTM establecida correctamente');
       } catch (error) {
         console.error('Error RTM:', error);
-        // Intentar reconectar cada 5 segundos
         setTimeout(initRTM, 5000);
       }
     };
@@ -101,10 +111,10 @@ const ChatComponent = ({ clientId, channelId }) => {
 
     return () => {
       if (channel.current) {
-        channel.current.leave();
+        channel.current.leave().catch((e) => console.error('Error al salir del canal:', e));
       }
       if (rtmClient.current) {
-        rtmClient.current.logout();
+        rtmClient.current.logout().catch((e) => console.error('Error al cerrar sesión:', e));
       }
     };
   }, [clientId, channelId]);
@@ -113,12 +123,10 @@ const ChatComponent = ({ clientId, channelId }) => {
     if (!message.trim() || !isConnected) return;
 
     try {
-      // CORRECCIÓN CLAVE: Usar el objeto channel para enviar mensajes
       await channel.current.sendMessage({
         text: message,
       });
 
-      // Actualizar la UI con el mensaje enviado
       setMessages((prev) => [...prev, {
         senderId: clientId,
         text: message,
@@ -129,7 +137,6 @@ const ChatComponent = ({ clientId, channelId }) => {
     } catch (error) {
       console.error('Error enviando mensaje:', error);
 
-      // Manejar error específico de canal no unido
       if (error.code === 'RTM_CHANNEL_NOT_JOINED') {
         console.warn('Reintentando unirse al canal...');
         try {
@@ -156,7 +163,7 @@ const ChatComponent = ({ clientId, channelId }) => {
           {messages.map((msg) => (
             <div
               className="user-msg-cont"
-              key={`${msg.senderId}-${msg.timestamp}`} // Usar timestamp único
+              key={`${msg.senderId}-${msg.timestamp}`}
             >
               <strong>
                 {`${usernames[msg.senderId] || 'Cargando...'}: `}
@@ -174,7 +181,11 @@ const ChatComponent = ({ clientId, channelId }) => {
             placeholder="Escribe un mensaje..."
             onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
           />
-          <button className="chat-btn" onClick={sendMessage} disabled={!isConnected}>
+          <button
+            className="chat-btn"
+            onClick={sendMessage}
+            disabled={!isConnected}
+          >
             <img src={sub} alt="Enviar mensaje" />
           </button>
         </div>
