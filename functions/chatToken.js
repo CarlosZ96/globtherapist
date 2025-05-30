@@ -3,19 +3,18 @@ const functions = require('firebase-functions');
 const { RtmTokenBuilder, RtmRole } = require('agora-access-token');
 
 exports.createAgoraChatToken = functions.https.onRequest(async (req, res) => {
-  // Configurar CORS
+  // Configurar CORS manualmente
   res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'GET');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  // Manejar solicitud preflight
+  // Manejar solicitud preflight OPTIONS
   if (req.method === 'OPTIONS') {
-    return res.status(200).send();
+    return res.status(204).send();
   }
 
   try {
-    const { userId } = req.query;
-    const { channelId } = req.query;
+    const { userId, channelId } = req.query;
 
     if (!userId || !channelId) {
       return res.status(400).json({
@@ -36,7 +35,7 @@ exports.createAgoraChatToken = functions.https.onRequest(async (req, res) => {
     const currentTimestamp = Math.floor(Date.now() / 1000);
     const privilegeExpireTime = currentTimestamp + expireTime;
 
-    // CORRECCIÓN: Usar token RTM correcto
+    // Construir token RTM
     const token = RtmTokenBuilder.buildToken(
       appId,
       appCertificate,
