@@ -104,7 +104,7 @@ exports.createPayment = functions.https.onRequest(handleCors(async (req, res) =>
       basePaymentData.transaction_details = {
         financial_institution: body.pseData.bank,
       };
-      basePaymentData.callback_url = 'https://globtherapist.vercel.app/';
+      basePaymentData.callback_url = 'https://globtherapist.vercel.app';
     } else {
       if (!body.cardData?.token) {
         return res.status(400).json({ error: 'Token de tarjeta requerido' });

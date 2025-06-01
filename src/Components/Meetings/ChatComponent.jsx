@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/control-has-associated-label */
-/* eslint-disable react/button-has-type */
 import React, { useEffect, useRef, useState } from 'react';
 import AgoraRTM from 'agora-rtm-sdk';
 import PropTypes from 'prop-types';
@@ -32,22 +30,25 @@ const ChatComponent = ({ clientId, channelId }) => {
   }, [clientId]);
 
   const getRtmToken = async (uid) => {
-    const response = await fetch(
-      `${functionsBaseUrl}/createAgoraChatToken?userId=${uid}&channelId=${channelId}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
+    try {
+      const response = await fetch(
+        `${functionsBaseUrl}/createAgoraChatToken?userId=${uid}&channelId=${channelId}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
         },
-      },
-    );
+      );
 
-    if (!response.ok) {
-      throw new Error(`Error en la solicitud: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.token;
+    } catch (error) {
+      console.error('Error fetching RTM token:', error);
+      throw error;
     }
-
-    const data = await response.json();
-    return data.token;
   };
 
   useEffect(() => {
@@ -182,6 +183,7 @@ const ChatComponent = ({ clientId, channelId }) => {
             onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
           />
           <button
+            type="button"
             className="chat-btn"
             onClick={sendMessage}
             disabled={!isConnected}
