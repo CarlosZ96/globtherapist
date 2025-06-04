@@ -7,7 +7,6 @@ import sub from '../../img/submit.png';
 const ChatComponent = ({ clientId, channelId }) => {
   const APP_ID = process.env.REACT_APP_AGORA_APP_ID;
   const functionsBaseUrl = process.env.REACT_APP_FUNCTIONS_BASE_URL;
-  const [connectionState, setConnectionState] = useState('DISCONNECTED');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -69,7 +68,6 @@ const ChatComponent = ({ clientId, channelId }) => {
 
         rtmClient.current.on('ConnectionStateChanged', (newState, reason) => {
           console.log('Estado conexión RTM:', newState, 'Razón:', reason);
-          setConnectionState(newState);
 
           if (newState === 'DISCONNECTED') {
             console.log('Reconectando...');
@@ -152,13 +150,6 @@ const ChatComponent = ({ clientId, channelId }) => {
 
   return (
     <div className="chat-room-cont">
-      {connectionState !== 'CONNECTED' && (
-        <div className="connection-warning">
-          Estado conexión:
-          {' '}
-          {connectionState}
-        </div>
-      )}
       <div className="chat-roon-txt-area">
         <div className="chat-room-users-txt">
           {messages.map((msg) => (
