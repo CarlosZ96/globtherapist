@@ -302,7 +302,7 @@ const Calendar = ({
                     <button className="time-button" type="button" onClick={() => incrementTime(setStartTime, startTime, endTime - 1)}>
                       <img src={up} alt="" />
                     </button>
-                    <button className="time-button" type="button" onClick={() => decrementTime(setStartTime, startTime, 8)}>
+                    <button className="time-button" type="button" onClick={() => decrementTime(setStartTime, startTime, 6)}>
                       <img src={dwn} alt="" />
                     </button>
                   </div>
@@ -328,13 +328,13 @@ const Calendar = ({
             <div className="Hours-selector">
               <h3>¿A que hora?:</h3>
               <div className="Time-control">
-                <button type="button" onClick={() => decrementTime(setSelectedTime, selectedTime, 7)}>-</button>
+                <button type="button" onClick={() => decrementTime(setSelectedTime, selectedTime, 6)}>-</button>
                 <div className="Time-hour-txt">
                   <h3>
                     {formatTimeRange(selectedTime)}
                   </h3>
                 </div>
-                <button type="button" onClick={() => incrementTime(setSelectedTime, selectedTime, 22)}>+</button>
+                <button type="button" onClick={() => incrementTime(setSelectedTime, selectedTime, 23)}>+</button>
               </div>
             </div>
           )}

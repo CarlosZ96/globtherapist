@@ -3,7 +3,7 @@ import { useState } from 'react';
 const useDateTime = (initialTime = 8, initialEndTime = 22) => {
   const [startTime, setStartTime] = useState(initialTime);
   const [endTime, setEndTime] = useState(initialEndTime);
-  const [selectedTime, setSelectedTime] = useState(7);
+  const [selectedTime, setSelectedTime] = useState(6);
 
   const incrementTime = (setter, current, max) => {
     if (current < max) setter(current + 1);

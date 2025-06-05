@@ -18,7 +18,12 @@ const Therapy = () => {
   const {
     currentUser, updateUserCitas, updateProMisCitas, pros, citaGlobal, setCitaGlobal,
   } = useAuth();
-
+  const therapyPrices = {
+    Fisica: 70000,
+    Lenguaje: 55000,
+    Mental: 80000,
+    Ocupacional: 41000,
+  };
   const normalizeText = (text) => {
     return text
       .normalize('NFD')
@@ -547,6 +552,19 @@ const Therapy = () => {
                 ) : (
                   <p>No hay una cita seleccionada.</p>
                 )}
+                <div className="therapy-price-info">
+                  <p>
+                    <strong>Terapia:</strong>
+                    {' '}
+                    {formData.therapyType}
+                  </p>
+                  <p>
+                    <strong>Precio:</strong>
+                    {' '}
+                    $
+                    {therapyPrices[formData.therapyType]?.toLocaleString('es-CO')}
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -570,7 +588,7 @@ const Therapy = () => {
             </div>
           )}
           <button type="submit" className="DynamiCanlendar-btn">
-            <h4>Confirmar</h4>
+            <h4>Confirmar e ir a pagar</h4>
           </button>
         </div>
       </div>

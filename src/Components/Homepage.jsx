@@ -11,6 +11,7 @@ import Login from './windows/login';
 import close from '../img/Closegt.png';
 import Create from './windows/Create';
 import CreatePro from './CreatePro';
+import ProsCards from './windows/ProsCards';
 import Dates from './Mydates/Dates';
 import Who from './windows/Who';
 import { useAuth } from '../AuthContext';
@@ -25,6 +26,9 @@ const Homepage = () => {
   const [showDates, setShowDates] = useState(false);
   const [showNotification, setShowNotification] = useState(true);
   const [showWho, setShowWho] = useState(false);
+  const [showPros, setShowPros] = useState(false);
+  const globodyRef = React.useRef(null);
+  const togglePros = () => setShowPros((prev) => !prev);
   const toggleWho = () => setShowWho((prev) => !prev);
   const toggleDates = () => setShowDates((prev) => !prev);
   const toggleLogin = () => setShowLogin((prev) => !prev);
@@ -46,10 +50,16 @@ const Homepage = () => {
     ? (currentPro.MisCitas?.filter((cita) => cita.status === 'pay_pending').length || 0)
     : (userData?.Citas?.filter((cita) => cita.status === 'pay_pending').length || 0);
 
+  const handleScheduleClick = () => {
+    if (globodyRef.current) {
+      globodyRef.current.scrollToTherapy();
+    }
+  };
+
   const renderContent = () => {
     if (currentPro) return <ProSpace />;
     if (userData?.role === 'admin') return <Admin />;
-    return <Globody />;
+    return <Globody ref={globodyRef} onScheduleClick={handleScheduleClick} />;
   };
 
   return (
@@ -62,7 +72,13 @@ const Homepage = () => {
           className="Home-windows"
           style={currentUser ? userStyles.homeWindows : noUserStyles.homeWindows}
         >
-          <h2>Especialistas</h2>
+          <button
+            type="button"
+            onClick={togglePros}
+            className="text-button"
+          >
+            <h2>Especialistas</h2>
+          </button>
           <button type="button" onClick={toggleWho} className="text-button">¿Quiénes somos?</button>
         </div>
         {!currentUser ? (
@@ -137,9 +153,14 @@ const Homepage = () => {
           </div>
         </div>
       )}
-
+      {showPros && (
+        <div className="modal-overlay" onClick={togglePros}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <ProsCards onClose={togglePros} />
+          </div>
+        </div>
+      )}
       {renderContent()}
-
       <div style={{ display: showLogin ? 'block' : 'none' }}>
         <Login toggleLogin={toggleLogin} />
       </div>

@@ -5,6 +5,7 @@ import {
 } from 'firebase/firestore';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../firebase';
+import '../../stylesheets/procards.css';
 import close from '../../img/Closegt.png';
 
 const ProsCards = ({ onClose }) => {
@@ -15,19 +16,14 @@ const ProsCards = ({ onClose }) => {
   useEffect(() => {
     const fetchRandomPros = async () => {
       try {
-        // Obtener todos los profesionales
         const q = collection(db, 'pros');
         const querySnapshot = await getDocs(q);
         const allPros = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-
-        // Seleccionar hasta 3 aleatorios
         const shuffled = allPros.sort(() => 0.5 - Math.random());
         const selectedPros = shuffled.slice(0, Math.min(3, shuffled.length));
-
-        // Para cada profesional, obtener la URL de la imagen
         const prosWithImages = await Promise.all(selectedPros.map(async (pro) => {
           const imageRef = ref(storage, `profileImages/${pro.id}`);
           try {
