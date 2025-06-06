@@ -77,10 +77,39 @@
 }
 
 .cita-time-cont {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     width: 10%;
+    color: #fff;
+    background-color: #041B5E;
+    padding: 0.2%;
+    border-radius: 5px;
 }
 
 .reunion-btn {
-    height: 80%;
-    width: 6%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 8%;
+    background-color: #041B5E;
+    border: none;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.reunion-btn img {
+    width: 58%;
+    height: 58%;
+    object-fit: contain;
+}
+
+.cita-pro-name{
+    font-size: 3.5vw;
+    font-family: Itim, serif;
+    color: #041B5E;
+    font-weight: lighter;
 }

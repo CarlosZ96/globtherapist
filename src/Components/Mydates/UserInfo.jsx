@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
@@ -5,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../AuthContext';
 import { auth, db } from '../../firebase';
+import submit from '../../img/submit.png';
 import '../../stylesheets/userInfo.css';
 
 const UserInfo = ({ citas }) => {
@@ -88,7 +90,7 @@ const UserInfo = ({ citas }) => {
                 });
               }}
             >
-              Ir
+              <img src={submit} alt="" />
             </button>
           </div>
         ))}

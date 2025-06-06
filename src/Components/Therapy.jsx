@@ -317,7 +317,6 @@ const Therapy = () => {
           .toLowerCase(); // ej: "lun"
       };
 
-      // Construir objeto de cita con todos los datos necesarios
       const userCita = {
         date: citaGlobal.date,
         month: citaGlobal.month,
@@ -329,7 +328,7 @@ const Therapy = () => {
         description: formData.description,
         status: 'pay_pending',
         uid: citaGlobal.uid,
-        proName: proData.username || 'Profesional',
+        proName: proData.Nombre || 'Profesional',
         proUid: selectedPro,
         dayOfWeek: getDayOfWeek(), // Nuevo campo calculado
       };
@@ -360,7 +359,7 @@ const Therapy = () => {
         dayOfWeek: userCita.dayOfWeek,
         fullDate: `de ${citaGlobal.month} a las ${citaGlobal.time}`,
         userName: formData.name,
-        proName: proData.username || 'Profesional',
+        proName: proData.Nombre || 'Profesional',
         userEmail: proData.email, // Para email de usuario
         userProfession: proData.profesion || 'Profesional de salud', // Campo de Firestore
         userTel: formData.phone,
