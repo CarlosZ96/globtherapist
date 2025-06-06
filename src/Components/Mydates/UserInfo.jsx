@@ -1,5 +1,4 @@
-/* eslint-disable jsx-a11y/control-has-associated-label */
-/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable no-nested-ternary */
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
@@ -9,13 +8,12 @@ import { auth, db } from '../../firebase';
 import submit from '../../img/submit.png';
 import '../../stylesheets/userInfo.css';
 
-const UserInfo = ({ citas }) => {
+const UserInfo = ({ citas, title, emptyMessage }) => {
   const navigate = useNavigate();
   const { setCitaGlobal } = useAuth();
+  // eslint-disable-next-line no-unused-vars
   const [userData, setuserData] = useState(null);
-  if (!citas || citas.length === 0) {
-    return <div className="no-citas">No tienes citas programadas</div>;
-  }
+
   useEffect(() => {
     const fetchUserData = async () => {
       const user = auth.currentUser;
@@ -35,22 +33,28 @@ const UserInfo = ({ citas }) => {
     fetchUserData();
   }, []);
 
+  if (!citas || citas.length === 0) {
+    return (
+      <div className="user-citas-container">
+        <h2>{title}</h2>
+        <div className="no-citas">{emptyMessage}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="user-citas-container">
-      <div className="user-win-name-cont">
-        {userData ? (
-          <h1>
-            {userData}
-          </h1>
-        ) : <h1>Cargando usuario...</h1>}
-      </div>
+      <h2>{title}</h2>
       <div className="citas-cont">
         {citas.map((cita) => (
           <div key={cita.id} className="cita-card">
             <div className="cita-info">
               <div className="cita-field-date">
-                <p>{cita.month}</p>
-                <p>{cita.date}</p>
+                <p>
+                  {cita.month}
+                  {' '}
+                  {cita.date}
+                </p>
               </div>
               <div className="cita-pro-cont">
                 <p className="cita-pro-name">
@@ -62,36 +66,46 @@ const UserInfo = ({ citas }) => {
                   {cita.time}
                 </p>
               </div>
+              <div className="cita-status">
+                <p className={`status-${cita.status}`}>
+                  {cita.status === 'pay_pending' ? 'Pago Pendiente'
+                   : cita.status === 'pending' ? 'Pendiente' : 'Finalizada'}
+                </p>
+              </div>
             </div>
-            <button
-              type="button"
-              className="reunion-btn"
-              onClick={() => {
-                setCitaGlobal({
-                  uid: cita.uid,
-                  startTime: cita.time,
-                  date: Number(cita.date),
-                  month: cita.month,
-                  therapyType: cita.therapyType,
-                  description: cita.description,
-                  status: cita.status,
-                  proName: cita.proName,
-                });
-                navigate('/meeting', {
-                  state: {
-                    cita: {
-                      uid: cita.uid,
-                      startTime: cita.time,
-                      date: Number(cita.date),
-                      month: cita.month,
+            {cita.status === 'pay_pending' || cita.status === 'pending' ? (
+              <button
+                type="button"
+                className="reunion-btn"
+                onClick={() => {
+                  setCitaGlobal({
+                    uid: cita.uid,
+                    startTime: cita.time,
+                    date: Number(cita.date),
+                    month: cita.month,
+                    therapyType: cita.therapyType,
+                    description: cita.description,
+                    status: cita.status,
+                    proName: cita.proName,
+                  });
+                  navigate('/meeting', {
+                    state: {
+                      cita: {
+                        uid: cita.uid,
+                        startTime: cita.time,
+                        date: Number(cita.date),
+                        month: cita.month,
+                      },
+                      collection: 'users',
                     },
-                    collection: 'users',
-                  },
-                });
-              }}
-            >
-              <img src={submit} alt="" />
-            </button>
+                  });
+                }}
+              >
+                <img src={submit} alt="Ir a reunión" />
+              </button>
+            ) : (
+              <div className="completed-badge">✓</div>
+            )}
           </div>
         ))}
       </div>
@@ -101,6 +115,8 @@ const UserInfo = ({ citas }) => {
 
 UserInfo.defaultProps = {
   citas: [],
+  title: 'Citas',
+  emptyMessage: 'No tienes citas programadas',
 };
 
 UserInfo.propTypes = {
@@ -116,6 +132,8 @@ UserInfo.propTypes = {
       description: PropTypes.string,
     }),
   ),
+  title: PropTypes.string,
+  emptyMessage: PropTypes.string,
 };
 
 export default UserInfo;
