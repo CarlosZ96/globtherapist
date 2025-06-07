@@ -1,9 +1,10 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../stylesheets/homepage.css';
 import '../stylesheets/windo.css';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import Globody from './Globody';
 import Admin from './glob/admin';
 import ProSpace from './ProSpace';
@@ -15,6 +16,7 @@ import ProsCards from './windows/ProsCards';
 import Dates from './Mydates/Dates';
 import Who from './windows/Who';
 import { useAuth } from '../AuthContext';
+import { db } from '../firebase';
 
 const Homepage = () => {
   const {
@@ -28,6 +30,8 @@ const Homepage = () => {
   const [showWho, setShowWho] = useState(false);
   const [showPros, setShowPros] = useState(false);
   const globodyRef = React.useRef(null);
+  const [appointmentsUpdated, setAppointmentsUpdated] = useState(false);
+
   const togglePros = () => setShowPros((prev) => !prev);
   const toggleWho = () => setShowWho((prev) => !prev);
   const toggleDates = () => setShowDates((prev) => !prev);
@@ -61,6 +65,119 @@ const Homepage = () => {
     if (userData?.role === 'admin') return <Admin />;
     return <Globody ref={globodyRef} onScheduleClick={handleScheduleClick} />;
   };
+
+  // Función para normalizar hora (ej: "8:00am" -> "08:00")
+  const normalizeTime = (timeStr) => {
+    if (!timeStr) return null;
+
+    const time = timeStr.toLowerCase().trim();
+    const [hours, minutes] = time.replace(/[^0-9:]/g, '').split(':');
+    let hoursInt = parseInt(hours, 10);
+
+    if (time.includes('pm') && hoursInt !== 12) hoursInt += 12;
+    if (time.includes('am') && hoursInt === 12) hoursInt = 0;
+
+    return `${String(hoursInt).padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+  };
+
+  // Función para verificar si una cita ya pasó
+  const isAppointmentPast = (cita) => {
+    try {
+      // Mapeo de meses en español
+      const monthMap = {
+        enero: 0,
+        febrero: 1,
+        marzo: 2,
+        abril: 3,
+        mayo: 4,
+        junio: 5,
+        julio: 6,
+        agosto: 7,
+        septiembre: 8,
+        octubre: 9,
+        noviembre: 10,
+        diciembre: 11,
+      };
+
+      // Obtener fecha y hora actual en Colombia (UTC-5)
+      const now = new Date();
+      const offsetColombia = -5 * 60; // UTC-5 en minutos
+      const nowColombia = new Date(now.getTime() + offsetColombia * 60000);
+
+      // Crear fecha de la cita
+      const citaMonth = monthMap[cita.month.toLowerCase()];
+      const citaDay = parseInt(cita.date, 10);
+      const citaYear = nowColombia.getFullYear();
+
+      // Normalizar hora de la cita
+      const normalizedTime = normalizeTime(cita.time);
+      if (!normalizedTime) return false;
+
+      const [citaHours, citaMinutes] = normalizedTime.split(':').map(Number);
+
+      // Crear objeto Date para la cita (en UTC-5)
+      const citaDate = new Date(citaYear, citaMonth, citaDay, citaHours, citaMinutes);
+
+      // Comparar con la hora actual en Colombia
+      return citaDate < nowColombia;
+    } catch (error) {
+      console.error('Error verificando cita:', error);
+      return false;
+    }
+  };
+
+  // Función para actualizar citas pasadas
+  const updatePastAppointments = async () => {
+    if (!currentUser) return;
+
+    try {
+      // Determinar si es usuario o profesional
+      const isPro = !!currentPro;
+      const collectionName = isPro ? 'pros' : 'users';
+      const citasField = isPro ? 'MisCitas' : 'Citas';
+
+      // Obtener referencia al documento
+      const docRef = doc(db, collectionName, currentUser.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const citas = data[citasField] || [];
+
+        let needsUpdate = false;
+        const updatedCitas = citas.map((cita) => {
+          if ((cita.status === 'pending' || cita.status === 'pay_pending') && isAppointmentPast(cita)) {
+            needsUpdate = true;
+            return { ...cita, status: 'end' };
+          }
+          return cita;
+        });
+
+        if (needsUpdate) {
+          await updateDoc(docRef, { [citasField]: updatedCitas });
+          console.log('Citas pasadas actualizadas a "end"');
+
+          // Recargar la página para reflejar cambios
+          window.location.reload();
+        }
+      }
+    } catch (error) {
+      console.error('Error actualizando citas pasadas:', error);
+    }
+  };
+
+  // Verificar citas pasadas al cargar el componente y cuando cambia el usuario
+  useEffect(() => {
+    if (currentUser && !appointmentsUpdated) {
+      updatePastAppointments();
+      setAppointmentsUpdated(true);
+    }
+
+    // Resetear cuando el usuario cierre sesión
+    if (!currentUser) {
+      setAppointmentsUpdated(false);
+    }
+  }, [currentUser]);
 
   return (
     <div className="Home-Page">
