@@ -288,8 +288,6 @@ const Therapy = () => {
   const handlePaymentSuccess = async () => {
     try {
       const proDocRef = doc(db, 'pros', selectedPro);
-      const proDoc = await getDoc(proDocRef);
-      const proData = proDoc.data();
 
       // Función para obtener el día de la semana desde citaGlobal
       const getDayOfWeek = () => {
@@ -317,7 +315,12 @@ const Therapy = () => {
           .toLowerCase(); // ej: "lun"
       };
 
+      // Generar ID único para la cita
+      const citaId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // Construir objeto de cita para usuario
       const userCita = {
+        id: citaId,
         date: citaGlobal.date,
         month: citaGlobal.month,
         time: citaGlobal.time,
@@ -328,18 +331,27 @@ const Therapy = () => {
         description: formData.description,
         status: 'pay_pending',
         uid: citaGlobal.uid,
-        proName: proData.Nombre || 'Profesional',
+        proName: citaGlobal.proName || 'Profesional',
         proUid: selectedPro,
-        dayOfWeek: getDayOfWeek(), // Nuevo campo calculado
+        dayOfWeek: getDayOfWeek(),
+        createdAt: new Date().toISOString(), // Fecha de creación
       };
 
-      // Actualizar usuario
+      // 1. Obtener datos ACTUALES del usuario
       const userRef = doc(db, 'users', currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      const userCurrentData = userSnap.data();
+
+      // 2. Actualizar usuario AÑADIENDO la nueva cita
       await updateDoc(userRef, {
-        Citas: [...(currentUser.Citas || []), userCita],
+        Citas: [...(userCurrentData.Citas || []), userCita],
       });
 
-      // Actualizar profesional
+      // 3. Obtener datos ACTUALES del profesional
+      const proSnap = await getDoc(proDocRef);
+      const proCurrentData = proSnap.data();
+
+      // 4. Crear cita para profesional
       const proCita = {
         ...userCita,
         userEmail: formData.email,
@@ -348,21 +360,23 @@ const Therapy = () => {
         userId: currentUser.uid,
       };
 
+      // 5. Actualizar profesional AÑADIENDO la nueva cita
       await updateDoc(proDocRef, {
-        MisCitas: [...(proData.MisCitas || []), proCita],
+        MisCitas: [...(proCurrentData.MisCitas || []), proCita],
       });
 
       // Construir datos para emails
       const emailData = {
-        therapyType: formData.therapyType.toLowerCase(), // Asegurar minúsculas
+        therapyType: formData.therapyType.toLowerCase(),
         date: citaGlobal.date.toString(),
         dayOfWeek: userCita.dayOfWeek,
         fullDate: `de ${citaGlobal.month} a las ${citaGlobal.time}`,
         userName: formData.name,
-        proName: proData.Nombre || 'Profesional',
-        userEmail: proData.email, // Para email de usuario
-        userProfession: proData.profesion || 'Profesional de salud', // Campo de Firestore
+        proName: proCurrentData.Nombre || 'Profesional',
+        userEmail: proCurrentData.email,
+        userProfession: proCurrentData.profesion || 'Profesional de salud',
         userTel: formData.phone,
+        price: therapyPrices[formData.therapyType],
       };
 
       // Email para USUARIO
@@ -372,21 +386,21 @@ const Therapy = () => {
           subject: 'Confirmación de cita - GLOBTHERAPIST',
           html: getEmailHtml({
             ...emailData,
-            collection: 'users', // Template para usuario
+            collection: 'users',
           }),
         },
       });
 
       // Email para PROFESIONAL
       await addDoc(collection(db, 'mail'), {
-        to: proData.email,
+        to: proCurrentData.email,
         message: {
           subject: 'Nueva cita agendada - GLOBTHERAPIST',
           html: getEmailHtml({
             ...emailData,
-            collection: 'pros', // Template para pro
-            userEmail: formData.email, // Invertir email
-            userTel: formData.phone, // Teléfono del usuario
+            collection: 'pros',
+            userEmail: formData.email,
+            userTel: formData.phone,
           }),
         },
       });
@@ -405,6 +419,7 @@ const Therapy = () => {
         icon: 'error',
         title: 'Error',
         text: `Error al procesar el pago: ${error.message}`,
+        footer: 'Por favor intenta nuevamente o contacta a soporte',
       });
     }
   };
