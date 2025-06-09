@@ -18,6 +18,7 @@ const ProSpace = () => {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hasHorarios, setHasHorarios] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -50,6 +51,20 @@ const ProSpace = () => {
     return () => unsubscribe();
   }, []);
 
+  const handleEditComplete = () => {
+    setIsEditing(false);
+    // Actualizar el estado para recargar los horarios
+    const proDocRef = doc(db, 'pros', auth.currentUser.uid);
+    getDoc(proDocRef).then((docSnap) => {
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        const hasHorario = userData.horarios
+          && Object.keys(userData.horarios).length > 0;
+        setHasHorarios(hasHorario);
+      }
+    });
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -57,10 +72,15 @@ const ProSpace = () => {
   return (
     <div className="prospace-cont">
       {status === 'aprobado' ? (
-        hasHorarios ? (
-          <MyCalendar /> // Mostrar MyCalendar si tiene horarios
+        isEditing ? (
+          <Calendar
+            collection="pros"
+            onReturn={handleEditComplete}
+          />
+        ) : hasHorarios ? (
+          <MyCalendar onEdit={() => setIsEditing(true)} />
         ) : (
-          <Calendar collection="pros" /> // Mostrar Calendar si no tiene horarios
+          <Calendar collection="pros" />
         )
       ) : (
         <div className="prospace-apro">

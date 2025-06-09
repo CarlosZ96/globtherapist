@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { doc, getDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '../AuthContext';
 import { db } from '../firebase';
 import '../stylesheets/MyCalendar.css';
 
-const MyCalendar = () => {
+const MyCalendar = ({ onEdit }) => {
   const { currentUser } = useAuth();
   const [horarios, setHorarios] = useState({});
   const [lunch, setLunch] = useState('');
@@ -27,28 +28,23 @@ const MyCalendar = () => {
     }
     return totalMinutes;
   };
-  // Función para calcular el horario de trabajo
+
   const calculateWorkSchedule = (horariosData) => {
     let earliestStart = null;
     let latestEnd = null;
 
-    // Recorrer todos los meses y días
     Object.values(horariosData).forEach((monthData) => {
       monthData.forEach((dayData) => {
         dayData.Timeslots.forEach((slot) => {
-          // Extraer las horas del formato "6:00am-7:00am"
           const [startStr, endStr] = slot.split('-');
 
-          // Convertir a minutos para comparar
           const startMinutes = convertTimeToMinutes(startStr);
           const endMinutes = convertTimeToMinutes(endStr);
 
-          // Encontrar la hora más temprana
           if (earliestStart === null || startMinutes < earliestStart) {
             earliestStart = startMinutes;
           }
 
-          // Encontrar la hora más tardía
           if (latestEnd === null || endMinutes > latestEnd) {
             latestEnd = endMinutes;
           }
@@ -56,19 +52,17 @@ const MyCalendar = () => {
       });
     });
 
-    // Función para convertir minutos a formato de hora
     const convertMinutesToTime = (totalMinutes) => {
       let hours = Math.floor(totalMinutes / 60);
       const minutes = totalMinutes % 60;
       const ampm = hours >= 12 ? 'pm' : 'am';
 
       hours %= 12;
-      hours = hours || 12; // Convertir 0 a 12
+      hours = hours || 12;
 
       return `${hours}:${minutes < 10 ? `0${minutes}` : minutes}${ampm}`;
     };
 
-    // Convertir de vuelta a formato de hora
     if (earliestStart !== null && latestEnd !== null) {
       setWorkSchedule({
         start: convertMinutesToTime(earliestStart),
@@ -87,11 +81,8 @@ const MyCalendar = () => {
           const horariosData = data.horarios || {};
           setHorarios(horariosData);
           setLunch(data.lunch || '');
-
-          // Calcular horario de trabajo
           calculateWorkSchedule(horariosData);
 
-          // Obtener meses con datos y ordenarlos cronológicamente
           const monthsWithData = Object.keys(horariosData).filter(
             (month) => horariosData[month].length > 0,
           );
@@ -101,12 +92,9 @@ const MyCalendar = () => {
             'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
           ];
 
-          // Ordenar meses cronológicamente
           monthsWithData.sort((a, b) => meses.indexOf(a) - meses.indexOf(b));
 
           setAvailableMonths(monthsWithData);
-
-          // Establecer el primer mes disponible como activo
           if (monthsWithData.length > 0) {
             setActiveMonth(monthsWithData[0]);
           }
@@ -126,12 +114,10 @@ const MyCalendar = () => {
     'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
   ];
 
-  // Obtener días de la semana
   const getWeekDays = () => {
     return ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   };
 
-  // Generar calendario para un mes específico
   const generateCalendar = (monthName) => {
     const monthIndex = meses.indexOf(monthName);
     if (monthIndex === -1) return [];
@@ -140,13 +126,11 @@ const MyCalendar = () => {
     const date = new Date(year, monthIndex, 1);
     const days = [];
 
-    // Agregar días vacíos para el primer día del mes
-    const firstDay = (date.getDay() + 6) % 7; // Ajuste para que lunes=0
+    const firstDay = (date.getDay() + 6) % 7;
     for (let i = 0; i < firstDay; i += 1) {
       days.push(null);
     }
 
-    // Agregar días del mes
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
     for (let i = 1; i <= daysInMonth; i += 1) {
       days.push(i);
@@ -155,13 +139,11 @@ const MyCalendar = () => {
     return days;
   };
 
-  // Verificar si un día tiene horarios definidos
   const hasScheduleForDay = (day, month) => {
     if (!horarios[month]) return false;
     return horarios[month].some((d) => d.date === day);
   };
 
-  // Navegar al mes anterior disponible
   const goToPreviousMonth = () => {
     const currentIndex = availableMonths.indexOf(activeMonth);
     if (currentIndex > 0) {
@@ -171,7 +153,6 @@ const MyCalendar = () => {
     }
   };
 
-  // Navegar al siguiente mes disponible
   const goToNextMonth = () => {
     const currentIndex = availableMonths.indexOf(activeMonth);
     if (currentIndex < availableMonths.length - 1) {
@@ -206,7 +187,7 @@ const MyCalendar = () => {
     <div className="MyCalendar-cont">
       <div className="MyCalendar-header">
         <h1>Mis horarios</h1>
-        <button type="button">Editar</button>
+        <button type="button" onClick={onEdit}>Editar</button>
       </div>
 
       <div className="calendar-month-cont">
@@ -268,6 +249,9 @@ const MyCalendar = () => {
       </div>
     </div>
   );
+};
+MyCalendar.propTypes = {
+  onEdit: PropTypes.func.isRequired,
 };
 
 export default MyCalendar;
