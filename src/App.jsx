@@ -5,6 +5,7 @@ import './App.css';
 import Mainpage from './Components/Homepage';
 import EmailPreview from './Components/EmailPreview';
 import PaymentStatus from './Components/PaymentStatus';
+import Test from './Components/MyCalendar';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/meeting" element={<GlobMeeting />} />
         <Route path="/Admin" element={<EmailPreview userName="CaredTest" />} />
         <Route path="/payment-status" element={<PaymentStatus />} />
+        <Route path="/test" element={<Test />} />
       </Routes>
     </div>
   );
