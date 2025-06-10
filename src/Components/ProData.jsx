@@ -3,6 +3,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import User from '../img/user.png';
@@ -11,7 +12,7 @@ import '../stylesheets/prospace.css';
 import { useAuth } from '../AuthContext';
 import { storage, db } from '../firebase';
 
-const ProData = () => {
+const ProData = ({ onFilesUploaded }) => {
   const { currentUser, currentPro } = useAuth();
   const [profileImageUrl, setProfileImageUrl] = useState(User);
   const [profileImageFile, setProfileImageFile] = useState(null);
@@ -19,13 +20,12 @@ const ProData = () => {
   const [professionalCardFile, setProfessionalCardFile] = useState(null);
   const [certificateFiles, setCertificateFiles] = useState([]);
   const [formDisabled, setFormDisabled] = useState(false);
+
   const handleFileUpload = async (file, path) => {
     if (!file || !currentUser) return;
     const fileRef = ref(storage, `${path}/${currentUser.uid}/${file.name}`);
     await uploadBytes(fileRef, file);
-    const downloadURL = await getDownloadURL(fileRef);
-    console.log('File uploaded successfully. Download URL:', downloadURL);
-    return downloadURL;
+    return getDownloadURL(fileRef);
   };
 
   const handleProfileImageChange = async (e) => {
@@ -64,33 +64,41 @@ const ProData = () => {
       return;
     }
 
-    const hdvUrl = await handleFileUpload(hdvFile, 'hdvFiles');
-    const professionalCardUrl = await handleFileUpload(professionalCardFile, 'professionalCards');
-    const certificateUrls = await Promise.all(
-      certificateFiles.map((file) => handleFileUpload(file, 'certificates')),
-    );
-
-    const filesData = {
-      profileImageFileName: profileImageFile.name,
-      profileImageUrl,
-      hdvFileName: hdvFile.name,
-      hdvUrl,
-      professionalCardFileName: professionalCardFile.name,
-      professionalCardUrl,
-      certificateFiles: certificateFiles.map((file, index) => ({
-        fileName: file.name,
-        url: certificateUrls[index],
-      })),
-    };
-
     try {
+      // Subir todos los archivos en paralelo
+      const [hdvUrl, professionalCardUrl] = await Promise.all([
+        handleFileUpload(hdvFile, 'hdvFiles'),
+        handleFileUpload(professionalCardFile, 'professionalCards'),
+      ]);
+
+      // Subir certificados si existen
+      const certificateUrls = await Promise.all(
+        certificateFiles.map((file) => handleFileUpload(file, 'certificates')),
+      );
+
+      const filesData = {
+        profileImageFileName: profileImageFile.name,
+        profileImageUrl,
+        hdvFileName: hdvFile.name,
+        hdvUrl,
+        professionalCardFileName: professionalCardFile.name,
+        professionalCardUrl,
+        certificateFiles: certificateFiles.map((file, index) => ({
+          fileName: file.name,
+          url: certificateUrls[index],
+        })),
+      };
+
       const userDocRef = doc(db, 'pros', currentUser.uid);
-      await updateDoc(userDocRef, {
-        files: filesData,
-      });
-      console.log('Datos de archivos guardados:', filesData);
+      await updateDoc(userDocRef, { files: filesData });
+
       alert('¡Archivos subidos y datos guardados correctamente!');
       setFormDisabled(true);
+
+      // Notificar al componente padre que los archivos se subieron
+      if (onFilesUploaded) {
+        onFilesUploaded();
+      }
     } catch (error) {
       console.error('Error al guardar la información de archivos:', error);
       alert('Hubo un error al guardar la información de archivos.');
@@ -198,6 +206,13 @@ const ProData = () => {
       </div>
     </div>
   );
+};
+ProData.propTypes = {
+  onFilesUploaded: PropTypes.func,
+};
+
+ProData.defaultProps = {
+  onFilesUploaded: null,
 };
 
 export default ProData;

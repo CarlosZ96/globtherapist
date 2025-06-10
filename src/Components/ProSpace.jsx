@@ -19,6 +19,7 @@ const ProSpace = () => {
   const [loading, setLoading] = useState(true);
   const [hasHorarios, setHasHorarios] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [hasFiles, setHasFiles] = useState(false); // Nuevo estado para controlar documentos
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -29,21 +30,32 @@ const ProSpace = () => {
           if (docSnap.exists()) {
             const userData = docSnap.data();
             setStatus(userData.status);
-            const hasHorario = userData.horarios
-              && Object.keys(userData.horarios).length > 0;
+
+            // Verificar si tiene horarios
+            const hasHorario = userData.horarios && Object.keys(userData.horarios).length > 0;
             setHasHorarios(hasHorario);
+
+            // Verificar si tiene documentos subidos
+            const hasRequiredFiles = userData.files
+                                    && userData.files.hdvUrl
+                                    && userData.files.professionalCardUrl
+                                    && userData.files.profileImageUrl;
+            setHasFiles(!!hasRequiredFiles);
           } else {
             setStatus(null);
             setHasHorarios(false);
+            setHasFiles(false);
           }
         } catch (error) {
           console.error('Error al obtener los datos del pro:', error);
           setStatus(null);
           setHasHorarios(false);
+          setHasFiles(false);
         }
       } else {
         setStatus(null);
         setHasHorarios(false);
+        setHasFiles(false);
       }
       setLoading(false);
     });
@@ -58,11 +70,22 @@ const ProSpace = () => {
     getDoc(proDocRef).then((docSnap) => {
       if (docSnap.exists()) {
         const userData = docSnap.data();
-        const hasHorario = userData.horarios
-          && Object.keys(userData.horarios).length > 0;
+        const hasHorario = userData.horarios && Object.keys(userData.horarios).length > 0;
         setHasHorarios(hasHorario);
+
+        // Actualizar estado de archivos
+        const hasRequiredFiles = userData.files
+                                && userData.files.hdvUrl
+                                && userData.files.professionalCardUrl
+                                && userData.files.profileImageUrl;
+        setHasFiles(!!hasRequiredFiles);
       }
     });
+  };
+
+  // Función para actualizar el estado cuando se suben archivos
+  const handleFilesUploaded = () => {
+    setHasFiles(true);
   };
 
   if (loading) {
@@ -153,7 +176,7 @@ const ProSpace = () => {
         </div>
       )}
       <Therapie />
-      <ProData />
+      {!hasFiles && <ProData onFilesUploaded={handleFilesUploaded} />}
       <Hdv />
     </div>
   );
