@@ -23,7 +23,6 @@ const ProData = ({ onFilesUploaded }) => {
   const [hdvFile, setHdvFile] = useState(null);
   const [professionalCardFile, setProfessionalCardFile] = useState(null);
   const [certificateFiles, setCertificateFiles] = useState([]);
-  const [formDisabled, setFormDisabled] = useState(false);
   const [editingCertificates, setEditingCertificates] = useState(false);
 
   const handleEditCertificates = () => {
@@ -188,9 +187,9 @@ const ProData = ({ onFilesUploaded }) => {
   };
 
   const handleCertificateChange = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setCertificateFiles([...certificateFiles, file]);
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      setCertificateFiles(files);
     }
   };
 
@@ -222,6 +221,7 @@ const ProData = ({ onFilesUploaded }) => {
         },
       });
 
+      // Eliminar archivos existentes en las carpetas que se actualizarán
       await Promise.all([
         profileImageFile && deleteAllFilesInPath('profileImages'),
         hdvFile && deleteAllFilesInPath('hdvFiles'),
@@ -289,7 +289,19 @@ const ProData = ({ onFilesUploaded }) => {
         iconColor: '#4ade80',
       });
 
-      setFormDisabled(true);
+      // Resetear estados
+      setProfileImageFile(null);
+      setHdvFile(null);
+      setProfessionalCardFile(null);
+      setCertificateFiles([]);
+      setEditingFile(null);
+      setEditingCertificates(false);
+
+      // Recargar archivos existentes
+      const fetchExistingFiles = async () => {
+        // ... (código de fetchExistingFiles)
+      };
+      fetchExistingFiles();
 
       if (onFilesUploaded) {
         onFilesUploaded();
@@ -324,7 +336,7 @@ const ProData = ({ onFilesUploaded }) => {
         <div className="pro-name-cont">
           <div
             className="user-image-cont"
-            onClick={() => !formDisabled && document.getElementById('profileImageInput').click()}
+            onClick={() => !isLoading && document.getElementById('profileImageInput').click()}
           >
             <img src={profileImageUrl} alt="user" className="pro-img" />
             <input
@@ -333,18 +345,18 @@ const ProData = ({ onFilesUploaded }) => {
               onChange={handleProfileImageChange}
               style={{ display: 'none' }}
               id="profileImageInput"
-              disabled={formDisabled}
+              disabled={isLoading}
             />
             {existingFiles.profileImage && !editingFile ? (
               <button
                 type="button"
                 onClick={() => setEditingFile('profileImage')}
-                disabled={formDisabled}
+                disabled={isLoading}
               >
                 Editar imagen
               </button>
             ) : (
-              <button type="button" disabled={formDisabled}>
+              <button type="button" disabled={isLoading}>
                 Cambiar imagen
               </button>
             )}
@@ -388,7 +400,7 @@ const ProData = ({ onFilesUploaded }) => {
                   className="edit-btn"
                   type="button"
                   onClick={() => setEditingFile('hdv')}
-                  disabled={formDisabled}
+                  disabled={isLoading}
                 >
                   Editar
                 </button>
@@ -405,7 +417,7 @@ const ProData = ({ onFilesUploaded }) => {
                   accept="application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   onChange={handleHdvChange}
                   style={{ display: 'none' }}
-                  disabled={formDisabled}
+                  disabled={isLoading}
                 />
               </>
             )}
@@ -428,7 +440,7 @@ const ProData = ({ onFilesUploaded }) => {
                   className="edit-btn"
                   type="button"
                   onClick={() => setEditingFile('professionalCard')}
-                  disabled={formDisabled}
+                  disabled={isLoading}
                 >
                   Editar
                 </button>
@@ -449,7 +461,7 @@ const ProData = ({ onFilesUploaded }) => {
                   accept="application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, image/*"
                   onChange={handleProfessionalCardChange}
                   style={{ display: 'none' }}
-                  disabled={formDisabled}
+                  disabled={isLoading}
                 />
               </>
             )}
@@ -478,7 +490,7 @@ const ProData = ({ onFilesUploaded }) => {
                   className="edit-btn"
                   type="button"
                   onClick={handleEditCertificates}
-                  disabled={formDisabled}
+                  disabled={isLoading}
                 >
                   Editar
                 </button>
@@ -496,7 +508,7 @@ const ProData = ({ onFilesUploaded }) => {
                   accept="application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, image/*"
                   onChange={handleCertificateChange}
                   style={{ display: 'none' }}
-                  disabled={formDisabled}
+                  disabled={isLoading}
                 />
               </>
             )}
@@ -511,7 +523,7 @@ const ProData = ({ onFilesUploaded }) => {
         <button
           type="submit"
           onClick={handleSubmit}
-          disabled={formDisabled || isLoading}
+          disabled={isLoading}
           className={`save-btn ${isLoading ? 'loading' : ''}`}
         >
           {isLoading ? (
