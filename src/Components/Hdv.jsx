@@ -21,7 +21,6 @@ const Hdv = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
-  // Obtener datos del HDV al cargar el componente
   useEffect(() => {
     const fetchProfileImage = async () => {
       if (currentUser) {
@@ -36,7 +35,6 @@ const Hdv = () => {
       }
     };
 
-    // Cargar datos existentes del HDV si existen
     if (currentPro && currentPro.Hdv) {
       const hdvData = currentPro.Hdv;
       setProfession(hdvData.profession || '');
@@ -70,10 +68,7 @@ const Hdv = () => {
     };
 
     try {
-      // Guardar datos del HDV
       await setDoc(proRef, { Hdv: hdvData }, { merge: true });
-
-      // Si es la primera vez que se guarda, enviar correo y cambiar estado
       if (!initialDataLoaded) {
         await updateDoc(proRef, { status: 'pendiente' });
         console.log('Status actualizado a pendiente');
@@ -88,10 +83,9 @@ const Hdv = () => {
         });
         console.log('Correo de validación enviado al pro:', currentUser.email);
 
-        setInitialDataLoaded(true); // Marcar que ya se envió el correo
+        setInitialDataLoaded(true);
       }
 
-      // Mostrar notificación de éxito
       Swal.fire({
         icon: 'success',
         title: '¡Éxito!',
@@ -103,7 +97,6 @@ const Hdv = () => {
         iconColor: '#4ade80',
       });
 
-      // Salir del modo edición
       setIsEditing(false);
     } catch (error) {
       console.error('Error guardando datos en Firestore:', error);
@@ -119,7 +112,6 @@ const Hdv = () => {
     }
   };
 
-  // Verificar si hay datos existentes
   const hasExistingData = initialDataLoaded && (
     profession || specialization || yearsOfExperience || university || professionalHistory
   );
