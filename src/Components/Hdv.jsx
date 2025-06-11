@@ -1,24 +1,31 @@
+/* eslint-disable no-nested-ternary */
 import React, { useState, useEffect } from 'react';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc, updateDoc } from 'firebase/firestore';
-import { auth, db, storage } from '../firebase';
+import Swal from 'sweetalert2';
+import { db, storage } from '../firebase';
 import '../stylesheets/prospace.css';
 import User from '../img/user.png';
 import { getValidationEmailHtml } from './mails/emailTemplate';
+import { useAuth } from '../AuthContext';
 
 const Hdv = () => {
+  const { currentPro, currentUser } = useAuth();
   const [profileImage, setProfileImage] = useState(User);
   const [profession, setProfession] = useState('');
   const [specialization, setSpecialization] = useState('');
   const [yearsOfExperience, setYearsOfExperience] = useState(0);
   const [university, setUniversity] = useState('');
   const [professionalHistory, setProfessionalHistory] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
+  // Obtener datos del HDV al cargar el componente
   useEffect(() => {
     const fetchProfileImage = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const imageRef = ref(storage, `profileImages/${user.uid}`);
+      if (currentUser) {
+        const imageRef = ref(storage, `profileImages/${currentUser.uid}`);
         try {
           const url = await getDownloadURL(imageRef);
           setProfileImage(url);
@@ -29,48 +36,93 @@ const Hdv = () => {
       }
     };
 
+    // Cargar datos existentes del HDV si existen
+    if (currentPro && currentPro.Hdv) {
+      const hdvData = currentPro.Hdv;
+      setProfession(hdvData.profession || '');
+      setSpecialization(hdvData.specialization || '');
+      setYearsOfExperience(hdvData.yearsOfExperience || 0);
+      setUniversity(hdvData.university || '');
+      setProfessionalHistory(hdvData.professionalHistory || '');
+      setInitialDataLoaded(true);
+    }
+
     fetchProfileImage();
-  }, []);
+  }, [currentPro, currentUser]);
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    const user = auth.currentUser;
-    if (user) {
-      const proRef = doc(db, 'pros', user.uid);
-      const hdvData = {
-        profession,
-        specialization,
-        yearsOfExperience,
-        university,
-        professionalHistory,
-      };
+    if (!currentUser) return;
 
-      try {
-        await setDoc(proRef, { Hdv: hdvData }, { merge: true });
-        console.log('Datos guardados correctamente en Firestore');
+    const proRef = doc(db, 'pros', currentUser.uid);
+    const hdvData = {
+      profession,
+      specialization,
+      yearsOfExperience,
+      university,
+      professionalHistory,
+    };
+
+    try {
+      // Guardar datos del HDV
+      await setDoc(proRef, { Hdv: hdvData }, { merge: true });
+
+      // Si es la primera vez que se guarda, enviar correo y cambiar estado
+      if (!initialDataLoaded) {
         await updateDoc(proRef, { status: 'pendiente' });
         console.log('Status actualizado a pendiente');
+
         const emailContent = getValidationEmailHtml();
-        await setDoc(doc(db, 'mail', user.uid), {
-          to: user.email,
+        await setDoc(doc(db, 'mail', currentUser.uid), {
+          to: currentUser.email,
           message: {
             subject: 'Estamos revisando tus datos',
             html: emailContent,
           },
         });
-        console.log('Correo de validación enviado al pro:', user.email);
-        setProfession('');
-        setSpecialization('');
-        setYearsOfExperience(0);
-        setUniversity('');
-        setProfessionalHistory('');
-        window.location.reload();
-      } catch (error) {
-        console.error('Error guardando datos en Firestore:', error);
+        console.log('Correo de validación enviado al pro:', currentUser.email);
+
+        setInitialDataLoaded(true); // Marcar que ya se envió el correo
       }
+
+      // Mostrar notificación de éxito
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Datos de HDV actualizados correctamente',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        background: '#f0f9ff',
+        iconColor: '#4ade80',
+      });
+
+      // Salir del modo edición
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error guardando datos en Firestore:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un problema al guardar los datos',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Entendido',
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // Verificar si hay datos existentes
+  const hasExistingData = initialDataLoaded && (
+    profession || specialization || yearsOfExperience || university || professionalHistory
+  );
 
   return (
     <div id="pp-cont" className="pp-cont">
@@ -82,9 +134,21 @@ const Hdv = () => {
           <div className="hdv-button-cont">
             <img src={profileImage} alt="user" className="pro-img" />
           </div>
-          <button type="button">x</button>
-          <h2>Pro name</h2>
+
+          {hasExistingData && !isEditing && (
+            <button
+              type="button"
+              className="edit-btn"
+              onClick={handleEdit}
+              disabled={isLoading}
+            >
+              Editar
+            </button>
+          )}
+
+          <h2>{currentPro?.Nombre || 'Nombre del profesional'}</h2>
         </div>
+
         <div className="fields-cont">
           <div className="hdv-field-cont">
             <h3>Profesional en:</h3>
@@ -93,8 +157,10 @@ const Hdv = () => {
               className="specialization"
               value={profession}
               onChange={(e) => setProfession(e.target.value)}
+              disabled={hasExistingData && !isEditing}
             />
           </div>
+
           <div className="hdv-field-cont">
             <h3>Especialización en:</h3>
             <input
@@ -102,8 +168,10 @@ const Hdv = () => {
               className="specialization"
               value={specialization}
               onChange={(e) => setSpecialization(e.target.value)}
+              disabled={hasExistingData && !isEditing}
             />
           </div>
+
           <div className="hdv-field-cont">
             <h3>Egresado en:</h3>
             <input
@@ -111,8 +179,10 @@ const Hdv = () => {
               className="specialization"
               value={university}
               onChange={(e) => setUniversity(e.target.value)}
+              disabled={hasExistingData && !isEditing}
             />
           </div>
+
           <div className="hdv-years-cont">
             <h3>Años de experiencia:</h3>
             <input
@@ -120,22 +190,38 @@ const Hdv = () => {
               name="hdv-year"
               className="hdv-year"
               value={yearsOfExperience}
-              onChange={(e) => setYearsOfExperience(parseInt(e.target.value, 10))}
+              onChange={(e) => setYearsOfExperience(parseInt(e.target.value, 10) || 0)}
               min="0"
+              disabled={hasExistingData && !isEditing}
             />
           </div>
+
           <div className="hdv-desc-cont">
             <h3>Cuéntanos brevemente tu historia profesional:</h3>
             <textarea
               className="hdv-desc"
               value={professionalHistory}
               onChange={(e) => setProfessionalHistory(e.target.value)}
+              disabled={hasExistingData && !isEditing}
             />
           </div>
         </div>
-        <div className="pp-submit">
-          <button type="submit">Confirmar</button>
-        </div>
+
+        {(isEditing || !hasExistingData) && (
+          <div className="pp-submit">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`save-btn ${isLoading ? 'loading' : ''}`}
+            >
+              {isLoading ? (
+                <div className="spinner" />
+              ) : (
+                hasExistingData ? 'Guardar cambios' : 'Confirmar'
+              )}
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );
