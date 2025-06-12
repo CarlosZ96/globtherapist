@@ -280,16 +280,16 @@ const Therapy = () => {
       return;
     }
 
-    // Mostrar modal de pago si todo está correcto
     setShowPayment(true);
   };
 
-  // Función que se ejecuta tras el pago exitoso
-  const handlePaymentSuccess = async () => {
+  const handlePaymentSuccess = async (paymentInfo) => {
     try {
       const proDocRef = doc(db, 'pros', selectedPro);
+      const { id: paymentId, method: paymentMethod } = paymentInfo;
+      const amount = therapyPrices[formData.therapyType];
+      const paymentDate = new Date().toISOString();
 
-      // Función para obtener el día de la semana desde citaGlobal
       const getDayOfWeek = () => {
         const monthMap = {
           enero: 0,
@@ -315,10 +315,8 @@ const Therapy = () => {
           .toLowerCase(); // ej: "lun"
       };
 
-      // Generar ID único para la cita
       const citaId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-      // Construir objeto de cita para usuario
       const userCita = {
         id: citaId,
         date: citaGlobal.date,
@@ -334,24 +332,20 @@ const Therapy = () => {
         proName: citaGlobal.proName || 'Profesional',
         proUid: selectedPro,
         dayOfWeek: getDayOfWeek(),
-        createdAt: new Date().toISOString(), // Fecha de creación
+        createdAt: new Date().toISOString(),
       };
 
-      // 1. Obtener datos ACTUALES del usuario
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnap = await getDoc(userRef);
       const userCurrentData = userSnap.data();
 
-      // 2. Actualizar usuario AÑADIENDO la nueva cita
       await updateDoc(userRef, {
         Citas: [...(userCurrentData.Citas || []), userCita],
       });
 
-      // 3. Obtener datos ACTUALES del profesional
       const proSnap = await getDoc(proDocRef);
       const proCurrentData = proSnap.data();
 
-      // 4. Crear cita para profesional
       const proCita = {
         ...userCita,
         userEmail: formData.email,
@@ -360,12 +354,10 @@ const Therapy = () => {
         userId: currentUser.uid,
       };
 
-      // 5. Actualizar profesional AÑADIENDO la nueva cita
       await updateDoc(proDocRef, {
         MisCitas: [...(proCurrentData.MisCitas || []), proCita],
       });
 
-      // Construir datos para emails
       const emailData = {
         therapyType: formData.therapyType.toLowerCase(),
         date: citaGlobal.date.toString(),
@@ -379,7 +371,6 @@ const Therapy = () => {
         price: therapyPrices[formData.therapyType],
       };
 
-      // Email para USUARIO
       await addDoc(collection(db, 'mail'), {
         to: formData.email,
         message: {
@@ -391,7 +382,6 @@ const Therapy = () => {
         },
       });
 
-      // Email para PROFESIONAL
       await addDoc(collection(db, 'mail'), {
         to: proCurrentData.email,
         message: {
@@ -405,7 +395,30 @@ const Therapy = () => {
         },
       });
 
-      // Cierre del proceso
+      const userPaymentRef = collection(db, 'users', currentUser.uid, 'payments');
+      await addDoc(userPaymentRef, {
+        paymentId,
+        citaId,
+        amount,
+        paymentMethod,
+        status: 'approved',
+        paymentDate,
+        proId: selectedPro,
+        therapyType: formData.therapyType,
+      });
+
+      const proPaymentRef = collection(db, 'pros', selectedPro, 'payments');
+      await addDoc(proPaymentRef, {
+        paymentId,
+        citaId,
+        amount,
+        paymentMethod,
+        status: 'approved',
+        paymentDate,
+        userId: currentUser.uid,
+        therapyType: formData.therapyType,
+      });
+
       setShowPayment(false);
       Swal.fire({
         icon: 'success',

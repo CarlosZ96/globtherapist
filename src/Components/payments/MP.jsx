@@ -176,7 +176,10 @@ const MP = ({
       if (result.redirect_url) {
         setPaymentId(result.id);
       } else {
-        onPaymentSuccess();
+        onPaymentSuccess({
+          id: result.id,
+          method: payload.paymentMethodId,
+        });
         Swal.fire({
           icon: 'success',
           title: '¡Pago exitoso!',
