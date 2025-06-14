@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { getAuth } from 'firebase/auth';
 import {
-  doc, getDoc, updateDoc, addDoc, collection,
+  doc, getDoc, updateDoc, addDoc, collection, getDocs, arrayUnion,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
@@ -284,12 +284,17 @@ const Therapy = () => {
   };
 
   const handlePaymentSuccess = async (paymentInfo) => {
+    const proDocRef = doc(db, 'pros', selectedPro);
     try {
-      const proDocRef = doc(db, 'pros', selectedPro);
       const { id: paymentId, method: paymentMethod } = paymentInfo;
       const amount = therapyPrices[formData.therapyType];
       const paymentDate = new Date().toISOString();
 
+      // Validar IDs esenciales
+      if (!currentUser || !currentUser.uid) throw new Error('Usuario no autenticado');
+      if (!selectedPro) throw new Error('Profesional no seleccionado');
+
+      // Función para obtener día de la semana
       const getDayOfWeek = () => {
         const monthMap = {
           enero: 0,
@@ -312,11 +317,13 @@ const Therapy = () => {
 
         return dateObj.toLocaleDateString('es-ES', { weekday: 'short' })
           .replace('.', '')
-          .toLowerCase(); // ej: "lun"
+          .toLowerCase();
       };
 
+      // Generar ID único para la cita
       const citaId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
+      // Crear objeto de cita para usuario
       const userCita = {
         id: citaId,
         date: citaGlobal.date,
@@ -335,17 +342,15 @@ const Therapy = () => {
         createdAt: new Date().toISOString(),
       };
 
+      // Referencias a documentos
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnap = await getDoc(userRef);
       const userCurrentData = userSnap.data();
 
-      await updateDoc(userRef, {
-        Citas: [...(userCurrentData.Citas || []), userCita],
-      });
-
       const proSnap = await getDoc(proDocRef);
       const proCurrentData = proSnap.data();
 
+      // Crear objeto de cita para profesional
       const proCita = {
         ...userCita,
         userEmail: formData.email,
@@ -354,10 +359,66 @@ const Therapy = () => {
         userId: currentUser.uid,
       };
 
-      await updateDoc(proDocRef, {
-        MisCitas: [...(proCurrentData.MisCitas || []), proCita],
-      });
+      // 1. Actualizar citas (usuario y profesional)
+      await Promise.all([
+        // Actualizar citas del usuario
+        updateDoc(doc(db, 'users', currentUser.uid), {
+          Citas: arrayUnion(userCita),
+        }),
 
+        // Actualizar citas del profesional
+        updateDoc(proDocRef, {
+          MisCitas: arrayUnion(proCita),
+        }),
+      ]);
+
+      // 2. Verificar y crear subcolección de pagos si no existe
+      const userPaymentsRef = collection(db, 'users', currentUser.uid, 'payments');
+      const proPaymentsRef = collection(db, 'pros', selectedPro, 'payments');
+
+      // Verificar si la subcolección existe
+      const userPaymentsQuery = await getDocs(userPaymentsRef);
+      if (userPaymentsQuery.empty) {
+        // Crear documento vacío para inicializar la subcolección
+        await addDoc(userPaymentsRef, {
+          initialized: true,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      const proPaymentsQuery = await getDocs(proPaymentsRef);
+      if (proPaymentsQuery.empty) {
+        // Crear documento vacío para inicializar la subcolección
+        await addDoc(proPaymentsRef, {
+          initialized: true,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      // Datos comunes del pago
+      const paymentData = {
+        paymentId,
+        citaId,
+        amount,
+        paymentMethod,
+        status: 'approved',
+        paymentDate,
+        therapyType: formData.therapyType,
+      };
+
+      // 3. Guardar pagos en ambas colecciones
+      await Promise.all([
+        addDoc(userPaymentsRef, {
+          ...paymentData,
+          proId: selectedPro,
+        }),
+        addDoc(proPaymentsRef, {
+          ...paymentData,
+          userId: currentUser.uid,
+        }),
+      ]);
+
+      // 4. Enviar emails de confirmación
       const emailData = {
         therapyType: formData.therapyType.toLowerCase(),
         date: citaGlobal.date.toString(),
@@ -371,54 +432,32 @@ const Therapy = () => {
         price: therapyPrices[formData.therapyType],
       };
 
-      await addDoc(collection(db, 'mail'), {
-        to: formData.email,
-        message: {
-          subject: 'Confirmación de cita - GLOBTHERAPIST',
-          html: getEmailHtml({
-            ...emailData,
-            collection: 'users',
-          }),
-        },
-      });
+      await Promise.all([
+        addDoc(collection(db, 'mail'), {
+          to: formData.email,
+          message: {
+            subject: 'Confirmación de cita - GLOBTHERAPIST',
+            html: getEmailHtml({
+              ...emailData,
+              collection: 'users',
+            }),
+          },
+        }),
+        addDoc(collection(db, 'mail'), {
+          to: proCurrentData.email,
+          message: {
+            subject: 'Nueva cita agendada - GLOBTHERAPIST',
+            html: getEmailHtml({
+              ...emailData,
+              collection: 'pros',
+              userEmail: formData.email,
+              userTel: formData.phone,
+            }),
+          },
+        }),
+      ]);
 
-      await addDoc(collection(db, 'mail'), {
-        to: proCurrentData.email,
-        message: {
-          subject: 'Nueva cita agendada - GLOBTHERAPIST',
-          html: getEmailHtml({
-            ...emailData,
-            collection: 'pros',
-            userEmail: formData.email,
-            userTel: formData.phone,
-          }),
-        },
-      });
-
-      const userPaymentRef = collection(db, 'users', currentUser.uid, 'payments');
-      await addDoc(userPaymentRef, {
-        paymentId,
-        citaId,
-        amount,
-        paymentMethod,
-        status: 'approved',
-        paymentDate,
-        proId: selectedPro,
-        therapyType: formData.therapyType,
-      });
-
-      const proPaymentRef = collection(db, 'pros', selectedPro, 'payments');
-      await addDoc(proPaymentRef, {
-        paymentId,
-        citaId,
-        amount,
-        paymentMethod,
-        status: 'approved',
-        paymentDate,
-        userId: currentUser.uid,
-        therapyType: formData.therapyType,
-      });
-
+      // Cerrar modal de pago y mostrar confirmación
       setShowPayment(false);
       Swal.fire({
         icon: 'success',
@@ -427,12 +466,22 @@ const Therapy = () => {
         willClose: () => window.location.reload(),
       });
     } catch (error) {
-      console.error('Error en el proceso de pago:', error);
+      console.error('Error detallado:', {
+        message: error.message,
+        code: error.code,
+        operation: 'updateDoc o addDoc',
+        userId: currentUser?.uid,
+        proId: selectedPro,
+      });
+
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: `Error al procesar el pago: ${error.message}`,
-        footer: 'Por favor intenta nuevamente o contacta a soporte',
+        title: 'Error en el proceso',
+        html: `No se pudo completar la operación:<br>
+           <strong>Código:</strong> ${error.code || 'N/A'}<br>
+           <strong>Mensaje:</strong> ${error.message}<br>
+           <strong>Ruta:</strong> ${proDocRef.path}`,
+        footer: 'Verifica las reglas de seguridad en Firestore',
       });
     }
   };
