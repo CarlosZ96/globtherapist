@@ -367,7 +367,7 @@ const Therapy = () => {
         }),
 
         // Actualizar citas del profesional
-        updateDoc(proDocRef, {
+        updateDoc(doc(db, 'pros', selectedPro), {
           MisCitas: arrayUnion(proCita),
         }),
       ]);
