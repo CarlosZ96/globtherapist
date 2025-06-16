@@ -323,7 +323,7 @@ const Therapy = () => {
       // Generar ID único para la cita
       const citaId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-      // Crear objeto de cita para usuario
+      // Crear objeto de cita para usuario CON DATOS DE PAGO
       const userCita = {
         id: citaId,
         date: citaGlobal.date,
@@ -340,6 +340,15 @@ const Therapy = () => {
         proUid: selectedPro,
         dayOfWeek: getDayOfWeek(),
         createdAt: new Date().toISOString(),
+        // INCLUIR DATOS DE PAGO DIRECTAMENTE EN LA CITA
+        payment: {
+          paymentId,
+          amount,
+          paymentMethod,
+          status: 'approved',
+          paymentDate,
+          therapyType: formData.therapyType,
+        },
       };
 
       // Referencias a documentos
@@ -350,75 +359,31 @@ const Therapy = () => {
       const proSnap = await getDoc(proDocRef);
       const proCurrentData = proSnap.data();
 
-      // Crear objeto de cita para profesional
+      // Crear objeto de cita para profesional CON DATOS DE PAGO
       const proCita = {
         ...userCita,
         userEmail: formData.email,
         userName: formData.name,
         userPhone: formData.phone,
         userId: currentUser.uid,
+        // INCLUIR LOS MISMOS DATOS DE PAGO
+        payment: userCita.payment,
       };
 
       // 1. Actualizar citas (usuario y profesional)
       await Promise.all([
         // Actualizar citas del usuario
-        updateDoc(doc(db, 'users', currentUser.uid), {
+        updateDoc(userRef, {
           Citas: arrayUnion(userCita),
         }),
 
         // Actualizar citas del profesional
-        updateDoc(doc(db, 'pros', selectedPro), {
+        updateDoc(proDocRef, {
           MisCitas: arrayUnion(proCita),
         }),
       ]);
 
-      // 2. Verificar y crear subcolección de pagos si no existe
-      const userPaymentsRef = collection(db, 'users', currentUser.uid, 'payments');
-      const proPaymentsRef = collection(db, 'pros', selectedPro, 'payments');
-
-      // Verificar si la subcolección existe
-      const userPaymentsQuery = await getDocs(userPaymentsRef);
-      if (userPaymentsQuery.empty) {
-        // Crear documento vacío para inicializar la subcolección
-        await addDoc(userPaymentsRef, {
-          initialized: true,
-          createdAt: new Date().toISOString(),
-        });
-      }
-
-      const proPaymentsQuery = await getDocs(proPaymentsRef);
-      if (proPaymentsQuery.empty) {
-        // Crear documento vacío para inicializar la subcolección
-        await addDoc(proPaymentsRef, {
-          initialized: true,
-          createdAt: new Date().toISOString(),
-        });
-      }
-
-      // Datos comunes del pago
-      const paymentData = {
-        paymentId,
-        citaId,
-        amount,
-        paymentMethod,
-        status: 'approved',
-        paymentDate,
-        therapyType: formData.therapyType,
-      };
-
-      // 3. Guardar pagos en ambas colecciones
-      await Promise.all([
-        addDoc(userPaymentsRef, {
-          ...paymentData,
-          proId: selectedPro,
-        }),
-        addDoc(proPaymentsRef, {
-          ...paymentData,
-          userId: currentUser.uid,
-        }),
-      ]);
-
-      // 4. Enviar emails de confirmación
+      // 2. Enviar emails de confirmación
       const emailData = {
         therapyType: formData.therapyType.toLowerCase(),
         date: citaGlobal.date.toString(),
@@ -469,7 +434,7 @@ const Therapy = () => {
       console.error('Error detallado:', {
         message: error.message,
         code: error.code,
-        operation: 'updateDoc o addDoc',
+        operation: 'updateDoc',
         userId: currentUser?.uid,
         proId: selectedPro,
       });
@@ -479,8 +444,7 @@ const Therapy = () => {
         title: 'Error en el proceso',
         html: `No se pudo completar la operación:<br>
            <strong>Código:</strong> ${error.code || 'N/A'}<br>
-           <strong>Mensaje:</strong> ${error.message}<br>
-           <strong>Ruta:</strong> ${proDocRef.path}`,
+           <strong>Mensaje:</strong> ${error.message}`,
         footer: 'Verifica las reglas de seguridad en Firestore',
       });
     }
