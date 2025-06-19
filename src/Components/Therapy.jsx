@@ -9,6 +9,7 @@ import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
 import Calendar from './Calendar/CalendarWithToggle';
 import Mp from './payments/MP';
+import StatusBrick from './payments/StatusBrick';
 import getEmailHtml from './mails/emailTemplate';
 import '../stylesheets/Therapy.css';
 
@@ -18,6 +19,8 @@ const Therapy = () => {
   const {
     currentUser, updateUserCitas, updateProMisCitas, pros, citaGlobal, setCitaGlobal,
   } = useAuth();
+  const [paymentStatus, setPaymentStatus] = useState(null);
+  const [paymentDetails, setPaymentDetails] = useState(null);
   const therapyPrices = {
     Fisica: 70000,
     Lenguaje: 55000,
@@ -290,11 +293,9 @@ const Therapy = () => {
       const amount = therapyPrices[formData.therapyType];
       const paymentDate = new Date().toISOString();
 
-      // Validar IDs esenciales
       if (!currentUser || !currentUser.uid) throw new Error('Usuario no autenticado');
       if (!selectedPro) throw new Error('Profesional no seleccionado');
 
-      // Función para obtener día de la semana
       const getDayOfWeek = () => {
         const monthMap = {
           enero: 0,
@@ -320,10 +321,8 @@ const Therapy = () => {
           .toLowerCase();
       };
 
-      // Generar ID único para la cita
       const citaId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-      // Crear objeto de cita para usuario CON DATOS DE PAGO
       const userCita = {
         id: citaId,
         date: citaGlobal.date,
@@ -340,7 +339,6 @@ const Therapy = () => {
         proUid: selectedPro,
         dayOfWeek: getDayOfWeek(),
         createdAt: new Date().toISOString(),
-        // INCLUIR DATOS DE PAGO DIRECTAMENTE EN LA CITA
         payment: {
           paymentId,
           amount,
@@ -351,7 +349,6 @@ const Therapy = () => {
         },
       };
 
-      // Referencias a documentos
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnap = await getDoc(userRef);
       const userCurrentData = userSnap.data();
@@ -359,31 +356,24 @@ const Therapy = () => {
       const proSnap = await getDoc(proDocRef);
       const proCurrentData = proSnap.data();
 
-      // Crear objeto de cita para profesional CON DATOS DE PAGO
       const proCita = {
         ...userCita,
         userEmail: formData.email,
         userName: formData.name,
         userPhone: formData.phone,
         userId: currentUser.uid,
-        // INCLUIR LOS MISMOS DATOS DE PAGO
         payment: userCita.payment,
       };
 
-      // 1. Actualizar citas (usuario y profesional)
       await Promise.all([
-        // Actualizar citas del usuario
         updateDoc(userRef, {
           Citas: arrayUnion(userCita),
         }),
-
-        // Actualizar citas del profesional
         updateDoc(proDocRef, {
           MisCitas: arrayUnion(proCita),
         }),
       ]);
 
-      // 2. Enviar emails de confirmación
       const emailData = {
         therapyType: formData.therapyType.toLowerCase(),
         date: citaGlobal.date.toString(),
@@ -422,14 +412,15 @@ const Therapy = () => {
         }),
       ]);
 
-      // Cerrar modal de pago y mostrar confirmación
-      setShowPayment(false);
-      Swal.fire({
-        icon: 'success',
-        title: '¡Cita agendada!',
-        text: 'Confirmación enviada a tu correo',
-        willClose: () => window.location.reload(),
+      // Actualización: Guardar detalles del pago y mostrar StatusBrick
+      setPaymentDetails({
+        id: paymentId,
+        amount,
+        method: paymentMethod,
+        status: 'approved',
       });
+      setPaymentStatus('success');
+      setShowPayment(false);
     } catch (error) {
       console.error('Error detallado:', {
         message: error.message,
@@ -443,8 +434,8 @@ const Therapy = () => {
         icon: 'error',
         title: 'Error en el proceso',
         html: `No se pudo completar la operación:<br>
-           <strong>Código:</strong> ${error.code || 'N/A'}<br>
-           <strong>Mensaje:</strong> ${error.message}`,
+         <strong>Código:</strong> ${error.code || 'N/A'}<br>
+         <strong>Mensaje:</strong> ${error.message}`,
         footer: 'Verifica las reglas de seguridad en Firestore',
       });
     }
@@ -470,6 +461,11 @@ const Therapy = () => {
 
     fetchUserData();
   }, [user]);
+
+  const handleCloseStatus = () => {
+    setPaymentStatus(null);
+    window.location.reload();
+  };
 
   return (
     <form className="Therapy-body" onSubmit={handleSubmit}>
@@ -525,21 +521,21 @@ const Therapy = () => {
               key={type}
               type="button"
               className={
-                formData.therapyType === type
-                  ? 'Therapy-tittle-cont Therapy-tittle'
-                  : 'inactive-cont inactive-txt'
-              }
+              formData.therapyType === type
+                ? 'Therapy-tittle-cont Therapy-tittle'
+                : 'inactive-cont inactive-txt'
+            }
               onClick={() => handleTherapyTypeClick(type)}
             >
               {type}
             </button>
-          ))}
+        ))}
         </div>
         {errors.therapyType && (
-          <div className="error-container">
-            <h5 className="error-text">{errors.therapyType}</h5>
-          </div>
-        )}
+        <div className="error-container">
+          <h5 className="error-text">{errors.therapyType}</h5>
+        </div>
+      )}
         <div className="Therapy-info">
           <textarea
             className="Therapy-txt-field"
@@ -560,78 +556,86 @@ const Therapy = () => {
             onProSelection={handleProSelection}
           />
           {showAppointmentError && (
-            <div className="appointment-error">
-              <h5 className="error-text">Por favor, selecciona al menos una cita.</h5>
-            </div>
-          )}
+          <div className="appointment-error">
+            <h5 className="error-text">Por favor, selecciona al menos una cita.</h5>
+          </div>
+        )}
         </div>
         <div className="DynamiCanlendar-btn-cont">
           {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName && (
-            <div className="Date-info-cont">
-              <div className="Date-info-txt">
-                <h3>Tu cita quedó para el:</h3>
-              </div>
-              <div className="Date-info-description">
-                {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName ? (
-                  <p>
-                    {citaGlobal.date}
-                    {' '}
-                    de
-                    {citaGlobal.month}
-                    {' '}
-                    del
-                    {new Date().getFullYear()}
-                    {' '}
-                    a las
-                    {citaGlobal.time}
-                    {' '}
-                    con el doctor
-                    {citaGlobal.proName}
-                    .
-                  </p>
-                ) : (
-                  <p>No hay una cita seleccionada.</p>
-                )}
-                <div className="therapy-price-info">
-                  <p>
-                    <strong>Terapia:</strong>
-                    {' '}
-                    {formData.therapyType}
-                  </p>
-                  <p>
-                    <strong>Precio:</strong>
-                    {' '}
-                    $
-                    {therapyPrices[formData.therapyType]?.toLocaleString('es-CO')}
-                  </p>
-                </div>
+          <div className="Date-info-cont">
+            <div className="Date-info-txt">
+              <h3>Tu cita quedó para el:</h3>
+            </div>
+            <div className="Date-info-description">
+              {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName ? (
+                <p>
+                  {citaGlobal.date}
+                  {' '}
+                  de
+                  {citaGlobal.month}
+                  {' '}
+                  del
+                  {new Date().getFullYear()}
+                  {' '}
+                  a las
+                  {citaGlobal.time}
+                  {' '}
+                  con el doctor
+                  {citaGlobal.proName}
+                  .
+                </p>
+              ) : (
+                <p>No hay una cita seleccionada.</p>
+              )}
+              <div className="therapy-price-info">
+                <p>
+                  <strong>Terapia:</strong>
+                  {' '}
+                  {formData.therapyType}
+                </p>
+                <p>
+                  <strong>Precio:</strong>
+                  {' '}
+                  $
+                  {therapyPrices[formData.therapyType]?.toLocaleString('es-CO')}
+                </p>
               </div>
             </div>
-          )}
+          </div>
+        )}
           {showPayment && (
-            <div className="payment-modal">
-              <button
-                type="button"
-                className="close-payment-btn"
-                onClick={() => setShowPayment(false)}
-              >
-                X
-              </button>
-              <Mp
-                therapyType={formData.therapyType}
-                onPaymentSuccess={handlePaymentSuccess}
-                currentUser={currentUser}
-                selectedPro={selectedPro}
-                citaGlobal={citaGlobal}
-                formData={formData}
-              />
-            </div>
-          )}
+          <div className="payment-modal">
+            <button
+              type="button"
+              className="close-payment-btn"
+              onClick={() => setShowPayment(false)}
+            >
+              X
+            </button>
+            <Mp
+              therapyType={formData.therapyType}
+              onPaymentSuccess={handlePaymentSuccess}
+              currentUser={currentUser}
+              selectedPro={selectedPro}
+              citaGlobal={citaGlobal}
+              formData={formData}
+            />
+          </div>
+        )}
           <button type="submit" className="DynamiCanlendar-btn">
             <h4>Confirmar e ir a pagar</h4>
           </button>
         </div>
       </div>
+
+      {/* Nuevo componente para mostrar estado de pago */}
+      {paymentStatus === 'success' && paymentDetails && (
+      <StatusBrick
+        paymentDetails={paymentDetails}
+        onClose={handleCloseStatus}
+      />
+    )}
     </form>
   );
 };
