@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-nested-ternary */
 /* eslint-disable consistent-return */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
 import '../../stylesheets/StatusBrick.css';
@@ -9,6 +11,9 @@ const StatusBrick = ({ paymentDetails, onClose, onRetry }) => {
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [showRetryButton, setShowRetryButton] = useState(false);
   const [brickLoaded, setBrickLoaded] = useState(false);
+  const [paymentInfo, setPaymentInfo] = useState(null);
+  const [sdkLoaded, setSdkLoaded] = useState(false);
+  const brickContainerRef = useRef(null);
 
   // Función para verificar el estado del pago directamente desde la API
   const checkPaymentStatus = async (paymentId) => {
@@ -28,7 +33,7 @@ const StatusBrick = ({ paymentDetails, onClose, onRetry }) => {
       }
 
       const data = await response.json();
-      return data.status;
+      return data;
     } catch (error) {
       console.error('Error verificando estado:', error);
       return null;
@@ -38,82 +43,97 @@ const StatusBrick = ({ paymentDetails, onClose, onRetry }) => {
   useEffect(() => {
     if (!paymentDetails || !paymentDetails.id) return;
 
-    // Verificar el estado del pago cada 5 segundos
-    const statusInterval = setInterval(async () => {
-      const status = await checkPaymentStatus(paymentDetails.id);
-      if (status) {
-        console.log(`Estado del pago: ${status}`);
-        setPaymentStatus(status);
+    // Obtener y mostrar información completa del pago
+    const fetchPaymentInfo = async () => {
+      const info = await checkPaymentStatus(paymentDetails.id);
+      if (info) {
+        setPaymentInfo(info);
+        setPaymentStatus(info.status);
 
-        if (['rejected', 'cancelled', 'refunded', 'charged_back'].includes(status)) {
+        if (['rejected', 'cancelled', 'refunded', 'charged_back'].includes(info.status)) {
           setShowRetryButton(true);
         }
       }
-    }, 5000);
+    };
 
+    fetchPaymentInfo();
+
+    // Verificar el estado del pago periódicamente
+    const statusInterval = setInterval(fetchPaymentInfo, 5000);
     return () => clearInterval(statusInterval);
   }, [paymentDetails]);
 
-  useEffect(() => {
-    if (!paymentDetails || !paymentDetails.id || brickLoaded) return;
+  const initializeBrick = () => {
+    if (!window.MercadoPago || brickLoaded) return;
 
-    const initializeBrick = () => {
-      const mp = new window.MercadoPago(publicKey, {
-        locale: 'es-CO',
-      });
+    const mp = new window.MercadoPago(publicKey, {
+      locale: 'es-CO',
+    });
 
-      const bricksBuilder = mp.bricks();
+    const bricksBuilder = mp.bricks();
 
-      const settings = {
-        initialization: {
-          paymentId: paymentDetails.id,
-        },
-        customization: {
-          visual: {
-            hideStatusDetails: true,
-            hideTransactionDate: true,
-            style: {
-              theme: 'default',
-              textPrimaryColor: '#fff',
-              formBackgroundColor: '#2B3E9D',
-            },
-          },
-          backUrls: {
-            error: 'https://globtherapist.vercel.app/error',
-            return: 'https://globtherapist.vercel.app/success',
+    const settings = {
+      initialization: {
+        paymentId: paymentDetails.id,
+      },
+      customization: {
+        visual: {
+          hideStatusDetails: true,
+          hideTransactionDate: true,
+          style: {
+            theme: 'default',
+            textPrimaryColor: '#fff',
+            formBackgroundColor: '#2B3E9D',
           },
         },
-        callbacks: {
-          onReady: () => {
-            console.log('Status Screen Brick listo');
-            setBrickLoaded(true);
-          },
-          onError: (error) => {
-            console.error('Error en Status Screen Brick:', error);
-            onClose();
-          },
+        backUrls: {
+          error: 'https://globtherapist.vercel.app/error',
+          return: 'https://globtherapist.vercel.app/success',
         },
-      };
-
-      bricksBuilder.create('statusScreen', 'statusScreenBrick_container', settings)
-        .then((controller) => {
-          window.statusScreenBrickController = controller;
-        })
-        .catch((error) => {
-          console.error('Error al crear el brick:', error);
-        });
+      },
+      callbacks: {
+        onReady: () => {
+          console.log('Status Screen Brick listo');
+          setBrickLoaded(true);
+        },
+        onError: (error) => {
+          console.error('Error en Status Screen Brick:', error);
+          onClose();
+        },
+      },
     };
+
+    bricksBuilder.create('statusScreen', brickContainerRef.current, settings)
+      .then((controller) => {
+        window.statusScreenBrickController = controller;
+      })
+      .catch((error) => {
+        console.error('Error al crear el brick:', error);
+      });
+  };
+
+  useEffect(() => {
+    if (!paymentDetails || !paymentDetails.id) return;
+
+    // Verificar si el SDK ya está cargado
+    if (sdkLoaded) {
+      initializeBrick();
+      return;
+    }
 
     const loadMercadoPago = async () => {
       if (window.MercadoPago) {
-        initializeBrick();
+        setSdkLoaded(true);
         return;
       }
 
       const script = document.createElement('script');
       script.src = 'https://sdk.mercadopago.com/js/v2';
       script.async = true;
-      script.onload = initializeBrick;
+      script.onload = () => {
+        console.log('SDK de MercadoPago cargado');
+        setSdkLoaded(true);
+      };
       script.onerror = () => {
         console.error('Error al cargar el SDK de MercadoPago');
         Swal.fire('Error', 'No se pudo cargar la pasarela de pago', 'error');
@@ -122,13 +142,13 @@ const StatusBrick = ({ paymentDetails, onClose, onRetry }) => {
     };
 
     loadMercadoPago();
+  }, [paymentDetails, sdkLoaded]);
 
-    return () => {
-      if (window.statusScreenBrickController) {
-        window.statusScreenBrickController.unmount();
-      }
-    };
-  }, [paymentDetails, onClose, publicKey, brickLoaded]);
+  useEffect(() => {
+    if (!sdkLoaded || brickLoaded || !paymentDetails?.id) return;
+
+    initializeBrick();
+  }, [sdkLoaded, brickLoaded, paymentDetails]);
 
   return (
     <div className="status-brick-overlay">
@@ -140,8 +160,20 @@ const StatusBrick = ({ paymentDetails, onClose, onRetry }) => {
         >
           ✕
         </button>
-        <div id="statusScreenBrick_container" style={{ width: '100%' }} />
 
+        {/* Contenedor del Status Screen Brick */}
+        <div
+          id="statusScreenBrick_container"
+          ref={brickContainerRef}
+          style={{
+            width: '100%',
+            minHeight: '300px',
+            position: 'relative',
+            zIndex: 10,
+          }}
+        />
+
+        {/* Contenedor para el botón de reintento */}
         {showRetryButton && (
           <div className="retry-button-container">
             <button
@@ -153,13 +185,12 @@ const StatusBrick = ({ paymentDetails, onClose, onRetry }) => {
             </button>
           </div>
         )}
-        {paymentStatus && (
-          <div className="debug-info">
-            <p>
-              Estado actual:
-              {' '}
-              {paymentStatus}
-            </p>
+
+        {/* Indicador de carga si el brick aún no está listo */}
+        {!brickLoaded && (
+          <div className="loading-indicator">
+            <div className="loading-spinner" />
+            <p>Cargando detalles del pago...</p>
           </div>
         )}
       </div>
