@@ -21,6 +21,7 @@ const Therapy = () => {
   } = useAuth();
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [paymentDetails, setPaymentDetails] = useState(null);
+  const [retryPayment, setRetryPayment] = useState(false);
   const therapyPrices = {
     Fisica: 70000,
     Lenguaje: 55000,
@@ -521,21 +522,21 @@ const Therapy = () => {
               key={type}
               type="button"
               className={
-              formData.therapyType === type
-                ? 'Therapy-tittle-cont Therapy-tittle'
-                : 'inactive-cont inactive-txt'
-            }
+                formData.therapyType === type
+                  ? 'Therapy-tittle-cont Therapy-tittle'
+                  : 'inactive-cont inactive-txt'
+              }
               onClick={() => handleTherapyTypeClick(type)}
             >
               {type}
             </button>
-        ))}
+          ))}
         </div>
         {errors.therapyType && (
-        <div className="error-container">
-          <h5 className="error-text">{errors.therapyType}</h5>
-        </div>
-      )}
+          <div className="error-container">
+            <h5 className="error-text">{errors.therapyType}</h5>
+          </div>
+        )}
         <div className="Therapy-info">
           <textarea
             className="Therapy-txt-field"
@@ -556,86 +557,91 @@ const Therapy = () => {
             onProSelection={handleProSelection}
           />
           {showAppointmentError && (
-          <div className="appointment-error">
-            <h5 className="error-text">Por favor, selecciona al menos una cita.</h5>
-          </div>
-        )}
+            <div className="appointment-error">
+              <h5 className="error-text">Por favor, selecciona al menos una cita.</h5>
+            </div>
+          )}
         </div>
         <div className="DynamiCanlendar-btn-cont">
           {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName && (
-          <div className="Date-info-cont">
-            <div className="Date-info-txt">
-              <h3>Tu cita quedó para el:</h3>
-            </div>
-            <div className="Date-info-description">
-              {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName ? (
-                <p>
-                  {citaGlobal.date}
-                  {' '}
-                  de
-                  {citaGlobal.month}
-                  {' '}
-                  del
-                  {new Date().getFullYear()}
-                  {' '}
-                  a las
-                  {citaGlobal.time}
-                  {' '}
-                  con el doctor
-                  {citaGlobal.proName}
-                  .
-                </p>
-              ) : (
-                <p>No hay una cita seleccionada.</p>
-              )}
-              <div className="therapy-price-info">
-                <p>
-                  <strong>Terapia:</strong>
-                  {' '}
-                  {formData.therapyType}
-                </p>
-                <p>
-                  <strong>Precio:</strong>
-                  {' '}
-                  $
-                  {therapyPrices[formData.therapyType]?.toLocaleString('es-CO')}
-                </p>
+            <div className="Date-info-cont">
+              <div className="Date-info-txt">
+                <h3>Tu cita quedó para el:</h3>
+              </div>
+              <div className="Date-info-description">
+                {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName ? (
+                  <p>
+                    {citaGlobal.date}
+                    {' '}
+                    de
+                    {citaGlobal.month}
+                    {' '}
+                    del
+                    {new Date().getFullYear()}
+                    {' '}
+                    a las
+                    {citaGlobal.time}
+                    {' '}
+                    con el doctor
+                    {citaGlobal.proName}
+                    .
+                  </p>
+                ) : (
+                  <p>No hay una cita seleccionada.</p>
+                )}
+                <div className="therapy-price-info">
+                  <p>
+                    <strong>Terapia:</strong>
+                    {' '}
+                    {formData.therapyType}
+                  </p>
+                  <p>
+                    <strong>Precio:</strong>
+                    {' '}
+                    $
+                    {therapyPrices[formData.therapyType]?.toLocaleString('es-CO')}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
           {showPayment && (
-          <div className="payment-modal">
-            <button
-              type="button"
-              className="close-payment-btn"
-              onClick={() => setShowPayment(false)}
-            >
-              X
-            </button>
-            <Mp
-              therapyType={formData.therapyType}
-              onPaymentSuccess={handlePaymentSuccess}
-              currentUser={currentUser}
-              selectedPro={selectedPro}
-              citaGlobal={citaGlobal}
-              formData={formData}
-            />
-          </div>
-        )}
+            <div className="payment-modal">
+              <button
+                type="button"
+                className="close-payment-btn"
+                onClick={() => setShowPayment(false)}
+              >
+                X
+              </button>
+              <Mp
+                key={retryPayment ? 'retry' : 'initial'}
+                therapyType={formData.therapyType}
+                onPaymentSuccess={handlePaymentSuccess}
+                currentUser={currentUser}
+                selectedPro={selectedPro}
+                citaGlobal={citaGlobal}
+                formData={formData}
+              />
+            </div>
+          )}
           <button type="submit" className="DynamiCanlendar-btn">
             <h4>Confirmar e ir a pagar</h4>
           </button>
         </div>
       </div>
 
-      {/* Nuevo componente para mostrar estado de pago */}
       {paymentStatus === 'success' && paymentDetails && (
-      <StatusBrick
-        paymentDetails={paymentDetails}
-        onClose={handleCloseStatus}
-      />
-    )}
+        <StatusBrick
+          paymentDetails={paymentDetails}
+          onClose={handleCloseStatus}
+          onRetry={() => {
+            setPaymentStatus(null);
+            setShowPayment(true);
+            setRetryPayment(true);
+          }}
+        />
+      )}
     </form>
   );
 };
