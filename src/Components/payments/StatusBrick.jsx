@@ -10,12 +10,15 @@ const StatusBrick = ({ paymentDetails, onClose, onRetry }) => {
   const publicKey = process.env.REACT_APP_MERCADOPAGO_PUBLIC_KEY;
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [showRetryButton, setShowRetryButton] = useState(false);
-  const [brickLoaded, setBrickLoaded] = useState(false);
-  const [paymentInfo, setPaymentInfo] = useState(null);
   const [sdkLoaded, setSdkLoaded] = useState(false);
-  const brickContainerRef = useRef(null);
+  const [loading, setLoading] = useState(true);
 
-  // Función para verificar el estado del pago directamente desde la API
+  // Referencias para controlar la instancia del brick y funciones de callback
+  const brickControllerRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Verificar estado del pago
   const checkPaymentStatus = async (paymentId) => {
     try {
       const response = await fetch(
@@ -28,48 +31,66 @@ const StatusBrick = ({ paymentDetails, onClose, onRetry }) => {
         },
       );
 
-      if (!response.ok) {
-        throw new Error('Error al obtener estado del pago');
-      }
-
-      const data = await response.json();
-      return data;
+      if (!response.ok) throw new Error('Error al obtener estado del pago');
+      return await response.json();
     } catch (error) {
       console.error('Error verificando estado:', error);
       return null;
     }
   };
 
+  // Cargar SDK de MercadoPago
   useEffect(() => {
-    if (!paymentDetails || !paymentDetails.id) return;
+    if (window.MercadoPago) {
+      setSdkLoaded(true);
+      return;
+    }
 
-    // Obtener y mostrar información completa del pago
+    const script = document.createElement('script');
+    script.src = 'https://sdk.mercadopago.com/js/v2';
+    script.async = true;
+    script.onload = () => setSdkLoaded(true);
+    script.onerror = () => {
+      console.error('Error al cargar el SDK de MercadoPago');
+      Swal.fire('Error', 'No se pudo cargar la pasarela de pago', 'error');
+      setLoading(false);
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  // Verificar estado del pago periódicamente
+  useEffect(() => {
+    if (!paymentDetails?.id) return;
+
     const fetchPaymentInfo = async () => {
       const info = await checkPaymentStatus(paymentDetails.id);
-      if (info) {
-        setPaymentInfo(info);
-        setPaymentStatus(info.status);
+      if (!info) return;
 
-        if (['rejected', 'cancelled', 'refunded', 'charged_back'].includes(info.status)) {
-          setShowRetryButton(true);
-        }
-      }
+      setPaymentStatus(info.status);
+      setShowRetryButton(['rejected', 'cancelled', 'refunded', 'charged_back'].includes(info.status));
     };
 
     fetchPaymentInfo();
-
-    // Verificar el estado del pago periódicamente
     const statusInterval = setInterval(fetchPaymentInfo, 5000);
     return () => clearInterval(statusInterval);
   }, [paymentDetails]);
 
-  const initializeBrick = () => {
-    if (!window.MercadoPago || brickLoaded) return;
+  // Inicializar el brick cuando el SDK y los detalles estén listos
+  useEffect(() => {
+    if (!sdkLoaded || !paymentDetails?.id) return;
+    setLoading(true);
 
-    const mp = new window.MercadoPago(publicKey, {
-      locale: 'es-CO',
-    });
+    // Limpiar instancia previa
+    if (brickControllerRef.current) {
+      brickControllerRef.current.unmount();
+      brickControllerRef.current = null;
+    }
 
+    const mp = new window.MercadoPago(publicKey, { locale: 'es-CO' });
     const bricksBuilder = mp.bricks();
 
     const settings = {
@@ -94,100 +115,56 @@ const StatusBrick = ({ paymentDetails, onClose, onRetry }) => {
       callbacks: {
         onReady: () => {
           console.log('Status Screen Brick listo');
-          setBrickLoaded(true);
+          setLoading(false);
         },
         onError: (error) => {
           console.error('Error en Status Screen Brick:', error);
-          onClose();
+          onCloseRef.current();
+          setLoading(false);
         },
       },
     };
 
-    bricksBuilder.create('statusScreen', brickContainerRef.current, settings)
+    bricksBuilder.create('statusScreen', 'statusScreenBrick_container', settings)
       .then((controller) => {
-        window.statusScreenBrickController = controller;
+        brickControllerRef.current = controller;
       })
       .catch((error) => {
         console.error('Error al crear el brick:', error);
+        setLoading(false);
       });
-  };
 
-  useEffect(() => {
-    if (!paymentDetails || !paymentDetails.id) return;
-
-    // Verificar si el SDK ya está cargado
-    if (sdkLoaded) {
-      initializeBrick();
-      return;
-    }
-
-    const loadMercadoPago = async () => {
-      if (window.MercadoPago) {
-        setSdkLoaded(true);
-        return;
+    return () => {
+      if (brickControllerRef.current) {
+        brickControllerRef.current.unmount();
+        brickControllerRef.current = null;
       }
-
-      const script = document.createElement('script');
-      script.src = 'https://sdk.mercadopago.com/js/v2';
-      script.async = true;
-      script.onload = () => {
-        console.log('SDK de MercadoPago cargado');
-        setSdkLoaded(true);
-      };
-      script.onerror = () => {
-        console.error('Error al cargar el SDK de MercadoPago');
-        Swal.fire('Error', 'No se pudo cargar la pasarela de pago', 'error');
-      };
-      document.body.appendChild(script);
     };
-
-    loadMercadoPago();
-  }, [paymentDetails, sdkLoaded]);
-
-  useEffect(() => {
-    if (!sdkLoaded || brickLoaded || !paymentDetails?.id) return;
-
-    initializeBrick();
-  }, [sdkLoaded, brickLoaded, paymentDetails]);
+  }, [sdkLoaded, paymentDetails, publicKey]);
 
   return (
     <div className="status-brick-overlay">
       <div className="status-brick-container">
-        <button
-          type="button"
-          className="close-button"
-          onClick={onClose}
-        >
+        <button type="button" className="close-button" onClick={onClose}>
           ✕
         </button>
 
-        {/* Contenedor del Status Screen Brick */}
         <div
           id="statusScreenBrick_container"
-          ref={brickContainerRef}
           style={{
-            width: '100%',
-            minHeight: '300px',
-            position: 'relative',
-            zIndex: 10,
-          }}
+ width: '100%', minHeight: '300px', position: 'relative', zIndex: 10,
+}}
         />
 
-        {/* Contenedor para el botón de reintento */}
-        {showRetryButton && (
+        {!loading && showRetryButton && (
           <div className="retry-button-container">
-            <button
-              type="button"
-              className="retry-button"
-              onClick={onRetry}
-            >
+            <button type="button" className="retry-button" onClick={onRetry}>
               Reintentar pago
             </button>
           </div>
         )}
 
-        {/* Indicador de carga si el brick aún no está listo */}
-        {!brickLoaded && (
+        {loading && (
           <div className="loading-indicator">
             <div className="loading-spinner" />
             <p>Cargando detalles del pago...</p>
