@@ -6,6 +6,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../AuthContext';
 import { auth, db } from '../../firebase';
 import submit from '../../img/submit.png';
+import StatusBrick from '../payments/StatusBrick';
 import '../../stylesheets/userInfo.css';
 
 const UserInfo = ({ citas, title, emptyMessage }) => {
@@ -13,6 +14,8 @@ const UserInfo = ({ citas, title, emptyMessage }) => {
   const { setCitaGlobal } = useAuth();
   // eslint-disable-next-line no-unused-vars
   const [userData, setuserData] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -32,6 +35,23 @@ const UserInfo = ({ citas, title, emptyMessage }) => {
 
     fetchUserData();
   }, []);
+
+  const handlePaymentClick = (cita) => {
+    if (cita.payment && cita.payment.paymentId) {
+      setSelectedPayment({
+        id: cita.payment.paymentId,
+        amount: cita.payment.amount,
+        method: cita.payment.method,
+        status: cita.payment.status,
+      });
+      setShowPaymentModal(true);
+    }
+  };
+
+  const closePaymentModal = () => {
+    setShowPaymentModal(false);
+    setSelectedPayment(null);
+  };
 
   if (!citas || citas.length === 0) {
     return (
@@ -67,10 +87,14 @@ const UserInfo = ({ citas, title, emptyMessage }) => {
                 </p>
               </div>
               <div className="cita-status">
-                <p className={`status-${cita.status}`}>
+                <button
+                  type="button"
+                  className={`status-${cita.status} status-button`}
+                  onClick={() => handlePaymentClick(cita)}
+                >
                   {cita.status === 'pay_pending' ? 'Pago Pendiente'
                    : cita.status === 'pending' ? 'Pendiente' : 'Finalizada'}
-                </p>
+                </button>
               </div>
             </div>
             {cita.status === 'pay_pending' || cita.status === 'pending' ? (
@@ -109,6 +133,18 @@ const UserInfo = ({ citas, title, emptyMessage }) => {
           </div>
         ))}
       </div>
+
+      {/* Modal para mostrar el estado del pago */}
+      {showPaymentModal && selectedPayment && (
+        <StatusBrick
+          paymentDetails={selectedPayment}
+          onClose={closePaymentModal}
+          onRetry={() => {
+            console.log('Reintentar pago implementaría nueva lógica de pago');
+            closePaymentModal();
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -130,6 +166,12 @@ UserInfo.propTypes = {
       therapyType: PropTypes.string.isRequired,
       proName: PropTypes.string.isRequired,
       description: PropTypes.string,
+      payment: PropTypes.shape({
+        paymentId: PropTypes.string.isRequired,
+        amount: PropTypes.number.isRequired,
+        method: PropTypes.string.isRequired,
+        status: PropTypes.string.isRequired,
+      }),
     }),
   ),
   title: PropTypes.string,
