@@ -8,6 +8,7 @@ import ChatComponent from './ChatComponent';
 import '../../stylesheets/videocall.css';
 import home from '../../img/home 1.png';
 import wait from '../../img/Iconjam.png';
+import chatIcon from '../../img/eye.png';
 
 const UserView = ({ meetingParams }) => {
   const { meetingAccess, setMeetingAccess } = useAuth();
@@ -25,6 +26,9 @@ const UserView = ({ meetingParams }) => {
   // Estados para compartir pantalla
   const [screenTrack, setScreenTrack] = useState(null);
   const [sharingScreen, setSharingScreen] = useState(false);
+
+  // Estado para mostrar/ocultar el chat
+  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     if (meetingAccess !== 'approved') return;
@@ -231,10 +235,62 @@ const UserView = ({ meetingParams }) => {
             <button type="button" onClick={handleScreenShare}>
               {sharingScreen ? 'Detener pantalla' : 'Compartir pantalla'}
             </button>
+            <button
+              type="button"
+              onClick={() => setShowChat(!showChat)}
+              style={{ background: showChat ? '#4CAF50' : '' }}
+            >
+              <img src={chatIcon} alt="Chat" width="20" height="20" />
+            </button>
           </div>
         </div>
       )}
-      <ChatComponent clientId={currentUser.uid} channelId={meetingParams.channelId} />
+
+      {/* Modal del chat */}
+      {showChat && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          right: '20px',
+          transform: 'translateY(-50%)',
+          width: '300px',
+          height: '400px',
+          backgroundColor: 'white',
+          zIndex: 1000,
+          boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+        >
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px',
+            borderBottom: '1px solid #eee',
+          }}
+          >
+            <h3>Chat</h3>
+            <button
+              type="button"
+              onClick={() => setShowChat(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '20px',
+                cursor: 'pointer',
+                color: '#666',
+              }}
+            >
+              ×
+            </button>
+          </div>
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <ChatComponent clientId={currentUser.uid} channelId={meetingParams.channelId} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
