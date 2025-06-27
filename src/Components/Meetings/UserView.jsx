@@ -8,7 +8,7 @@ import ChatComponent from './ChatComponent';
 import '../../stylesheets/videocall.css';
 import home from '../../img/home 1.png';
 import wait from '../../img/Iconjam.png';
-import chatIcon from '../../img/eye.png';
+import chatIcon from '../../img/bubble-chat.png';
 
 const UserView = ({ meetingParams }) => {
   const { meetingAccess, setMeetingAccess } = useAuth();
