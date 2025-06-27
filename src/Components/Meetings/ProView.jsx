@@ -65,6 +65,10 @@ const ProView = ({ meetingParams }) => {
   const [cameraOn, setCameraOn] = useState(false);
   const [remoteCameraOn, setRemoteCameraOn] = useState(false);
 
+  // Estados para compartir pantalla
+  const [screenTrack, setScreenTrack] = useState(null);
+  const [sharingScreen, setSharingScreen] = useState(false);
+
   useEffect(() => {
     const initAgora = async () => {
       const agoraClient = AgoraRTC.createClient({
@@ -128,6 +132,7 @@ const ProView = ({ meetingParams }) => {
     return () => {
       if (micTrack) micTrack.close();
       if (cameraTrack) cameraTrack.close();
+      if (screenTrack) screenTrack.close();
       if (client) client.leave();
     };
   }, [meetingParams]);
@@ -179,6 +184,28 @@ const ProView = ({ meetingParams }) => {
     }
   };
 
+  // Función para compartir pantalla
+  const handleScreenShare = async () => {
+    if (!client) return;
+    if (!sharingScreen) {
+      try {
+        const track = await AgoraRTC.createScreenVideoTrack();
+        await client.publish(track);
+        setScreenTrack(track);
+        setSharingScreen(true);
+      } catch (e) {
+        console.error('Error al compartir pantalla:', e);
+      }
+    } else {
+      if (screenTrack) {
+        await client.unpublish(screenTrack);
+        screenTrack.close();
+        setScreenTrack(null);
+      }
+      setSharingScreen(false);
+    }
+  };
+
   return (
     <div
       style={{
@@ -220,13 +247,18 @@ const ProView = ({ meetingParams }) => {
           backgroundColor: 'rgba(0,0,0,0.6)',
           padding: '0.5rem',
           borderRadius: '0.5rem',
+          display: 'flex',
+          gap: '0.5rem',
         }}
       >
-        <button type="button" onClick={handleToggleCamera} style={{ marginRight: '1rem' }}>
+        <button type="button" onClick={handleToggleCamera}>
           {cameraOn ? 'Apagar cámara' : 'Encender cámara'}
         </button>
         <button type="button" onClick={handleToggleMic}>
           {micOn ? 'Apagar micrófono' : 'Encender micrófono'}
+        </button>
+        <button type="button" onClick={handleScreenShare}>
+          {sharingScreen ? 'Detener pantalla' : 'Compartir pantalla'}
         </button>
       </div>
       <ChatComponent clientId={currentPro.uid} channelId={meetingParams.channelId} />

@@ -22,6 +22,10 @@ const UserView = ({ meetingParams }) => {
   const [cameraOn, setCameraOn] = useState(false);
   const [remoteCameraOn, setRemoteCameraOn] = useState(false);
 
+  // Estados para compartir pantalla
+  const [screenTrack, setScreenTrack] = useState(null);
+  const [sharingScreen, setSharingScreen] = useState(false);
+
   useEffect(() => {
     if (meetingAccess !== 'approved') return;
     const initAgora = async () => {
@@ -87,6 +91,7 @@ const UserView = ({ meetingParams }) => {
     return () => {
       if (micTrack) micTrack.close();
       if (cameraTrack) cameraTrack.close();
+      if (screenTrack) screenTrack.close();
       if (client) client.leave();
     };
   }, [meetingAccess, meetingParams]);
@@ -135,6 +140,28 @@ const UserView = ({ meetingParams }) => {
         setMicTrack(null);
       }
       setMicOn(false);
+    }
+  };
+
+  // Función para compartir pantalla
+  const handleScreenShare = async () => {
+    if (!client) return;
+    if (!sharingScreen) {
+      try {
+        const track = await AgoraRTC.createScreenVideoTrack();
+        await client.publish(track);
+        setScreenTrack(track);
+        setSharingScreen(true);
+      } catch (e) {
+        console.error('Error al compartir pantalla:', e);
+      }
+    } else {
+      if (screenTrack) {
+        await client.unpublish(screenTrack);
+        screenTrack.close();
+        setScreenTrack(null);
+      }
+      setSharingScreen(false);
     }
   };
 
@@ -191,13 +218,18 @@ const UserView = ({ meetingParams }) => {
             backgroundColor: 'rgba(0,0,0,0.6)',
             padding: '0.5rem',
             borderRadius: '0.5rem',
+            display: 'flex',
+            gap: '0.5rem',
           }}
           >
-            <button type="button" onClick={handleToggleCamera} style={{ marginRight: '1rem' }}>
+            <button type="button" onClick={handleToggleCamera}>
               {cameraOn ? 'Apagar cámara' : 'Encender cámara'}
             </button>
             <button type="button" onClick={handleToggleMic}>
               {micOn ? 'Apagar micrófono' : 'Encender micrófono'}
+            </button>
+            <button type="button" onClick={handleScreenShare}>
+              {sharingScreen ? 'Detener pantalla' : 'Compartir pantalla'}
             </button>
           </div>
         </div>
