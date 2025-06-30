@@ -5,7 +5,7 @@ import './App.css';
 import Mainpage from './Components/Homepage';
 import EmailPreview from './Components/EmailPreview';
 import PaymentStatus from './Components/PaymentStatus';
-import Test from './Components/MyCalendar';
+import Test from './Components/windows/ProInfo';
 
 function App() {
   return (
