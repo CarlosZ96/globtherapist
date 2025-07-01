@@ -287,6 +287,46 @@ const Therapy = () => {
     setShowPayment(true);
   };
 
+  const getDateProInfo = (therapyType) => {
+    const normalizedType = normalizeText(therapyType);
+
+    switch (normalizedType) {
+      case 'mental':
+        return {
+          estadoAnimico: '',
+          sintomas: '',
+          tecnicasUsadas: [],
+          recomendaciones: '',
+        };
+      case 'fisica':
+        return {
+          movilidadObservada: '',
+          rangoArticula: '',
+          escalaDeDolor: { localizacion: '', intensidad: 0 },
+          ejerciciosRealizados: [],
+          recomendaciones: '',
+        };
+      case 'lenguaje':
+        return {
+          comprension: '',
+          expresionVerbal: '',
+          ejerciciosRealizados: [],
+          denominacion: '',
+          recomendaciones: '',
+        };
+      case 'ocupacional':
+        return {
+          nivelDeIndependencia: '',
+          destrezasMotorasFinas: '',
+          ejerciciosRealizados: [],
+          adaptacionesSugeridas: { hogar: '', trabajo: '' },
+          recomendaciones: '',
+        };
+      default:
+        return {};
+    }
+  };
+
   const handlePaymentSuccess = async (paymentInfo) => {
     const proDocRef = doc(db, 'pros', selectedPro);
     try {
@@ -364,6 +404,7 @@ const Therapy = () => {
         userPhone: formData.phone,
         userId: currentUser.uid,
         payment: userCita.payment,
+        DateProInfo: getDateProInfo(formData.therapyType),
       };
 
       await Promise.all([
