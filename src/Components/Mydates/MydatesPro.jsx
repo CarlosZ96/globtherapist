@@ -18,7 +18,6 @@ const MydatesPro = ({ citas }) => {
         <h1>Citas de Pacientes</h1>
       </div>
 
-      {/* Movemos el contenedor fuera del map */}
       <div className="citas-cont">
         {citas.map((cita) => (
           <div key={cita.id} className="cita-card">
@@ -77,7 +76,7 @@ const MydatesPro = ({ citas }) => {
 MydatesPro.propTypes = {
   citas: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string.isRequired, // Cambiado de number a string
+      id: PropTypes.string.isRequired,
       date: PropTypes.string.isRequired,
       month: PropTypes.string.isRequired,
       time: PropTypes.string.isRequired,

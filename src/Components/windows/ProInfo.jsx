@@ -4,7 +4,7 @@ import '../../stylesheets/proinfo.css';
 const ProInfo = () => {
   return (
     <div className="date-info">
-      <div>
+      <div className="date-info-theratype">
         <h1>Tipo de Terapia</h1>
       </div>
       <div className="date-info-header-cont">
@@ -54,7 +54,8 @@ const ProInfo = () => {
           <h3>Mindfulness</h3>
         </div>
       </div>
-      <div className="pro-results">
+      <div className="pro-results-cont">
+        <h2>Recomendaciones:</h2>
         <p>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit,
           sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
