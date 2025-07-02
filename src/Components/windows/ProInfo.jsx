@@ -7,7 +7,6 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import '../../stylesheets/proinfo.css';
 
-// Función para normalizar texto (igual que en Therapy)
 const normalizeText = (text) => {
   return text
     .normalize('NFD')
@@ -24,7 +23,6 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
   useEffect(() => {
     const fetchPacienteData = async () => {
       try {
-        // Obtener datos del profesional
         const proDocRef = doc(db, 'pros', proId);
         const proDocSnap = await getDoc(proDocRef);
 
@@ -32,7 +30,6 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
           throw new Error('Profesional no encontrado');
         }
 
-        // Buscar la cita específica
         const misCitas = proDocSnap.data().MisCitas || [];
         const cita = misCitas.find((c) => c.uid === citaUid);
 
@@ -40,7 +37,6 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
           throw new Error('Cita no encontrada');
         }
 
-        // Obtener DateProInfo si existe
         if (cita.DateProInfo) {
           setDateProInfo(cita.DateProInfo);
         }
@@ -61,7 +57,6 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
     fetchPacienteData();
   }, [citaUid, proId]);
 
-  // Función para manejar cambios en los campos
   const handleFieldChange = (field, value) => {
     setDateProInfo((prev) => ({
       ...prev,
@@ -69,7 +64,6 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
     }));
   };
 
-  // Función para manejar cambios en campos anidados
   const handleNestedFieldChange = (parentField, field, value) => {
     setDateProInfo((prev) => ({
       ...prev,
@@ -80,7 +74,6 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
     }));
   };
 
-  // Función para manejar arrays
   const handleArrayChange = (field, index, value) => {
     const newArray = [...dateProInfo[field]];
     newArray[index] = value;
@@ -90,7 +83,6 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
     }));
   };
 
-  // Función para agregar elementos a arrays
   const addToArray = (field, defaultValue = '') => {
     setDateProInfo((prev) => ({
       ...prev,
@@ -98,7 +90,13 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
     }));
   };
 
-  // Función para guardar cambios en Firestore
+  const handleOptionChange = (field, value) => {
+    setDateProInfo((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
   const saveChanges = async () => {
     try {
       const proDocRef = doc(db, 'pros', proId);
@@ -125,7 +123,6 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
     }
   };
 
-  // Función para renderizar campos según el tipo de terapia
   const renderTherapyFields = () => {
     if (!dateProInfo) return null;
 
@@ -138,11 +135,36 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
             <div className="patient-state-cont">
               <div className="patient-states">
                 <h2>Estado anímico:</h2>
-                <input
-                  type="text"
-                  value={dateProInfo.estadoAnimico || ''}
-                  onChange={(e) => handleFieldChange('estadoAnimico', e.target.value)}
-                />
+                <div className="options-container">
+                  {['Estable', 'Ansioso', 'Deprimido', 'Irritable'].map((option) => (
+                    <div key={option} className="option-item">
+                      <input
+                        type="radio"
+                        name="estadoAnimico"
+                        id={`estado-${option}`}
+                        checked={dateProInfo.estadoAnimico === option}
+                        onChange={() => handleOptionChange('estadoAnimico', option)}
+                      />
+                      <label htmlFor={`estado-${option}`}>{option}</label>
+                    </div>
+                  ))}
+                  <div className="option-item">
+                    <input
+                      type="radio"
+                      name="estadoAnimico"
+                      id="estado-otro"
+                      checked={dateProInfo.estadoAnimico === 'Otro'}
+                      onChange={() => handleOptionChange('estadoAnimico', 'Otro')}
+                    />
+                    <label htmlFor="estado-otro">Otro:</label>
+                    <input
+                      type="text"
+                      value={dateProInfo.estadoAnimicoOtro || ''}
+                      onChange={(e) => handleFieldChange('estadoAnimicoOtro', e.target.value)}
+                      disabled={dateProInfo.estadoAnimico !== 'Otro'}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             <div className="patient-symptoms">
@@ -184,20 +206,32 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
             <div className="patient-state-cont">
               <div className="patient-states">
                 <h2>Movilidad observada:</h2>
-                <input
-                  type="text"
-                  value={dateProInfo.movilidadObservada || ''}
-                  onChange={(e) => handleFieldChange('movilidadObservada', e.target.value)}
-                />
+                <div className="options-container">
+                  <div className="marcha-options">
+                    <h3>Marcha:</h3>
+                    {['Normal', 'Alterada'].map((option) => (
+                      <div key={option} className="option-item">
+                        <input
+                          type="radio"
+                          name="marcha"
+                          id={`marcha-${option}`}
+                          checked={dateProInfo.marcha === option}
+                          onChange={() => handleFieldChange('marcha', option)}
+                        />
+                        <label htmlFor={`marcha-${option}`}>{option}</label>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="ayudas-option">
+                    <label>Uso de ayudas:</label>
+                    <input
+                      type="text"
+                      value={dateProInfo.usoAyudas || ''}
+                      onChange={(e) => handleFieldChange('usoAyudas', e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="patient-symptoms">
-              <h2>Rango articular:</h2>
-              <input
-                type="text"
-                value={dateProInfo.rangoArticula || ''}
-                onChange={(e) => handleFieldChange('rangoArticula', e.target.value)}
-              />
             </div>
             <div className="pro-management">
               <div className="pro-management-tecniques">
@@ -252,18 +286,38 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
             <div className="patient-state-cont">
               <div className="patient-states">
                 <h2>Comprensión:</h2>
-                <textarea
-                  value={dateProInfo.comprension || ''}
-                  onChange={(e) => handleFieldChange('comprension', e.target.value)}
-                />
+                <div className="options-container">
+                  {['Adecuada', 'Dificultad leve', 'Dificultad severa'].map((option) => (
+                    <div key={option} className="option-item">
+                      <input
+                        type="radio"
+                        name="comprension"
+                        id={`comprension-${option}`}
+                        checked={dateProInfo.comprension === option}
+                        onChange={() => handleOptionChange('comprension', option)}
+                      />
+                      <label htmlFor={`comprension-${option}`}>{option}</label>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="patient-symptoms">
               <h2>Expresión verbal:</h2>
-              <textarea
-                value={dateProInfo.expresionVerbal || ''}
-                onChange={(e) => handleFieldChange('expresionVerbal', e.target.value)}
-              />
+              <div className="options-container">
+                {['Normal', 'Tartamudez', 'Omisión palabras'].map((option) => (
+                  <div key={option} className="option-item">
+                    <input
+                      type="radio"
+                      name="expresionVerbal"
+                      id={`expresion-${option}`}
+                      checked={dateProInfo.expresionVerbal === option}
+                      onChange={() => handleOptionChange('expresionVerbal', option)}
+                    />
+                    <label htmlFor={`expresion-${option}`}>{option}</label>
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="pro-management">
               <div className="pro-management-tecniques">
@@ -305,20 +359,44 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
             <div className="patient-state-cont">
               <div className="patient-states">
                 <h2>Nivel de independencia:</h2>
-                <input
-                  type="text"
-                  value={dateProInfo.nivelDeIndependencia || ''}
-                  onChange={(e) => handleFieldChange('nivelDeIndependencia', e.target.value)}
-                />
+                <div className="options-container">
+                  {['Independiente', 'Supervisado', 'Asistido'].map((option) => (
+                    <div key={option} className="option-item">
+                      <input
+                        type="radio"
+                        name="independencia"
+                        id={`independencia-${option}`}
+                        checked={dateProInfo.nivelDeIndependencia === option}
+                        onChange={() => handleOptionChange('nivelDeIndependencia', option)}
+                      />
+                      <label htmlFor={`independencia-${option}`}>{option}</label>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="patient-symptoms">
               <h2>Destrezas motoras finas:</h2>
-              <input
-                type="text"
-                value={dateProInfo.destrezasMotorasFinas || ''}
-                onChange={(e) => handleFieldChange('destrezasMotorasFinas', e.target.value)}
-              />
+              <div className="options-container">
+                <div className="option-item">
+                  <input
+                    type="checkbox"
+                    id="coordinacion-optima"
+                    checked={dateProInfo.coordinacionOptima || false}
+                    onChange={(e) => handleFieldChange('coordinacionOptima', e.target.checked)}
+                  />
+                  <label htmlFor="coordinacion-optima">Coordinación óptima</label>
+                </div>
+                <div className="option-item">
+                  <label>Dificultad en:</label>
+                  <input
+                    type="text"
+                    value={dateProInfo.dificultadEn || ''}
+                    onChange={(e) => handleFieldChange('dificultadEn', e.target.value)}
+                    disabled={dateProInfo.coordinacionOptima}
+                  />
+                </div>
+              </div>
             </div>
             <div className="pro-management">
               <div className="pro-management-tecniques">
@@ -394,17 +472,17 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
         <div className="date-time-cont">
           <div className="date-time">
             <input
-              type="checkbox"
+              type="radio"
               name="time"
-              id="time"
+              id=""
             />
             <h2>Primera vez</h2>
           </div>
           <div className="date-time">
             <input
-              type="checkbox"
+              type="radio"
               name="time"
-              id="time"
+              id=""
             />
             <h2>Seguimiento</h2>
           </div>

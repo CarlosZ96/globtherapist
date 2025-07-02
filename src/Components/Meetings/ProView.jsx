@@ -6,6 +6,7 @@ import { useAuth } from '../../AuthContext';
 import ChatComponent from './ChatComponent';
 import home from '../../img/home 1.png';
 import chatIcon from '../../img/bubble-chat.png';
+import formIcon from '../../img/contact-form.png';
 import '../../stylesheets/videocall.css';
 import ProInfo from '../windows/ProInfo';
 
@@ -69,6 +70,7 @@ const ProView = ({ meetingParams }) => {
   const [screenTrack, setScreenTrack] = useState(null);
   const [sharingScreen, setSharingScreen] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showProInfo, setShowProInfo] = useState(false); // Estado para controlar el modal
 
   useEffect(() => {
     const initAgora = async () => {
@@ -234,17 +236,6 @@ const ProView = ({ meetingParams }) => {
         </div>
       </div>
 
-      {/* Sección de información de la cita */}
-      {citaGlobal && (
-        <div style={{ flex: 1, padding: '1rem', overflowY: 'auto' }}>
-          <ProInfo
-            therapyType={citaGlobal.therapyType}
-            citaUid={citaGlobal.uid}
-            proId={currentUser.uid}
-          />
-        </div>
-      )}
-
       <div
         style={{
           position: 'absolute',
@@ -273,6 +264,14 @@ const ProView = ({ meetingParams }) => {
           style={{ background: showChat ? '#4CAF50' : '' }}
         >
           <img src={chatIcon} alt="Chat" width="20" height="20" />
+        </button>
+        {/* Botón para abrir el formulario ProInfo */}
+        <button
+          type="button"
+          onClick={() => setShowProInfo(true)}
+          style={{ background: showProInfo ? '#4CAF50' : '' }}
+        >
+          <img src={formIcon} alt="Formulario" width="20" height="20" />
         </button>
       </div>
 
@@ -317,6 +316,58 @@ const ProView = ({ meetingParams }) => {
           </div>
           <div style={{ flex: 1, overflow: 'hidden' }}>
             <ChatComponent clientId={currentPro.uid} channelId={meetingParams.channelId} />
+          </div>
+        </div>
+      )}
+
+      {/* Modal para ProInfo */}
+      {showProInfo && citaGlobal && (
+        <div
+          className="pro-info-modal"
+          style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          zIndex: 1001,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+        >
+          <div style={{
+            width: '90%',
+            maxWidth: '800px',
+            height: '90%',
+            backgroundColor: 'white',
+            borderRadius: '10px',
+            overflow: 'auto',
+            position: 'relative',
+          }}
+          >
+            <button
+              type="button"
+              onClick={() => setShowProInfo(false)}
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: '#666',
+              }}
+            >
+              ×
+            </button>
+            <ProInfo
+              therapyType={citaGlobal.therapyType}
+              citaUid={citaGlobal.uid}
+              proId={currentUser.uid}
+            />
           </div>
         </div>
       )}
