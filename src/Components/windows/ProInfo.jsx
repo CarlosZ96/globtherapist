@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable radix */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useEffect } from 'react';
@@ -19,6 +20,8 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
   const [dateProInfo, setDateProInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [previousCitaInfo, setPreviousCitaInfo] = useState(null);
+  const [showPreviousInfo, setShowPreviousInfo] = useState(false);
 
   useEffect(() => {
     const fetchPacienteData = async () => {
@@ -44,6 +47,7 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
         setPaciente({
           name: cita.userName,
           description: cita.description,
+          userId: cita.userId, // Guardamos el ID del usuario para buscar citas anteriores
         });
         setError(null);
       } catch (err) {
@@ -56,6 +60,53 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
 
     fetchPacienteData();
   }, [citaUid, proId]);
+
+  // Función para obtener la información de la cita anterior más reciente
+  const fetchPreviousCitaInfo = async () => {
+    try {
+      if (!paciente || !paciente.userId) {
+        Swal.fire('Información', 'No se encontró información del paciente.', 'info');
+        return;
+      }
+
+      const proDocRef = doc(db, 'pros', proId);
+      const proDocSnap = await getDoc(proDocRef);
+
+      if (!proDocSnap.exists()) {
+        throw new Error('Profesional no encontrado');
+      }
+
+      const misCitas = proDocSnap.data().MisCitas || [];
+      const citasFiltradas = misCitas.filter((cita) => cita.userId === paciente.userId
+        && normalizeText(cita.therapyType) === normalizeText(therapyType)
+        && cita.uid !== citaUid);
+      citasFiltradas.sort((a, b) => new Date(b.createdAt).getTime()
+       - new Date(a.createdAt).getTime());
+      if (citasFiltradas.length === 0) {
+        Swal.fire('Información', 'No se encontraron citas anteriores de este tipo de terapia.', 'info');
+        return;
+      }
+
+      // Tomar la cita más reciente
+      const citaMasReciente = citasFiltradas[0];
+
+      if (!citaMasReciente.DateProInfo) {
+        Swal.fire('Información', 'La cita anterior no tiene información registrada.', 'info');
+        return;
+      }
+
+      setPreviousCitaInfo({
+        date: citaMasReciente.date,
+        month: citaMasReciente.month,
+        time: citaMasReciente.time,
+        data: citaMasReciente.DateProInfo,
+      });
+      setShowPreviousInfo(true);
+    } catch (errore) {
+      console.error('Error obteniendo cita anterior:', errore);
+      Swal.fire('Error', 'No se pudo obtener la información de la cita anterior', 'error');
+    }
+  };
 
   const handleFieldChange = (field, value) => {
     setDateProInfo((prev) => ({
@@ -448,6 +499,109 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
     }
   };
 
+  // Función para renderizar la información de la cita anterior
+  const renderPreviousInfoModal = () => {
+    if (!showPreviousInfo || !previousCitaInfo) return null;
+
+    return (
+      <div
+        className="previous-info-modal"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          zIndex: 1002,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <div style={{
+          width: '80%',
+          maxWidth: '700px',
+          backgroundColor: 'white',
+          borderRadius: '10px',
+          padding: '20px',
+          overflow: 'auto',
+          maxHeight: '90vh',
+          position: 'relative',
+        }}
+        >
+          <button
+            type="button"
+            onClick={() => setShowPreviousInfo(false)}
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: '#666',
+            }}
+          >
+            ×
+          </button>
+          <h2>Información de Cita Anterior</h2>
+          <p>
+            <strong>Fecha:</strong>
+            {' '}
+            {previousCitaInfo.date}
+            {' '}
+            de
+            {' '}
+            {previousCitaInfo.month}
+            {' '}
+            a las
+            {' '}
+            {previousCitaInfo.time}
+          </p>
+
+          <h3>Datos Clínicos:</h3>
+          <div style={{ marginTop: '10px' }}>
+            {Object.entries(previousCitaInfo.data).map(([key, value]) => (
+              <div key={key} style={{ marginBottom: '15px' }}>
+                <strong>
+                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
+                  :
+                </strong>
+                {Array.isArray(value) ? (
+                  <ul style={{ paddingLeft: '20px', margin: '5px 0' }}>
+                    {value.map((item, index) => (
+                      <li key={typeof item === 'string' || typeof item === 'number' ? item : `${JSON.stringify(item)}-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                ) : typeof value === 'object' ? (
+                  <div style={{ paddingLeft: '20px' }}>
+                    {Object.entries(value).map(([subKey, subValue]) => (
+                      <div key={subKey}>
+                        <strong>
+                          {subKey.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
+                          :
+                        </strong>
+                        {' '}
+                        {subValue}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <span>
+                    {' '}
+                    {value}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) return <div className="loading-info">Cargando información del paciente...</div>;
   if (error) {
     return (
@@ -461,6 +615,8 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
 
   return (
     <div className="date-info">
+      {renderPreviousInfoModal()}
+
       <div className="date-info-theratype">
         <h1>{therapyType.toLowerCase()}</h1>
       </div>
@@ -505,13 +661,23 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
         />
       </div>
 
-      <button
-        type="button"
-        onClick={saveChanges}
-        className="save-button"
-      >
-        Guardar Cambios
-      </button>
+      <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+        <button
+          type="button"
+          onClick={saveChanges}
+          className="save-button"
+        >
+          Guardar Cambios
+        </button>
+        <button
+          type="button"
+          onClick={fetchPreviousCitaInfo}
+          className="save-button"
+          style={{ backgroundColor: '#2196F3' }}
+        >
+          Ver Cita Anterior
+        </button>
+      </div>
     </div>
   );
 };
