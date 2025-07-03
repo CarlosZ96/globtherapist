@@ -41,7 +41,7 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
         }
 
         if (cita.DateProInfo) {
-          setDateProInfo(cita.DateProInfo);
+          setDateProInfo(cita.DateProInfo || {});
         }
 
         setPaciente({
@@ -143,13 +143,16 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
   };
 
   const handleNestedFieldChange = (parentField, field, value) => {
-    setDateProInfo((prev) => ({
-      ...prev,
-      [parentField]: {
-        ...prev[parentField],
-        [field]: value,
-      },
-    }));
+    setDateProInfo((prev) => {
+      const prevObj = prev || {};
+      return {
+        ...prevObj,
+        [parentField]: {
+          ...(prevObj[parentField] || {}),
+          [field]: value,
+        },
+      };
+    });
   };
 
   const handleArrayChange = (field, index, value) => {
@@ -179,7 +182,8 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
     try {
       // Asegurarse de que dateProInfo no sea undefined
       const infoToSave = dateProInfo || {};
-
+      // eslint-disable-next-line no-unused-vars
+      const cleanInfoToSave = JSON.parse(JSON.stringify(dateProInfo));
       // 1. Actualizar citas del profesional
       const proDocRef = doc(db, 'pros', proId);
       const proDocSnap = await getDoc(proDocRef);
