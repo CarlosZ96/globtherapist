@@ -69,31 +69,58 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
         return;
       }
 
-      const proDocRef = doc(db, 'pros', proId);
-      const proDocSnap = await getDoc(proDocRef);
+      // Buscar en la colección de usuarios
+      const userDocRef = doc(db, 'users', paciente.userId);
+      const userDocSnap = await getDoc(userDocRef);
 
-      if (!proDocSnap.exists()) {
-        throw new Error('Profesional no encontrado');
+      if (!userDocSnap.exists()) {
+        throw new Error('Usuario no encontrado');
       }
 
-      const misCitas = proDocSnap.data().MisCitas || [];
-      const citasFiltradas = misCitas.filter((cita) => cita.userId === paciente.userId
-        && normalizeText(cita.therapyType) === normalizeText(therapyType)
-        && cita.uid !== citaUid);
-      citasFiltradas.sort((a, b) => new Date(b.createdAt).getTime()
-       - new Date(a.createdAt).getTime());
+      // Obtener las citas del usuario
+      const userCitas = userDocSnap.data().Citas || [];
+      console.log('Citas del usuario:', userCitas);
+      // Normalizar el tipo de terapia actual
+      const normalizedCurrentTherapy = normalizeText(therapyType);
+
+      // Filtrar citas del mismo tipo y que no sea la actual
+      const citasFiltradas = userCitas.filter((cita) => {
+        // Verificar que la cita tenga información
+        if (!cita.DateProInfo || !cita.therapyType) return false;
+
+        // Normalizar el tipo de terapia de la cita
+        const normalizedCitaTherapy = normalizeText(cita.therapyType);
+        console.log('tipo de terapia en la base de datos:', normalizedCitaTherapy);
+        // Comparar los tipos normalizados
+        return cita.uid !== citaUid
+          && normalizedCitaTherapy === normalizedCurrentTherapy;
+      });
+      console.log('Citas filtradas:', citasFiltradas);
+      console.log('tipo de terapia:', normalizedCurrentTherapy);
+
+      // Ordenar por fecha (más reciente primero)
+      citasFiltradas.sort((a, b) => {
+        // Usar timestamps si están disponibles
+        if (a.createdAt && b.createdAt) {
+          return b.createdAt.toMillis() - a.createdAt.toMillis();
+        }
+
+        // Alternativa: convertir fechas a objetos Date
+        try {
+          const dateA = new Date(`${a.date} ${a.month} ${a.year || new Date().getFullYear()}`);
+          const dateB = new Date(`${b.date} ${b.month} ${b.year || new Date().getFullYear()}`);
+          return dateB - dateA;
+        } catch (e) {
+          return 0;
+        }
+      });
+
       if (citasFiltradas.length === 0) {
         Swal.fire('Información', 'No se encontraron citas anteriores de este tipo de terapia.', 'info');
         return;
       }
 
-      // Tomar la cita más reciente
       const citaMasReciente = citasFiltradas[0];
-
-      if (!citaMasReciente.DateProInfo) {
-        Swal.fire('Información', 'La cita anterior no tiene información registrada.', 'info');
-        return;
-      }
 
       setPreviousCitaInfo({
         date: citaMasReciente.date,
@@ -150,6 +177,10 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
 
   const saveChanges = async () => {
     try {
+      // Asegurarse de que dateProInfo no sea undefined
+      const infoToSave = dateProInfo || {};
+
+      // 1. Actualizar citas del profesional
       const proDocRef = doc(db, 'pros', proId);
       const proDocSnap = await getDoc(proDocRef);
 
@@ -157,7 +188,10 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
         const misCitas = proDocSnap.data().MisCitas || [];
         const updatedCitas = misCitas.map((cita) => {
           if (cita.uid === citaUid) {
-            return { ...cita, DateProInfo: dateProInfo };
+            return {
+              ...cita,
+              DateProInfo: infoToSave,
+            };
           }
           return cita;
         });
@@ -165,15 +199,47 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
         await updateDoc(proDocRef, {
           MisCitas: updatedCitas,
         });
-
-        Swal.fire('Guardado!', 'Los cambios se han guardado correctamente', 'success');
       }
+
+      // 2. Actualizar citas del usuario
+      if (paciente && paciente.userId) {
+        const userDocRef = doc(db, 'users', paciente.userId);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          const userCitas = userDocSnap.data().Citas || [];
+          const updatedUserCitas = userCitas.map((cita) => {
+            if (cita.uid === citaUid) {
+              return {
+                ...cita,
+                DateProInfo: infoToSave,
+                // Mantener campos importantes
+                userName: cita.userName,
+                description: cita.description,
+                therapyType: cita.therapyType,
+                date: cita.date,
+                month: cita.month,
+                time: cita.time,
+                createdAt: cita.createdAt,
+                proName: cita.proName,
+                status: cita.status,
+              };
+            }
+            return cita;
+          });
+
+          await updateDoc(userDocRef, {
+            Citas: updatedUserCitas,
+          });
+        }
+      }
+
+      Swal.fire('Guardado!', 'Los cambios se han guardado correctamente', 'success');
     } catch (errore) {
       console.error('Error guardando cambios:', errore);
       Swal.fire('Error', 'No se pudieron guardar los cambios', 'error');
     }
   };
-
   const renderTherapyFields = () => {
     if (!dateProInfo) return null;
 
