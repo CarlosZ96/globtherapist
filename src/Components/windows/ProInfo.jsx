@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable radix */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useEffect } from 'react';
@@ -19,6 +20,8 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
   const [dateProInfo, setDateProInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [previousCitaInfo, setPreviousCitaInfo] = useState(null);
+  const [showPreviousInfo, setShowPreviousInfo] = useState(false);
 
   useEffect(() => {
     const fetchPacienteData = async () => {
@@ -44,6 +47,7 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
         setPaciente({
           name: cita.userName,
           description: cita.description,
+          userId: cita.userId, // Guardamos el ID del usuario
         });
         setError(null);
       } catch (err) {
@@ -56,6 +60,70 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
 
     fetchPacienteData();
   }, [citaUid, proId]);
+
+  // Función para obtener la información de la cita anterior más reciente
+  const fetchPreviousCitaInfo = async () => {
+    try {
+      if (!paciente || !paciente.userId) {
+        Swal.fire('Información', 'No se encontró información del paciente.', 'info');
+        return;
+      }
+
+      // Buscar en la colección de usuarios
+      const userDocRef = doc(db, 'users', paciente.userId);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (!userDocSnap.exists()) {
+        throw new Error('Usuario no encontrado');
+      }
+
+      // Obtener las citas del usuario
+      const userCitas = userDocSnap.data().Citas || [];
+
+      // Normalizar el tipo de terapia actual
+      const normalizedCurrentTherapy = normalizeText(therapyType);
+
+      // Filtrar citas del mismo tipo y que no sea la actual
+      const citasFiltradas = userCitas.filter((cita) => {
+        // Verificar que la cita tenga información y sea del mismo tipo
+        if (!cita.DateProInfo || !cita.therapyType) return false;
+
+        // Normalizar el tipo de terapia de la cita
+        const normalizedCitaTherapy = normalizeText(cita.therapyType);
+
+        // Comparar los tipos normalizados y excluir la cita actual
+        return cita.uid !== citaUid && normalizedCitaTherapy === normalizedCurrentTherapy;
+      });
+
+      // Ordenar por fecha (más reciente primero) usando el timestamp
+      citasFiltradas.sort((a, b) => {
+        // Usar timestamps si están disponibles
+        if (a.createdAt && b.createdAt) {
+          return b.createdAt.toMillis() - a.createdAt.toMillis();
+        }
+        return 0;
+      });
+
+      if (citasFiltradas.length === 0) {
+        Swal.fire('Información', 'No se encontraron citas anteriores de este tipo de terapia.', 'info');
+        return;
+      }
+
+      const citaMasReciente = citasFiltradas[0];
+
+      setPreviousCitaInfo({
+        date: citaMasReciente.date,
+        month: citaMasReciente.month,
+        time: citaMasReciente.time,
+        data: citaMasReciente.DateProInfo,
+        proName: citaMasReciente.proName || 'Profesional no disponible',
+      });
+      setShowPreviousInfo(true);
+    } catch (errore) {
+      console.error('Error obteniendo cita anterior:', errore);
+      Swal.fire('Error', 'No se pudo obtener la información de la cita anterior', 'error');
+    }
+  };
 
   const handleFieldChange = (field, value) => {
     setDateProInfo((prev) => ({
@@ -153,6 +221,114 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
       console.error('Error guardando cambios:', errore);
       Swal.fire('Error', `No se pudieron guardar los cambios: ${errore.message}`, 'error');
     }
+  };
+
+  // Función para renderizar la información de la cita anterior
+  const renderPreviousInfoModal = () => {
+    if (!showPreviousInfo || !previousCitaInfo) return null;
+
+    return (
+      <div
+        className="previous-info-modal"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          zIndex: 1002,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <div style={{
+          width: '80%',
+          maxWidth: '700px',
+          backgroundColor: 'white',
+          borderRadius: '10px',
+          padding: '20px',
+          overflow: 'auto',
+          maxHeight: '90vh',
+          position: 'relative',
+        }}
+        >
+          <button
+            type="button"
+            onClick={() => setShowPreviousInfo(false)}
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: '#666',
+            }}
+          >
+            ×
+          </button>
+          <h2>Información de Cita Anterior</h2>
+          <p>
+            <strong>Fecha:</strong>
+            {' '}
+            {previousCitaInfo.date}
+            {' '}
+            de
+            {' '}
+            {previousCitaInfo.month}
+            {' '}
+            a las
+            {' '}
+            {previousCitaInfo.time}
+          </p>
+          <p>
+            <strong>Profesional:</strong>
+            {' '}
+            {previousCitaInfo.proName}
+          </p>
+
+          <h3>Datos Clínicos:</h3>
+          <div style={{ marginTop: '10px' }}>
+            {Object.entries(previousCitaInfo.data).map(([key, value]) => (
+              <div key={key} style={{ marginBottom: '15px' }}>
+                <strong>
+                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
+                  :
+                </strong>
+                {Array.isArray(value) ? (
+                  <ul style={{ paddingLeft: '20px', margin: '5px 0' }}>
+                    {value.map((item, index) => (
+                      <li key={typeof item === 'string' || typeof item === 'number' ? item : `${JSON.stringify(item)}-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                ) : typeof value === 'object' ? (
+                  <div style={{ paddingLeft: '20px' }}>
+                    {Object.entries(value).map(([subKey, subValue]) => (
+                      <div key={subKey}>
+                        <strong>
+                          {subKey.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
+                          :
+                        </strong>
+                        {' '}
+                        {subValue}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <span>
+                    {' '}
+                    {value}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const renderTherapyFields = () => {
@@ -493,6 +669,8 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
 
   return (
     <div className="date-info">
+      {renderPreviousInfoModal()}
+
       <div className="date-info-theratype">
         <h1>{therapyType.toLowerCase()}</h1>
       </div>
@@ -537,13 +715,23 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
         />
       </div>
 
-      <button
-        type="button"
-        onClick={saveChanges}
-        className="save-button"
-      >
-        Guardar Cambios
-      </button>
+      <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+        <button
+          type="button"
+          onClick={saveChanges}
+          className="save-button"
+        >
+          Guardar Cambios
+        </button>
+        <button
+          type="button"
+          onClick={fetchPreviousCitaInfo}
+          className="save-button"
+          style={{ backgroundColor: '#2196F3' }}
+        >
+          Ver Cita Anterior
+        </button>
+      </div>
     </div>
   );
 };
