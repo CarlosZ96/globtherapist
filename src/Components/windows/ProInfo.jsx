@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 /* eslint-disable radix */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useEffect } from 'react';
@@ -20,8 +19,6 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
   const [dateProInfo, setDateProInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [previousCitaInfo, setPreviousCitaInfo] = useState(null);
-  const [showPreviousInfo, setShowPreviousInfo] = useState(false);
 
   useEffect(() => {
     const fetchPacienteData = async () => {
@@ -41,13 +38,12 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
         }
 
         if (cita.DateProInfo) {
-          setDateProInfo(cita.DateProInfo || {});
+          setDateProInfo(cita.DateProInfo);
         }
 
         setPaciente({
           name: cita.userName,
           description: cita.description,
-          userId: cita.userId, // Guardamos el ID del usuario para buscar citas anteriores
         });
         setError(null);
       } catch (err) {
@@ -61,80 +57,6 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
     fetchPacienteData();
   }, [citaUid, proId]);
 
-  // Función para obtener la información de la cita anterior más reciente
-  const fetchPreviousCitaInfo = async () => {
-    try {
-      if (!paciente || !paciente.userId) {
-        Swal.fire('Información', 'No se encontró información del paciente.', 'info');
-        return;
-      }
-
-      // Buscar en la colección de usuarios
-      const userDocRef = doc(db, 'users', paciente.userId);
-      const userDocSnap = await getDoc(userDocRef);
-
-      if (!userDocSnap.exists()) {
-        throw new Error('Usuario no encontrado');
-      }
-
-      // Obtener las citas del usuario
-      const userCitas = userDocSnap.data().Citas || [];
-      console.log('Citas del usuario:', userCitas);
-      // Normalizar el tipo de terapia actual
-      const normalizedCurrentTherapy = normalizeText(therapyType);
-
-      // Filtrar citas del mismo tipo y que no sea la actual
-      const citasFiltradas = userCitas.filter((cita) => {
-        // Verificar que la cita tenga información
-        if (!cita.DateProInfo || !cita.therapyType) return false;
-
-        // Normalizar el tipo de terapia de la cita
-        const normalizedCitaTherapy = normalizeText(cita.therapyType);
-        console.log('tipo de terapia en la base de datos:', normalizedCitaTherapy);
-        // Comparar los tipos normalizados
-        return cita.uid !== citaUid
-          && normalizedCitaTherapy === normalizedCurrentTherapy;
-      });
-      console.log('Citas filtradas:', citasFiltradas);
-      console.log('tipo de terapia:', normalizedCurrentTherapy);
-
-      // Ordenar por fecha (más reciente primero)
-      citasFiltradas.sort((a, b) => {
-        // Usar timestamps si están disponibles
-        if (a.createdAt && b.createdAt) {
-          return b.createdAt.toMillis() - a.createdAt.toMillis();
-        }
-
-        // Alternativa: convertir fechas a objetos Date
-        try {
-          const dateA = new Date(`${a.date} ${a.month} ${a.year || new Date().getFullYear()}`);
-          const dateB = new Date(`${b.date} ${b.month} ${b.year || new Date().getFullYear()}`);
-          return dateB - dateA;
-        } catch (e) {
-          return 0;
-        }
-      });
-
-      if (citasFiltradas.length === 0) {
-        Swal.fire('Información', 'No se encontraron citas anteriores de este tipo de terapia.', 'info');
-        return;
-      }
-
-      const citaMasReciente = citasFiltradas[0];
-
-      setPreviousCitaInfo({
-        date: citaMasReciente.date,
-        month: citaMasReciente.month,
-        time: citaMasReciente.time,
-        data: citaMasReciente.DateProInfo,
-      });
-      setShowPreviousInfo(true);
-    } catch (errore) {
-      console.error('Error obteniendo cita anterior:', errore);
-      Swal.fire('Error', 'No se pudo obtener la información de la cita anterior', 'error');
-    }
-  };
-
   const handleFieldChange = (field, value) => {
     setDateProInfo((prev) => ({
       ...prev,
@@ -143,16 +65,13 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
   };
 
   const handleNestedFieldChange = (parentField, field, value) => {
-    setDateProInfo((prev) => {
-      const prevObj = prev || {};
-      return {
-        ...prevObj,
-        [parentField]: {
-          ...(prevObj[parentField] || {}),
-          [field]: value,
-        },
-      };
-    });
+    setDateProInfo((prev) => ({
+      ...prev,
+      [parentField]: {
+        ...prev[parentField],
+        [field]: value,
+      },
+    }));
   };
 
   const handleArrayChange = (field, index, value) => {
@@ -180,70 +99,62 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
 
   const saveChanges = async () => {
     try {
-      // Asegurarse de que dateProInfo no sea undefined
-      const infoToSave = dateProInfo || {};
-      // eslint-disable-next-line no-unused-vars
-      const cleanInfoToSave = JSON.parse(JSON.stringify(dateProInfo));
-      // 1. Actualizar citas del profesional
+      // Limpiar el objeto para quitar undefined
+      const cleanDateProInfo = JSON.parse(JSON.stringify(dateProInfo || {}));
+
+      // 1. Obtener datos del profesional para recuperar el userId del paciente
       const proDocRef = doc(db, 'pros', proId);
       const proDocSnap = await getDoc(proDocRef);
 
-      if (proDocSnap.exists()) {
-        const misCitas = proDocSnap.data().MisCitas || [];
-        const updatedCitas = misCitas.map((cita) => {
-          if (cita.uid === citaUid) {
-            return {
-              ...cita,
-              DateProInfo: infoToSave,
-            };
-          }
-          return cita;
-        });
-
-        await updateDoc(proDocRef, {
-          MisCitas: updatedCitas,
-        });
+      if (!proDocSnap.exists()) {
+        throw new Error('Profesional no encontrado');
       }
 
-      // 2. Actualizar citas del usuario
-      if (paciente && paciente.userId) {
-        const userDocRef = doc(db, 'users', paciente.userId);
-        const userDocSnap = await getDoc(userDocRef);
+      // Buscar la cita específica para obtener el userId del paciente
+      const misCitas = proDocSnap.data().MisCitas || [];
+      const currentCita = misCitas.find((c) => c.uid === citaUid);
 
-        if (userDocSnap.exists()) {
-          const userCitas = userDocSnap.data().Citas || [];
-          const updatedUserCitas = userCitas.map((cita) => {
-            if (cita.uid === citaUid) {
-              return {
-                ...cita,
-                DateProInfo: infoToSave,
-                // Mantener campos importantes
-                userName: cita.userName,
-                description: cita.description,
-                therapyType: cita.therapyType,
-                date: cita.date,
-                month: cita.month,
-                time: cita.time,
-                createdAt: cita.createdAt,
-                proName: cita.proName,
-                status: cita.status,
-              };
-            }
-            return cita;
-          });
+      if (!currentCita) {
+        throw new Error('Cita no encontrada en el profesional');
+      }
 
-          await updateDoc(userDocRef, {
-            Citas: updatedUserCitas,
-          });
-        }
+      const { userId } = currentCita;
+
+      if (!userId) {
+        throw new Error('No se encontró el ID del usuario en la cita');
+      }
+
+      // 2. Actualizar la cita en el documento del profesional
+      const updatedProCitas = misCitas.map((cita) => (cita.uid === citaUid
+        ? { ...cita, DateProInfo: cleanDateProInfo } : cita));
+
+      await updateDoc(proDocRef, {
+        MisCitas: updatedProCitas,
+      });
+
+      // 3. Actualizar la cita en el documento del usuario
+      const userDocRef = doc(db, 'users', userId);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userCitas = userDocSnap.data().Citas || [];
+        const updatedUserCitas = userCitas.map((cita) => (cita.uid === citaUid
+          ? { ...cita, DateProInfo: cleanDateProInfo } : cita));
+
+        await updateDoc(userDocRef, {
+          Citas: updatedUserCitas,
+        });
+      } else {
+        throw new Error('Documento de usuario no encontrado');
       }
 
       Swal.fire('Guardado!', 'Los cambios se han guardado correctamente', 'success');
     } catch (errore) {
       console.error('Error guardando cambios:', errore);
-      Swal.fire('Error', 'No se pudieron guardar los cambios', 'error');
+      Swal.fire('Error', `No se pudieron guardar los cambios: ${errore.message}`, 'error');
     }
   };
+
   const renderTherapyFields = () => {
     if (!dateProInfo) return null;
 
@@ -569,109 +480,6 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
     }
   };
 
-  // Función para renderizar la información de la cita anterior
-  const renderPreviousInfoModal = () => {
-    if (!showPreviousInfo || !previousCitaInfo) return null;
-
-    return (
-      <div
-        className="previous-info-modal"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          zIndex: 1002,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <div style={{
-          width: '80%',
-          maxWidth: '700px',
-          backgroundColor: 'white',
-          borderRadius: '10px',
-          padding: '20px',
-          overflow: 'auto',
-          maxHeight: '90vh',
-          position: 'relative',
-        }}
-        >
-          <button
-            type="button"
-            onClick={() => setShowPreviousInfo(false)}
-            style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              background: 'none',
-              border: 'none',
-              fontSize: '24px',
-              cursor: 'pointer',
-              color: '#666',
-            }}
-          >
-            ×
-          </button>
-          <h2>Información de Cita Anterior</h2>
-          <p>
-            <strong>Fecha:</strong>
-            {' '}
-            {previousCitaInfo.date}
-            {' '}
-            de
-            {' '}
-            {previousCitaInfo.month}
-            {' '}
-            a las
-            {' '}
-            {previousCitaInfo.time}
-          </p>
-
-          <h3>Datos Clínicos:</h3>
-          <div style={{ marginTop: '10px' }}>
-            {Object.entries(previousCitaInfo.data).map(([key, value]) => (
-              <div key={key} style={{ marginBottom: '15px' }}>
-                <strong>
-                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
-                  :
-                </strong>
-                {Array.isArray(value) ? (
-                  <ul style={{ paddingLeft: '20px', margin: '5px 0' }}>
-                    {value.map((item, index) => (
-                      <li key={typeof item === 'string' || typeof item === 'number' ? item : `${JSON.stringify(item)}-${index}`}>{item}</li>
-                    ))}
-                  </ul>
-                ) : typeof value === 'object' ? (
-                  <div style={{ paddingLeft: '20px' }}>
-                    {Object.entries(value).map(([subKey, subValue]) => (
-                      <div key={subKey}>
-                        <strong>
-                          {subKey.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
-                          :
-                        </strong>
-                        {' '}
-                        {subValue}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <span>
-                    {' '}
-                    {value}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   if (loading) return <div className="loading-info">Cargando información del paciente...</div>;
   if (error) {
     return (
@@ -685,8 +493,6 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
 
   return (
     <div className="date-info">
-      {renderPreviousInfoModal()}
-
       <div className="date-info-theratype">
         <h1>{therapyType.toLowerCase()}</h1>
       </div>
@@ -731,23 +537,13 @@ const ProInfo = ({ therapyType, citaUid, proId }) => {
         />
       </div>
 
-      <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-        <button
-          type="button"
-          onClick={saveChanges}
-          className="save-button"
-        >
-          Guardar Cambios
-        </button>
-        <button
-          type="button"
-          onClick={fetchPreviousCitaInfo}
-          className="save-button"
-          style={{ backgroundColor: '#2196F3' }}
-        >
-          Ver Cita Anterior
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={saveChanges}
+        className="save-button"
+      >
+        Guardar Cambios
+      </button>
     </div>
   );
 };
