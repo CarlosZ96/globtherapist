@@ -7,6 +7,7 @@ import ChatComponent from './ChatComponent';
 import home from '../../img/home 1.png';
 import chatIcon from '../../img/bubble-chat.png';
 import formIcon from '../../img/contact-form.png';
+import endCallIcon from '../../img/phone.png';
 import '../../stylesheets/videocall.css';
 import ProInfo from '../windows/ProInfo';
 
@@ -70,8 +71,45 @@ const ProView = ({ meetingParams }) => {
   const [screenTrack, setScreenTrack] = useState(null);
   const [sharingScreen, setSharingScreen] = useState(false);
   const [showChat, setShowChat] = useState(false);
-  const [showProInfo, setShowProInfo] = useState(false); // Estado para controlar el modal
+  const [showProInfo, setShowProInfo] = useState(false);
 
+  // Función para limpiar todos los recursos de Agora
+  const cleanupAgoraResources = async () => {
+    try {
+      // Cerrar todas las pistas locales
+      if (micTrack) {
+        micTrack.close();
+        setMicTrack(null);
+        setMicOn(false);
+      }
+      if (cameraTrack) {
+        cameraTrack.close();
+        setCameraTrack(null);
+        setCameraOn(false);
+      }
+      if (screenTrack) {
+        screenTrack.close();
+        setScreenTrack(null);
+        setSharingScreen(false);
+      }
+
+      // Dejar el canal
+      if (client) {
+        await client.leave();
+        setClient(null);
+      }
+
+      // Limpiar el reproductor de video remoto
+      setRemoteCameraOn(false);
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.innerHTML = '';
+      }
+    } catch (error) {
+      console.error('Error al limpiar recursos de Agora:', error);
+    }
+  };
+
+  // Inicializar Agora
   useEffect(() => {
     const initAgora = async () => {
       const agoraClient = AgoraRTC.createClient({
@@ -85,10 +123,12 @@ const ProView = ({ meetingParams }) => {
       });
       setClient(agoraClient);
       const appId = process.env.REACT_APP_AGORA_APP_ID;
+
       if (!appId) {
         console.error('No se encontró REACT_APP_AGORA_APP_ID en las variables de entorno');
         return;
       }
+
       try {
         await agoraClient.join(appId, meetingParams.channelId, meetingParams.token, 0);
         console.log('Se unió al canal sin tracks');
@@ -129,13 +169,21 @@ const ProView = ({ meetingParams }) => {
 
     initAgora();
 
-    return () => {
-      if (micTrack) micTrack.close();
-      if (cameraTrack) cameraTrack.close();
-      if (screenTrack) screenTrack.close();
-      if (client) client.leave();
-    };
+    // SOLUCIÓN: Remover el cleanup automático
+    return () => {};
   }, [meetingParams]);
+
+  // Función para colgar la llamada y regresar al inicio
+  const handleEndCall = async () => {
+    await cleanupAgoraResources();
+    navigate('/');
+  };
+
+  // Función para el botón Home
+  const handleGoHome = async () => {
+    await cleanupAgoraResources();
+    navigate('/');
+  };
 
   const handleToggleCamera = async () => {
     if (!cameraOn) {
@@ -216,7 +264,7 @@ const ProView = ({ meetingParams }) => {
     >
       <header className="video-header">
         <h1>GLOBTHERAPIST</h1>
-        <button type="button" onClick={() => navigate('/')}>
+        <button type="button" onClick={handleGoHome}>
           <img src={home} alt="" />
           <h5>Home</h5>
         </button>
@@ -265,13 +313,20 @@ const ProView = ({ meetingParams }) => {
         >
           <img src={chatIcon} alt="Chat" width="20" height="20" />
         </button>
-        {/* Botón para abrir el formulario ProInfo */}
         <button
           type="button"
           onClick={() => setShowProInfo(true)}
           style={{ background: showProInfo ? '#4CAF50' : '' }}
         >
           <img src={formIcon} alt="Formulario" width="20" height="20" />
+        </button>
+        {/* Botón para colgar la llamada */}
+        <button
+          type="button"
+          onClick={handleEndCall}
+          style={{ backgroundColor: '#ff0000' }}
+        >
+          <img src={endCallIcon} alt="Colgar" width="20" height="20" />
         </button>
       </div>
 
@@ -325,17 +380,17 @@ const ProView = ({ meetingParams }) => {
         <div
           className="pro-info-modal"
           style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          zIndex: 1001,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            zIndex: 1001,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
         >
           <div style={{
             width: '90%',
