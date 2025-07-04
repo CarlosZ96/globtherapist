@@ -1,19 +1,22 @@
-/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable no-nested-ternary */
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../AuthContext';
 import { auth, db } from '../../firebase';
+import submit from '../../img/submit.png';
+import StatusBrick from '../payments/StatusBrick';
 import '../../stylesheets/userInfo.css';
 
-const UserInfo = ({ citas }) => {
+const UserInfo = ({ citas, title, emptyMessage }) => {
   const navigate = useNavigate();
   const { setCitaGlobal } = useAuth();
+  // eslint-disable-next-line no-unused-vars
   const [userData, setuserData] = useState(null);
-  if (!citas || citas.length === 0) {
-    return <div className="no-citas">No tienes citas programadas</div>;
-  }
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+
   useEffect(() => {
     const fetchUserData = async () => {
       const user = auth.currentUser;
@@ -33,22 +36,45 @@ const UserInfo = ({ citas }) => {
     fetchUserData();
   }, []);
 
+  const handlePaymentClick = (cita) => {
+    if (cita.payment && cita.payment.paymentId) {
+      setSelectedPayment({
+        id: cita.payment.paymentId,
+        amount: cita.payment.amount,
+        method: cita.payment.method,
+        status: cita.payment.status,
+      });
+      setShowPaymentModal(true);
+    }
+  };
+
+  const closePaymentModal = () => {
+    setShowPaymentModal(false);
+    setSelectedPayment(null);
+  };
+
+  if (!citas || citas.length === 0) {
+    return (
+      <div className="user-citas-container">
+        <h2>{title}</h2>
+        <div className="no-citas">{emptyMessage}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="user-citas-container">
-      <div className="user-win-name-cont">
-        {userData ? (
-          <h1>
-            {userData}
-          </h1>
-        ) : <h1>Cargando usuario...</h1>}
-      </div>
+      <h2>{title}</h2>
       <div className="citas-cont">
         {citas.map((cita) => (
           <div key={cita.id} className="cita-card">
             <div className="cita-info">
               <div className="cita-field-date">
-                <p>{cita.month}</p>
-                <p>{cita.date}</p>
+                <p>
+                  {cita.month}
+                  {' '}
+                  {cita.date}
+                </p>
               </div>
               <div className="cita-pro-cont">
                 <p className="cita-pro-name">
@@ -60,45 +86,73 @@ const UserInfo = ({ citas }) => {
                   {cita.time}
                 </p>
               </div>
+              <div className="cita-status">
+                <button
+                  type="button"
+                  className={`status-${cita.status} status-button`}
+                  onClick={() => handlePaymentClick(cita)}
+                >
+                  {cita.status === 'pay_pending' ? 'Pago Pendiente'
+                   : cita.status === 'pending' ? 'Pendiente' : 'Finalizada'}
+                </button>
+              </div>
             </div>
-            <button
-              type="button"
-              className="reunion-btn"
-              onClick={() => {
-                setCitaGlobal({
-                  uid: cita.uid,
-                  startTime: cita.time,
-                  date: Number(cita.date),
-                  month: cita.month,
-                  therapyType: cita.therapyType,
-                  description: cita.description,
-                  status: cita.status,
-                  proName: cita.proName,
-                });
-                navigate('/meeting', {
-                  state: {
-                    cita: {
-                      uid: cita.uid,
-                      startTime: cita.time,
-                      date: Number(cita.date),
-                      month: cita.month,
+            {cita.status === 'pay_pending' || cita.status === 'pending' ? (
+              <button
+                type="button"
+                className="reunion-btn"
+                onClick={() => {
+                  setCitaGlobal({
+                    uid: cita.uid,
+                    startTime: cita.time,
+                    date: Number(cita.date),
+                    month: cita.month,
+                    therapyType: cita.therapyType,
+                    description: cita.description,
+                    status: cita.status,
+                    proName: cita.proName,
+                  });
+                  navigate('/meeting', {
+                    state: {
+                      cita: {
+                        uid: cita.uid,
+                        startTime: cita.time,
+                        date: Number(cita.date),
+                        month: cita.month,
+                      },
+                      collection: 'users',
                     },
-                    collection: 'users',
-                  },
-                });
-              }}
-            >
-              Ir
-            </button>
+                  });
+                }}
+              >
+                <img src={submit} alt="Ir a reunión" />
+              </button>
+            ) : (
+              <div className="completed-badge">✓</div>
+            )}
           </div>
         ))}
       </div>
+
+      {/* Modal para mostrar el estado del pago */}
+      {showPaymentModal && selectedPayment && (
+        <StatusBrick
+          paymentDetails={selectedPayment}
+          onClose={closePaymentModal}
+          onRetry={() => {
+            console.log('Reintentar pago implementaría nueva lógica de pago');
+            closePaymentModal();
+          }}
+        />
+      )}
     </div>
   );
 };
 
 UserInfo.defaultProps = {
   citas: [],
+  title: 'Citas',
+  emptyMessage: 'No tienes citas programadas',
 };
 
 UserInfo.propTypes = {
@@ -112,8 +166,16 @@ UserInfo.propTypes = {
       therapyType: PropTypes.string.isRequired,
       proName: PropTypes.string.isRequired,
       description: PropTypes.string,
+      payment: PropTypes.shape({
+        paymentId: PropTypes.string.isRequired,
+        amount: PropTypes.number.isRequired,
+        method: PropTypes.string.isRequired,
+        status: PropTypes.string.isRequired,
+      }),
     }),
   ),
+  title: PropTypes.string,
+  emptyMessage: PropTypes.string,
 };
 
 export default UserInfo;

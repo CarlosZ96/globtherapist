@@ -171,11 +171,37 @@ exports.mpWebhook = functions.https.onRequest(async (req, res) => {
         const paymentRef = db.collection('pendingPayments').doc(paymentId);
         const snapshot = await paymentRef.get();
 
-        if (!snapshot.exists) {
-          return res.status(404).send('Cita no encontrada');
-        }
+        if (!snapshot.exists) return res.status(404).send('Cita no encontrada');
 
         const citaData = snapshot.data();
+        const citaId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const paymentDate = paymentInfo.date_approved;
+
+        // Guardar pago en usuario
+        const userPaymentRef = db.collection('users').doc(citaData.userId).collection('payments');
+        await userPaymentRef.add({
+          paymentId,
+          citaId,
+          amount: paymentInfo.transaction_amount,
+          paymentMethod: paymentInfo.payment_method_id,
+          status: paymentInfo.status,
+          paymentDate,
+          proId: citaData.proId,
+          therapyType: citaData.therapyType,
+        });
+
+        // Guardar pago en profesional
+        const proPaymentRef = db.collection('pros').doc(citaData.proId).collection('payments');
+        await proPaymentRef.add({
+          paymentId,
+          citaId,
+          amount: paymentInfo.transaction_amount,
+          paymentMethod: paymentInfo.payment_method_id,
+          status: paymentInfo.status,
+          paymentDate,
+          userId: citaData.userId,
+          therapyType: citaData.therapyType,
+        });
 
         // Crear cita para usuario
         const userRef = db.collection('users').doc(citaData.userId);
@@ -189,6 +215,7 @@ exports.mpWebhook = functions.https.onRequest(async (req, res) => {
             proName: citaData.proName,
             proUid: citaData.proId,
             description: citaData.description,
+            citaId,
           }),
         });
 
@@ -205,13 +232,13 @@ exports.mpWebhook = functions.https.onRequest(async (req, res) => {
             userPhone: citaData.userPhone,
             status: 'paid',
             userId: citaData.userId,
+            citaId,
           }),
         });
 
         await paymentRef.delete();
       }
     }
-
     res.status(200).send('OK');
   } catch (error) {
     functions.logger.error('Error en webhook:', error);

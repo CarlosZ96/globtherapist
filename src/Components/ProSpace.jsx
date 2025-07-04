@@ -1,8 +1,10 @@
+/* eslint-disable no-nested-ternary */
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import Calendar from './Calendar/CalendarWithToggle';
+import MyCalendar from './MyCalendar';
 import ProData from './ProData';
 import Therapie from './therapie';
 import Hdv from './Hdv';
@@ -15,6 +17,8 @@ import '../stylesheets/prospace.css';
 const ProSpace = () => {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hasHorarios, setHasHorarios] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -25,21 +29,40 @@ const ProSpace = () => {
           if (docSnap.exists()) {
             const userData = docSnap.data();
             setStatus(userData.status);
+
+            // Verificar si tiene horarios
+            const hasHorario = userData.horarios && Object.keys(userData.horarios).length > 0;
+            setHasHorarios(hasHorario);
           } else {
             setStatus(null);
+            setHasHorarios(false);
           }
         } catch (error) {
           console.error('Error al obtener los datos del pro:', error);
           setStatus(null);
+          setHasHorarios(false);
         }
       } else {
         setStatus(null);
+        setHasHorarios(false);
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
+
+  const handleEditComplete = () => {
+    setIsEditing(false);
+    const proDocRef = doc(db, 'pros', auth.currentUser.uid);
+    getDoc(proDocRef).then((docSnap) => {
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        const hasHorario = userData.horarios && Object.keys(userData.horarios).length > 0;
+        setHasHorarios(hasHorario);
+      }
+    });
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -48,7 +71,16 @@ const ProSpace = () => {
   return (
     <div className="prospace-cont">
       {status === 'aprobado' ? (
-        <Calendar collection="pros" />
+        isEditing ? (
+          <Calendar
+            collection="pros"
+            onReturn={handleEditComplete}
+          />
+        ) : hasHorarios ? (
+          <MyCalendar onEdit={() => setIsEditing(true)} />
+        ) : (
+          <Calendar collection="pros" />
+        )
       ) : (
         <div className="prospace-apro">
           <div className="prospace-title-cont">

@@ -20,7 +20,7 @@ import edit from '../../img/editar.png';
 import '../../stylesheets/month.css';
 
 const Calendar = ({
-  collection: collectionName, onDateSelection, therapyType, onProSelection,
+  collection: collectionName, onDateSelection, therapyType, onProSelection, onReturn,
 }) => {
   const {
     days, loading, monthName, monthOffset, changeMonth,
@@ -302,7 +302,7 @@ const Calendar = ({
                     <button className="time-button" type="button" onClick={() => incrementTime(setStartTime, startTime, endTime - 1)}>
                       <img src={up} alt="" />
                     </button>
-                    <button className="time-button" type="button" onClick={() => decrementTime(setStartTime, startTime, 8)}>
+                    <button className="time-button" type="button" onClick={() => decrementTime(setStartTime, startTime, 6)}>
                       <img src={dwn} alt="" />
                     </button>
                   </div>
@@ -328,13 +328,13 @@ const Calendar = ({
             <div className="Hours-selector">
               <h3>¿A que hora?:</h3>
               <div className="Time-control">
-                <button type="button" onClick={() => decrementTime(setSelectedTime, selectedTime, 7)}>-</button>
+                <button type="button" onClick={() => decrementTime(setSelectedTime, selectedTime, 6)}>-</button>
                 <div className="Time-hour-txt">
                   <h3>
                     {formatTimeRange(selectedTime)}
                   </h3>
                 </div>
-                <button type="button" onClick={() => incrementTime(setSelectedTime, selectedTime, 22)}>+</button>
+                <button type="button" onClick={() => incrementTime(setSelectedTime, selectedTime, 23)}>+</button>
               </div>
             </div>
           )}
@@ -348,21 +348,31 @@ const Calendar = ({
           >
             <h3>{collectionName === 'pros' ? 'Confirmar mis horarios' : 'Confirmar hora'}</h3>
           </button>
-          {isConfirmed && (
-            <>
-              <button type="button" className="Edit-Hours" onClick={handleEditClick}>
-                <img src={edit} className="edit-btn" alt="" onClick={handleEditClick} />
-              </button>
-              <button
-                type="button"
-                className="Lunch-btn"
-                onClick={handleLunchClick}
-                style={{ display: showLunchButton ? 'block' : 'none' }}
-              >
-                <h3>Lunch</h3>
-              </button>
-            </>
-          )}
+
+          {isConfirmed && !onReturn && (
+          <>
+            <button type="button" className="Edit-Hours" onClick={handleEditClick}>
+              <img src={edit} className="edit-btn" alt="" />
+            </button>
+            <button
+              type="button"
+              className="Lunch-btn"
+              onClick={handleLunchClick}
+              style={{ display: showLunchButton ? 'block' : 'none' }}
+            >
+              <h3>Lunch</h3>
+            </button>
+          </>
+  )}
+          {isConfirmed && onReturn && (
+          <button
+            type="button"
+            className="return-btn"
+            onClick={onReturn}
+          >
+            Volver a mis horarios
+          </button>
+  )}
         </div>
       </div>
       {showLunchDialog && (
@@ -468,12 +478,13 @@ Calendar.propTypes = {
   onDateSelection: PropTypes.func,
   therapyType: PropTypes.string,
   onProSelection: PropTypes.func,
+  onReturn: PropTypes.func,
 };
-
 Calendar.defaultProps = {
   onDateSelection: () => { },
   therapyType: () => { },
   onProSelection: () => { },
+  onReturn: () => { },
 };
 
 export default Calendar;

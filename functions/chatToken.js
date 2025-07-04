@@ -1,51 +1,58 @@
+/* eslint-disable global-require */
 const functions = require('firebase-functions');
-const express = require('express');
-const cors = require('cors');
 const { RtmTokenBuilder, RtmRole } = require('agora-access-token');
 
-const app = express();
+exports.createAgoraChatToken = functions.https.onRequest(async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://globtherapist.vercel.app',
-];
-
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  optionsSuccessStatus: 200,
-};
-
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
-
-app.get('/', (req, res) => {
-  res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
-  const { userId, channelId } = req.query;
-
-  if (!userId || !channelId) {
-    return res.status(400).json({ error: 'userId y channelId son requeridos' });
+  if (req.method === 'OPTIONS') {
+    return res.status(204).send();
   }
 
   try {
+    const { userId, channelId } = req.query;
+
+    if (!userId || !channelId) {
+      return res.status(400).json({
+        error: 'userId y channelId son requeridos',
+      });
+    }
+
+    const appId = process.env.AGORA_APP_ID;
+    const appCertificate = process.env.AGORA_APP_CERTIFICATE;
+
+    if (!appId || !appCertificate) {
+      return res.status(500).json({
+        error: 'Configuración de Agora no encontrada',
+      });
+    }
+
+    const expireTime = 3600; // 1 hora
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const privilegeExpireTime = currentTimestamp + expireTime;
+
+    // Construir token RTM
     const token = RtmTokenBuilder.buildToken(
-      process.env.AGORA_APP_ID,
-      process.env.AGORA_APP_CERTIFICATE,
+      appId,
+      appCertificate,
       userId,
       RtmRole.Rtm_User,
-      3600,
+      privilegeExpireTime,
     );
 
-    return res.status(200).json({ token });
+    return res.status(200).json({
+      token,
+      appId,
+      userId,
+      channelId,
+      expireTime: privilegeExpireTime,
+    });
   } catch (error) {
     console.error('Error generando token RTM:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({
+      error: error.message || 'Error generando token',
+    });
   }
 });
-
-exports.createAgoraChatToken = functions.https.onRequest(app);

@@ -44,15 +44,42 @@ const Dates = () => {
     fetchUserType();
   }, []);
 
+  // Filtrar citas por estado
+  const pendingCitas = citas.filter((cita) => cita.status === 'pending' || cita.status === 'pay_pending');
+
+  const completedCitas = citas.filter((cita) => cita.status === 'end');
+
   if (loading) return <div>Cargando...</div>;
   if (!userType) return <div>Usuario no encontrado</div>;
 
   return (
     <div className="Dates-info-mcont">
       {userType === 'user' ? (
-        <UserInfo citas={citas} />
+        <>
+          <UserInfo
+            citas={pendingCitas}
+            title="Citas Pendientes"
+            emptyMessage="No tienes citas pendientes"
+          />
+          <UserInfo
+            citas={completedCitas}
+            title="Citas Finalizadas"
+            emptyMessage="No tienes citas finalizadas"
+          />
+        </>
       ) : (
-        <MydatesPro citas={citas} />
+        <>
+          <MydatesPro
+            citas={pendingCitas}
+            title="Citas Pendientes"
+            emptyMessage="No hay citas pendientes"
+          />
+          <MydatesPro
+            citas={completedCitas}
+            title="Citas Finalizadas"
+            emptyMessage="No hay citas finalizadas"
+          />
+        </>
       )}
     </div>
   );

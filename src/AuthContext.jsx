@@ -30,8 +30,6 @@ export const AuthProvider = ({ children }) => {
     proName: '',
   });
 
-  // Nuevo estado para controlar permisos de acceso a la reunión:
-  // Puede tener los valores: 'none' (sin solicitud), 'pending' (solicitado), 'approved' (aceptado)
   const [meetingAccess, setMeetingAccess] = useState('none');
 
   const fetchUserData = async (user) => {

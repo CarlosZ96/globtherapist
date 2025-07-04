@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { getAuth } from 'firebase/auth';
 import {
-  doc, getDoc, updateDoc, addDoc, collection,
+  doc, getDoc, updateDoc, addDoc, collection, getDocs, arrayUnion,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
 import Calendar from './Calendar/CalendarWithToggle';
 import Mp from './payments/MP';
+import StatusBrick from './payments/StatusBrick';
 import getEmailHtml from './mails/emailTemplate';
 import '../stylesheets/Therapy.css';
 
@@ -18,7 +19,15 @@ const Therapy = () => {
   const {
     currentUser, updateUserCitas, updateProMisCitas, pros, citaGlobal, setCitaGlobal,
   } = useAuth();
-
+  const [paymentStatus, setPaymentStatus] = useState(null);
+  const [paymentDetails, setPaymentDetails] = useState(null);
+  const [retryPayment, setRetryPayment] = useState(false);
+  const therapyPrices = {
+    Fisica: 70000,
+    Lenguaje: 55000,
+    Mental: 80000,
+    Ocupacional: 41000,
+  };
   const normalizeText = (text) => {
     return text
       .normalize('NFD')
@@ -275,18 +284,59 @@ const Therapy = () => {
       return;
     }
 
-    // Mostrar modal de pago si todo está correcto
     setShowPayment(true);
   };
 
-  // Función que se ejecuta tras el pago exitoso
-  const handlePaymentSuccess = async () => {
-    try {
-      const proDocRef = doc(db, 'pros', selectedPro);
-      const proDoc = await getDoc(proDocRef);
-      const proData = proDoc.data();
+  const getDateProInfo = (therapyType) => {
+    const normalizedType = normalizeText(therapyType);
 
-      // Función para obtener el día de la semana desde citaGlobal
+    switch (normalizedType) {
+      case 'mental':
+        return {
+          estadoAnimico: '',
+          sintomas: '',
+          tecnicasUsadas: [],
+          recomendaciones: '',
+        };
+      case 'fisica':
+        return {
+          movilidadObservada: '',
+          rangoArticula: '',
+          escalaDeDolor: { localizacion: '', intensidad: 0 },
+          ejerciciosRealizados: [],
+          recomendaciones: '',
+        };
+      case 'lenguaje':
+        return {
+          comprension: '',
+          expresionVerbal: '',
+          ejerciciosRealizados: [],
+          denominacion: '',
+          recomendaciones: '',
+        };
+      case 'ocupacional':
+        return {
+          nivelDeIndependencia: '',
+          destrezasMotorasFinas: '',
+          ejerciciosRealizados: [],
+          adaptacionesSugeridas: { hogar: '', trabajo: '' },
+          recomendaciones: '',
+        };
+      default:
+        return {};
+    }
+  };
+
+  const handlePaymentSuccess = async (paymentInfo) => {
+    const proDocRef = doc(db, 'pros', selectedPro);
+    try {
+      const { id: paymentId, method: paymentMethod } = paymentInfo;
+      const amount = therapyPrices[formData.therapyType];
+      const paymentDate = new Date().toISOString();
+
+      if (!currentUser || !currentUser.uid) throw new Error('Usuario no autenticado');
+      if (!selectedPro) throw new Error('Profesional no seleccionado');
+
       const getDayOfWeek = () => {
         const monthMap = {
           enero: 0,
@@ -309,11 +359,13 @@ const Therapy = () => {
 
         return dateObj.toLocaleDateString('es-ES', { weekday: 'short' })
           .replace('.', '')
-          .toLowerCase(); // ej: "lun"
+          .toLowerCase();
       };
 
-      // Construir objeto de cita con todos los datos necesarios
+      const citaId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
       const userCita = {
+        id: citaId,
         date: citaGlobal.date,
         month: citaGlobal.month,
         time: citaGlobal.time,
@@ -324,83 +376,109 @@ const Therapy = () => {
         description: formData.description,
         status: 'pay_pending',
         uid: citaGlobal.uid,
-        proName: proData.username || 'Profesional',
+        proName: citaGlobal.proName || 'Profesional',
         proUid: selectedPro,
-        dayOfWeek: getDayOfWeek(), // Nuevo campo calculado
+        dayOfWeek: getDayOfWeek(),
+        createdAt: new Date().toISOString(),
+        payment: {
+          paymentId,
+          amount,
+          paymentMethod,
+          status: 'approved',
+          paymentDate,
+          therapyType: formData.therapyType,
+        },
       };
 
-      // Actualizar usuario
       const userRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userRef, {
-        Citas: [...(currentUser.Citas || []), userCita],
-      });
+      const userSnap = await getDoc(userRef);
+      const userCurrentData = userSnap.data();
 
-      // Actualizar profesional
+      const proSnap = await getDoc(proDocRef);
+      const proCurrentData = proSnap.data();
+
       const proCita = {
         ...userCita,
         userEmail: formData.email,
         userName: formData.name,
         userPhone: formData.phone,
         userId: currentUser.uid,
+        payment: userCita.payment,
+        DateProInfo: getDateProInfo(formData.therapyType),
       };
 
-      await updateDoc(proDocRef, {
-        MisCitas: [...(proData.MisCitas || []), proCita],
-      });
+      await Promise.all([
+        updateDoc(userRef, {
+          Citas: arrayUnion(userCita),
+        }),
+        updateDoc(proDocRef, {
+          MisCitas: arrayUnion(proCita),
+        }),
+      ]);
 
-      // Construir datos para emails
       const emailData = {
-        therapyType: formData.therapyType.toLowerCase(), // Asegurar minúsculas
+        therapyType: formData.therapyType.toLowerCase(),
         date: citaGlobal.date.toString(),
         dayOfWeek: userCita.dayOfWeek,
         fullDate: `de ${citaGlobal.month} a las ${citaGlobal.time}`,
         userName: formData.name,
-        proName: proData.username || 'Profesional',
-        userEmail: proData.email, // Para email de usuario
-        userProfession: proData.profesion || 'Profesional de salud', // Campo de Firestore
+        proName: proCurrentData.Nombre || 'Profesional',
+        userEmail: proCurrentData.email,
+        userProfession: proCurrentData.profesion || 'Profesional de salud',
         userTel: formData.phone,
+        price: therapyPrices[formData.therapyType],
       };
 
-      // Email para USUARIO
-      await addDoc(collection(db, 'mail'), {
-        to: formData.email,
-        message: {
-          subject: 'Confirmación de cita - GLOBTHERAPIST',
-          html: getEmailHtml({
-            ...emailData,
-            collection: 'users', // Template para usuario
-          }),
-        },
-      });
+      await Promise.all([
+        addDoc(collection(db, 'mail'), {
+          to: formData.email,
+          message: {
+            subject: 'Confirmación de cita - GLOBTHERAPIST',
+            html: getEmailHtml({
+              ...emailData,
+              collection: 'users',
+            }),
+          },
+        }),
+        addDoc(collection(db, 'mail'), {
+          to: proCurrentData.email,
+          message: {
+            subject: 'Nueva cita agendada - GLOBTHERAPIST',
+            html: getEmailHtml({
+              ...emailData,
+              collection: 'pros',
+              userEmail: formData.email,
+              userTel: formData.phone,
+            }),
+          },
+        }),
+      ]);
 
-      // Email para PROFESIONAL
-      await addDoc(collection(db, 'mail'), {
-        to: proData.email,
-        message: {
-          subject: 'Nueva cita agendada - GLOBTHERAPIST',
-          html: getEmailHtml({
-            ...emailData,
-            collection: 'pros', // Template para pro
-            userEmail: formData.email, // Invertir email
-            userTel: formData.phone, // Teléfono del usuario
-          }),
-        },
+      // Actualización: Guardar detalles del pago y mostrar StatusBrick
+      setPaymentDetails({
+        id: paymentId,
+        amount,
+        method: paymentMethod,
+        status: 'approved',
       });
-
-      // Cierre del proceso
+      setPaymentStatus('success');
       setShowPayment(false);
-      Swal.fire({
-        icon: 'success',
-        title: '¡Cita agendada!',
-        text: 'Confirmación enviada a tu correo',
-        willClose: () => window.location.reload(),
-      });
     } catch (error) {
-      console.error('Error en el proceso de pago:', error);
+      console.error('Error detallado:', {
+        message: error.message,
+        code: error.code,
+        operation: 'updateDoc',
+        userId: currentUser?.uid,
+        proId: selectedPro,
+      });
+
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: `Error al procesar el pago: ${error.message}`,
+        title: 'Error en el proceso',
+        html: `No se pudo completar la operación:<br>
+         <strong>Código:</strong> ${error.code || 'N/A'}<br>
+         <strong>Mensaje:</strong> ${error.message}`,
+        footer: 'Verifica las reglas de seguridad en Firestore',
       });
     }
   };
@@ -425,6 +503,11 @@ const Therapy = () => {
 
     fetchUserData();
   }, [user]);
+
+  const handleCloseStatus = () => {
+    setPaymentStatus(null);
+    window.location.reload();
+  };
 
   return (
     <form className="Therapy-body" onSubmit={handleSubmit}>
@@ -547,6 +630,19 @@ const Therapy = () => {
                 ) : (
                   <p>No hay una cita seleccionada.</p>
                 )}
+                <div className="therapy-price-info">
+                  <p>
+                    <strong>Terapia:</strong>
+                    {' '}
+                    {formData.therapyType}
+                  </p>
+                  <p>
+                    <strong>Precio:</strong>
+                    {' '}
+                    $
+                    {therapyPrices[formData.therapyType]?.toLocaleString('es-CO')}
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -560,6 +656,7 @@ const Therapy = () => {
                 X
               </button>
               <Mp
+                key={retryPayment ? 'retry' : 'initial'}
                 therapyType={formData.therapyType}
                 onPaymentSuccess={handlePaymentSuccess}
                 currentUser={currentUser}
@@ -570,10 +667,22 @@ const Therapy = () => {
             </div>
           )}
           <button type="submit" className="DynamiCanlendar-btn">
-            <h4>Confirmar</h4>
+            <h4>Confirmar e ir a pagar</h4>
           </button>
         </div>
       </div>
+
+      {paymentStatus === 'success' && paymentDetails && (
+        <StatusBrick
+          paymentDetails={paymentDetails}
+          onClose={handleCloseStatus}
+          onRetry={() => {
+            setPaymentStatus(null);
+            setShowPayment(true);
+            setRetryPayment(true);
+          }}
+        />
+      )}
     </form>
   );
 };
