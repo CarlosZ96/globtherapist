@@ -52,6 +52,7 @@
 
 .Log-Btn:last-child {
     background: none;
+    height: 20%;
 }
 
 .Log-Btn-txt {
@@ -78,7 +79,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-around;
-    width: 70%;
+    width: 68%;
 }
 
 @media (max-width: 370px) {
@@ -219,6 +220,7 @@
     flex-flow: column wrap;
     place-content: center space-around;
     align-items: center;
+    justify-content: center;
     width: 70%;
     height: 100%;
     color: #fff;
@@ -230,7 +232,7 @@
     flex-flow: column wrap;
     place-content: center end;
     height: 49%;
-    width: 75%;
+    width: 100%;
     font-family: Itim, serif;
     font-weight: lighter;
     align-content: center;
@@ -238,29 +240,34 @@
 }
 
 .Glob-btn-cont {
-    width: 90%;
+    width: 100%;
     height: 22%;
     display: flex;
     flex-direction: column;
-    align-items: end;
+    align-items: center;
 }
 
 .Glob-btn {
     height: 100%;
-    width: 56%;
+    width: 90%;
     background-color: #ffffffb4;
     color: #2b3e9d;
     border: none;
-    border-radius: 50px;
+    border-radius: 2px;
     font-family: Itim, serif;
     font-weight: 400;
     font-style: normal;
     font-size: 2.4vw;
 }
 
+.Glob-btn h3 {
+    font-size: 3.1vw;
+    font-family: Itim, serif;
+}
+
 .Glob-txt-cont p {
     margin: 0;
-    font-size: 3vw;
+    font-size: 4.5vw;
 }
 
 .Theras-cont {
