@@ -277,22 +277,33 @@
     place-items: center center;
     gap: 1% 0;
     width: 90vw;
+    height: 49vh;
+    margin: 0;
+}
+
+.Therapy {
+    height: 90%;
+    border-radius: 20px;
 }
 
 .Theras-cont>.Therapy:nth-child(1) {
-    background-color: #7C95A6;
+    width: 96%;
+    background-color: #687AD7;
 }
 
 .Theras-cont>.Therapy:nth-child(2) {
-    background-color: #DEB841;
+    width: 90%;
+    background-color: #EF5557;
 }
 
 .Theras-cont>.Therapy:nth-child(3) {
-    background-color: #40F246;
+    width: 90%;
+    background-color: #38DDE3;
 }
 
 .Theras-cont>.Therapy:nth-child(4) {
-    background-color: #2B3A67;
+    width: 96%;
+    background-color: #FFD904;
 }
 
 .Theras-body {
@@ -312,7 +323,7 @@
     font-family: Itim, serif;
     font-weight: 400;
     font-style: normal;
-    font-size: 6vw;
+    font-size: 8vw;
     margin: 0;
     height: 29%;
     text-align: center;
@@ -333,10 +344,12 @@
     border-radius: 50%;
     border: none;
     background-color: #2B3A67;
+    margin-bottom: 21%;
+    margin-right: 20%;
 }
 
 .Theras-btn p {
-    height: 100%;
+    height: 75%;
     margin: 0;
     font-size: 4vw;
     color: #fff;
@@ -345,22 +358,9 @@
     font-style: normal;
 }
 
-.Therapy {
-    width: 88%;
-    height: 96%;
-    border-radius: 20px;
-}
-
 .Therapy:last-child .Therapy-title {
-    color: #fff;
-}
-
-.Therapy:last-child .Theras-btn {
-    background-color: #fff;
-}
-
-.Therapy:last-child .Theras-btn p {
-    color: #01268d;
+    font-size: 7vw;
+    color: #041B5E;
 }
 
 .modal-overlay {
