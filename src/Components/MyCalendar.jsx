@@ -1,9 +1,11 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { doc, getDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '../AuthContext';
 import { db } from '../firebase';
+import arrow from '../img/right-arrow.png';
 import '../stylesheets/MyCalendar.css';
 
 const MyCalendar = ({ onEdit }) => {
@@ -196,7 +198,7 @@ const MyCalendar = ({ onEdit }) => {
           type="button"
           onClick={goToPreviousMonth}
         >
-          ←
+          <img src={arrow} alt="" />
         </button>
         <h2 className="calendar-title">{activeMonth}</h2>
         <button
