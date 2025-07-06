@@ -1,3 +1,4 @@
+/* eslint-disable react/self-closing-comp */
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
@@ -198,7 +199,7 @@ const MyCalendar = ({ onEdit }) => {
           type="button"
           onClick={goToPreviousMonth}
         >
-          <img src={arrow} alt="" />
+          <img src={arrow} alt="" className="arrow" />
         </button>
         <h2 className="calendar-title">{activeMonth}</h2>
         <button
@@ -206,7 +207,6 @@ const MyCalendar = ({ onEdit }) => {
           type="button"
           onClick={goToNextMonth}
         >
-          →
         </button>
       </div>
 
