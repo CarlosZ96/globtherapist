@@ -41,7 +41,7 @@ const Homepage = () => {
 
   const noUserStyles = {
     homeWindows: { width: '70%' },
-    logBtnCont: { position: 'relative' },
+    logBtnCont: { position: 'relative', flexDirection: 'column' },
   };
 
   const userStyles = {

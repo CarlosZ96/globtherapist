@@ -33,7 +33,7 @@
 
 .Log-Btn-Cont {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
     width: 20%;
@@ -53,6 +53,10 @@
 .Log-Btn:last-child {
     background: none;
     height: 20%;
+}
+
+.Log-Btn img {
+    max-width: 10px;
 }
 
 .Log-Btn-txt {

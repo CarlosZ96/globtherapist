@@ -198,7 +198,7 @@
     font-weight: lighter;
     color: #000;
     padding-top: 1%;
-    padding-left: 2%;
+    text-align: left;
 }
 
 .Therapy-txt-field::placeholder {
@@ -206,7 +206,6 @@
     font-size: 4vw;
     text-align: center;
     padding-top: 2%;
-    padding-left: 1%;
 }
 
 .Therapy-info {
