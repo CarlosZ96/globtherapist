@@ -91,7 +91,13 @@
 .Ask-Therapy-fields-input {
     height: 48%;
     width: 100%;
-    font-size: 2vw;
+    font-size: 3.5vw;
+}
+
+.Ask-Therapy-fields-input::placeholder {
+    font-size: 3vw;
+    color: #000;
+    font-family: Itim, serif;
 }
 
 .Ask-Therapy-field-cont {
@@ -187,10 +193,12 @@
     height: 30vh;
     width: 100%;
     background-color: #fff;
-    font-size: 2.4vw;
+    font-size: 4vw;
     font-family: Itim, serif;
     font-weight: lighter;
     color: #000;
+    padding-top: 1%;
+    padding-left: 2%;
 }
 
 .Therapy-txt-field::placeholder {
@@ -294,4 +302,8 @@
 .therapy-error-cont {
     margin-top: 1rem;
     text-align: center;
+}
+
+.calendar-cont {
+    background-color: #fff;
 }

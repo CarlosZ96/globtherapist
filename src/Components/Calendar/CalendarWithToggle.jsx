@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
@@ -32,6 +30,7 @@ const Calendar = ({
   const [selectedLunchHour, setSelectedLunchHour] = useState(null);
   const [currentSlotIndex, setCurrentSlotIndex] = useState(0);
   const [showLunchButton, setShowLunchButton] = useState(true);
+  const [showContainers, setShowContainers] = useState(false);
 
   const normalizeText = (text) => {
     if (!text) return '';
@@ -103,6 +102,12 @@ const Calendar = ({
       });
     }
   };
+
+  useEffect(() => {
+    if (isConfirmed) {
+      setShowContainers(true);
+    }
+  }, [isConfirmed]);
 
   const handleEditClick = () => {
     console.log('Editing hours...');
@@ -259,7 +264,7 @@ const Calendar = ({
       </div>
       <hr className="date-blue-line" />
       <div className="Choose-Day-Cont">
-        <div className="Calendar-cont">
+        <div className="Calendar-cont" style={{ backgroundColor: '#fff' }}>
           {days.map((day) => (
             <button
               type="button"
@@ -353,6 +358,7 @@ const Calendar = ({
           <>
             <button type="button" className="Edit-Hours" onClick={handleEditClick}>
               <img src={edit} className="edit-btn" alt="" />
+              Editar
             </button>
             <button
               type="button"
@@ -360,7 +366,7 @@ const Calendar = ({
               onClick={handleLunchClick}
               style={{ display: showLunchButton ? 'block' : 'none' }}
             >
-              <h3>Lunch</h3>
+              <h3>+ Hora de Almuerzo</h3>
             </button>
           </>
   )}
@@ -417,58 +423,59 @@ const Calendar = ({
         </div>
       )}
       <hr className="date-blue-line" />
-      <div
-        className="Pros-cont"
-        style={{ display: collectionName === 'pros' ? 'none' : 'block' }}
-      >
-        <div className="Pros-btn-cont">
-          <button
-            type="button"
-            disabled={!isConfirmed}
-            onClick={handleShowPros}
-          >
-            <h3>Ver pros</h3>
-          </button>
+
+      {/* Contenedor Pros-cont - visible solo después de confirmar */}
+      {showContainers && collectionName === 'users' && (
+        <div className="Pros-cont">
+          <div className="Pros-btn-cont">
+            <button
+              type="button"
+              disabled={!isConfirmed}
+              onClick={handleShowPros}
+            >
+              <h3>Ver pros</h3>
+            </button>
+          </div>
+          <div className="pro-img-def-cont">
+            {showPros && (
+              <div className="pro-img-def">
+                {availablePros.map((pro) => (
+                  <div key={pro.id} className="pro-item">
+                    <button
+                      type="button"
+                      className={`user-info-comt ${selectedPro === pro.id ? 'pro-active' : 'pro-inactive'}`}
+                      onClick={() => handleProClick(pro.id)}
+                    >
+                      <div className="user-image-comt">
+                        <img src={User} alt="user" className="pro-img" />
+                      </div>
+                      <h3>{pro.name}</h3>
+                    </button>
+                    <button
+                      type="button"
+                      className="show-modal-btn"
+                      onClick={() => handleShowDetails(pro.id)}
+                    >
+                      +
+                    </button>
+                  </div>
+                ))}
+                {availablePros.length === 0 && (
+                  <div className="no-pros-message">
+                    <h3>No hay pros disponibles para esta fecha</h3>
+                  </div>
+                )}
+                {selectedProId && (
+                  <ProModal proId={selectedProId} onClose={handleCloseModal} />
+                )}
+              </div>
+            )}
+            {selectedProId && (
+              <ProModal proId={selectedProId} onClose={handleCloseModal} />
+            )}
+          </div>
         </div>
-        <div className="pro-img-def-cont">
-          {showPros && (
-            <div className="pro-img-def">
-              {availablePros.map((pro) => (
-                <div key={pro.id} className="pro-item">
-                  <button
-                    type="button"
-                    className={`user-info-comt ${selectedPro === pro.id ? 'pro-active' : 'pro-inactive'}`}
-                    onClick={() => handleProClick(pro.id)}
-                  >
-                    <div className="user-image-comt">
-                      <img src={User} alt="user" className="pro-img" />
-                    </div>
-                    <h3>{pro.name}</h3>
-                  </button>
-                  <button
-                    type="button"
-                    className="show-modal-btn"
-                    onClick={() => handleShowDetails(pro.id)}
-                  >
-                    +
-                  </button>
-                </div>
-              ))}
-              {availablePros.length === 0 && (
-                <div className="no-pros-message">
-                  <h3>No hay pros disponibles para esta fecha</h3>
-                </div>
-              )}
-              {selectedProId && (
-                <ProModal proId={selectedProId} onClose={handleCloseModal} />
-              )}
-            </div>
-          )}
-          {selectedProId && (
-            <ProModal proId={selectedProId} onClose={handleCloseModal} />
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 };
