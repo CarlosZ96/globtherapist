@@ -31,7 +31,7 @@ const Calendar = ({
   const [currentSlotIndex, setCurrentSlotIndex] = useState(0);
   const [showLunchButton, setShowLunchButton] = useState(true);
   const [showContainers, setShowContainers] = useState(false);
-
+  const [isPro, setIsPro] = useState(false);
   const normalizeText = (text) => {
     if (!text) return '';
     const normalized = text
@@ -48,6 +48,20 @@ const Calendar = ({
       console.log('Cita global actualizada:', citaGlobal);
     }
   }, [citaGlobal]);
+
+  useEffect(() => {
+    const checkIfPro = async () => {
+      if (currentUser && currentUser.uid) {
+        const proRef = doc(db, 'pros', currentUser.uid);
+        const proSnap = await getDoc(proRef);
+        setIsPro(proSnap.exists());
+      } else {
+        setIsPro(false);
+      }
+    };
+
+    checkIfPro();
+  }, [currentUser]);
 
   const normalizedTherapyType = normalizeText(therapyType);
   console.log('Therapy type passed to Calendar (normalized):', normalizedTherapyType);
@@ -355,30 +369,32 @@ const Calendar = ({
           </button>
 
           {isConfirmed && !onReturn && (
-          <>
-            <button type="button" className="Edit-Hours" onClick={handleEditClick}>
-              <img src={edit} className="edit-btn" alt="" />
-              Editar
-            </button>
+            <>
+              <button type="button" className="Edit-Hours" onClick={handleEditClick}>
+                <img src={edit} className="edit-btn" alt="" />
+                Editar
+              </button>
+              {isPro && (
+                <button
+                  type="button"
+                  className="Lunch-btn"
+                  onClick={handleLunchClick}
+                  style={{ display: showLunchButton ? 'block' : 'none' }}
+                >
+                  <h3>+ Hora de Almuerzo</h3>
+                </button>
+              )}
+            </>
+          )}
+          {isConfirmed && onReturn && (
             <button
               type="button"
-              className="Lunch-btn"
-              onClick={handleLunchClick}
-              style={{ display: showLunchButton ? 'block' : 'none' }}
+              className="return-btn"
+              onClick={onReturn}
             >
-              <h3>+ Hora de Almuerzo</h3>
+              Volver a mis horarios
             </button>
-          </>
-  )}
-          {isConfirmed && onReturn && (
-          <button
-            type="button"
-            className="return-btn"
-            onClick={onReturn}
-          >
-            Volver a mis horarios
-          </button>
-  )}
+          )}
         </div>
       </div>
       {showLunchDialog && (
