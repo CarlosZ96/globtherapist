@@ -4,7 +4,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../firebase';
 import '../../stylesheets/procards.css';
-import close from '../../img/Closegt.png';
+import close from '../../img/close.png';
 
 const ProsCards = ({ onClose }) => {
   const [pros, setPros] = useState([]);
@@ -21,12 +21,9 @@ const ProsCards = ({ onClose }) => {
 
       try {
         const proData = await Promise.all(allowedIds.map(async (proId) => {
-          // Obtener doc
           const snap = await getDoc(doc(db, 'pros', proId));
           if (!snap.exists()) return null;
           const data = snap.data();
-
-          // Buscar imagen si existe
           let imageUrl = null;
           try {
             const files = await listAll(ref(storage, `profileImages/${proId}`));
@@ -92,64 +89,64 @@ const ProsCards = ({ onClose }) => {
 
   return (
     <div className="ProsCards-cont">
-      <button type="button" className="close-button" onClick={onClose}>
+      <button type="button" className="close-button-procrd" onClick={onClose}>
         <img src={close} alt="Cerrar" />
       </button>
-
       <div className="ProCard-cont">
-        <div className="proInfo-cont">
-          <h1>{currentPro.username || 'Profesional'}</h1>
-          {currentPro.imageUrl ? (
-            <img
-              src={currentPro.imageUrl}
-              alt="Perfil profesional"
-              className="profile-image"
-            />
-          ) : (
-            <div className="profile-placeholder">Sin imagen</div>
-          )}
-          <h3>{hdv.profession || 'Profesión no especificada'}</h3>
+        <div className="ProCard-sec1">
+          <div className="proInfo-cont">
+            {currentPro.imageUrl ? (
+              <img
+                src={currentPro.imageUrl}
+                alt="Perfil profesional"
+                className="profile-image"
+              />
+            ) : (
+              <div className="profile-placeholder">Sin imagen</div>
+            )}
+            <h1>{currentPro.username || 'Profesional'}</h1>
+            <h3>{hdv.profession || 'Profesión no especificada'}</h3>
+          </div>
+          <div className="proDescription-cont">
+            <p>{hdv.professionalHistory || 'Historia profesional no disponible'}</p>
+          </div>
         </div>
-
-        <div className="proDescription-cont">
-          <p>{hdv.professionalHistory || 'Historia profesional no disponible'}</p>
-        </div>
-
-        <div className="GlobProDescription-cont">
-          <p>
-            Profesional especializado/a en
-            {' '}
-            {hdv.specialization || 'su campo'}
-            egresado en la universidad
-            {' '}
-            {hdv.university || 'no especificada'}
-            con
-            {' '}
-            {hdv.yearsOfExperience || 'varios'}
-            {' '}
-            años de experiencia
-          </p>
-        </div>
-
-        <div className="ProTeras-cont">
-          <h2>Terapias Disponibles:</h2>
-          <div className="ProTeras-list">
-            <ul>
-              {currentPro.terapias?.map((terapia) => (
-                <li key={`${currentPro.id}-${terapia}`}>{terapia}</li>
-              ))}
-            </ul>
+        <div className="ProCard-sec2">
+          <div className="GlobProDescription-cont">
+            <p>
+              Profesional especializado/a en
+              {' '}
+              {hdv.specialization || 'su campo'}
+              {' '}
+              egresado en la universidad
+              {' '}
+              {hdv.university || 'no especificada'}
+              con
+              {' '}
+              {hdv.yearsOfExperience || 'varios'}
+              {' '}
+              años de experiencia
+            </p>
+          </div>
+          <div className="ProTeras-cont">
+            <h2>Terapias Disponibles:</h2>
+            <div className="ProTeras-list">
+              <ul>
+                {currentPro.terapias?.map((terapia) => (
+                  <li key={`${currentPro.id}-${terapia}`}>{terapia}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Controles del carrusel */}
       <div className="carousel-controls">
         <button type="button" onClick={prevCard} disabled={pros.length <= 1}>‹</button>
         <span>
           {currentIndex + 1}
           {' '}
-          /
+          -
           {' '}
           {pros.length}
         </span>
