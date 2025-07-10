@@ -1,10 +1,10 @@
 .Login-cont {
     position: absolute;
-    left: 14%;
-    top: 28%;
-    width: 71vw;
-    height: 42vh;
-    border: 7px #01268d solid;
+    left: 4%;
+    top: 27%;
+    width: 92vw;
+    height: 47vh;
+    border: 4px #01268d solid;
     background-color: #fff;
 }
 
@@ -32,11 +32,11 @@
 
 .Create-cont {
     position: absolute;
-    left: 11%;
+    left: 3%;
     top: 17%;
     z-index: 101;
-    width: 78vw;
-    height: max-content;
+    width: 95vw;
+    height: 67vh;
     border: 3px #01268d solid;
     background-color: #fff;
 }
@@ -44,7 +44,7 @@
 .Create-title-cont {
     display: flex;
     width: 100%;
-    height: 5vh;
+    height: 6vh;
     border-bottom: #01268d 2px solid;
     flex-direction: row;
     align-items: center;
@@ -59,7 +59,7 @@
     font-style: normal;
     margin: 0;
     text-align: center;
-    font-size: 4vw;
+    font-size: 6vw;
 }
 
 .close-button {
@@ -69,6 +69,21 @@
     width: 10%;
     background: none;
     font-size: 5vw;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: 300;
+    font-style: normal;
+    border: none;
+    text-align: center;
+}
+
+.close-button-crt {
+    position: absolute;
+    left: 90%;
+    top: -2px;
+    width: 10%;
+    background: none;
+    font-size: 7vw;
     color: #fff;
     font-family: Itim, serif;
     font-weight: 300;
@@ -95,6 +110,25 @@
     height: 27%;
 }
 
+.Crt-input-cont {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    height: 12.8%;
+}
+
+.Crt-input-cont h3 {
+    width: 60%;
+    font-size: 4.9vw;
+    color: #2B3A67;
+    font-family: Itim, serif;
+    font-weight: 300;
+    font-style: normal;
+    margin: 1%;
+}
+
 .Login-input-cont {
     display: flex;
     flex-direction: row;
@@ -106,7 +140,7 @@
 
 .log-txt-h {
     width: 40%;
-    font-size: 4.5vw;
+    font-size: 5.8vw;
     color: #2B3A67;
     font-family: Itim, serif;
     font-weight: 300;
@@ -135,7 +169,7 @@
     margin: 1% 1% 1% 3%;
     border: #2B3A67 3px solid;
     border-radius: 5px;
-    font-size: 2.8vw;
+    font-size: 4.5vw;
     font-family: Itim, serif;
     font-weight: lighter;
     padding-left: 1%;
@@ -157,20 +191,21 @@
     border-radius: 5px;
     color: #fff;
     font-family: Itim, serif;
-    font-weight: 200;
-    font-size: 3vw;
+    font-weight: lighter;
+    font-size: 4vw;
 }
 
 .Create-input {
-    height: 4.2vh;
-    width: 56%;
-    margin: 1% 1% 1% 3%;
+    height: 5vh;
+    width: 50%;
+    margin: 1%;
     border: #2B3A67 3px solid;
     border-radius: 5px;
 }
 
 .create-submit-cont {
     width: 100%;
+    height: 12vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -179,7 +214,7 @@
 
 .create-submit-cont button {
     width: 60%;
-    height: 5vh;
+    height: 6.5vh;
     background-color: #041B5E;
     border: none;
     border-radius: 5px;
@@ -188,16 +223,16 @@
 
 .create-submit-cont button h3 {
     color: #fff;
-    font-size: 3vw;
+    font-size: 4vw;
     font-family: Itim, serif;
-    font-weight: 300;
+    font-weight: 100;
     font-style: normal;
     margin: 0;
 }
 
 .Create-pro-popup {
     width: 100%;
-    height: 6%;
+    height: 9%;
     display: flex;
     align-items: center;
     justify-content: space-around;
@@ -206,18 +241,18 @@
 
 .Create-pro-popup h4 {
     color: #01268d;
-    font-size: 2vw;
+    font-size: 2.9vw;
     font-family: Itim, serif;
     font-weight: 300;
     font-style: normal;
-    margin: 5% 0;
+    margin: 4% 0;
 }
 
 .Create-pro-popup button {
     background-color: #041B5E;
     width: 40%;
     height: 3vh;
-    font-size: 2vw;
+    font-size: 2.9vw;
     color: #fff;
     font-family: Itim, serif;
     font-weight: 300;
@@ -256,13 +291,27 @@
 
 .CreatePro-cont {
     position: absolute;
-    left: 24%;
-    top: 26%;
-    z-index: 101;
-    width: 50vw;
-    height: 50vh;
+    left: 3%;
+    top: 7%;
+    z-index: 102;
+    width: 94vw;
+    height: 85vh;
     border: 3px #01268d solid;
     background-color: #fff;
+}
+
+.CreatePro-body{
+    width: 100%;
+    height: 100%;
+}
+
+.CreatePro-input-cont{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    height: 10%;
 }
 
 .pending-dates {

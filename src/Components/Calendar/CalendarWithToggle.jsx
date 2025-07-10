@@ -440,7 +440,6 @@ const Calendar = ({
       )}
       <hr className="date-blue-line" />
 
-      {/* Contenedor Pros-cont - visible solo después de confirmar */}
       {showContainers && collectionName === 'users' && (
         <div className="Pros-cont">
           <div className="Pros-btn-cont">

@@ -622,19 +622,23 @@ const Therapy = () => {
                   {new Date().getFullYear()}
                 </p>
                 <p className="appointment-time">
-                  de:
+                  de
+                  {' '}
                   {citaGlobal.time}
                   {' '}
                   a
+                  {' '}
                   {calculateEndTime(normalizeTime(citaGlobal.time), 40)}
                 </p>
                 <p className="appointment-doctor">
-                  Con el doctor
+                  Asignada a:
+                  {' '}
                   {citaGlobal.proName}
                 </p>
                 <div className="therapy-price-info">
                   <p className="appointment-therapy">
                     Terapia
+                    {' '}
                     {formData.therapyType}
                     : $
                     {therapyPrices[formData.therapyType]?.toLocaleString('es-CO')}
