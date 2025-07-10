@@ -63,24 +63,33 @@ const CreatePro = ({ toggleCreatePro }) => {
 
   const validateForm = () => {
     const validationErrors = {};
+
     if (!formData.fullName.trim()) {
-      validationErrors.fullName = 'El nombre completo es obligatorio.';
+      validationErrors.fullName = 'Este campo es obligatorio.';
     }
     if (!formData.username.trim()) {
-      validationErrors.username = 'El nombre de usuario es obligatorio.';
+      validationErrors.username = 'Este campo es obligatorio.';
     }
-    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    if (!formData.email.trim()) {
+      validationErrors.email = 'Este campo es obligatorio.';
+    } else if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       validationErrors.email = 'Por favor, ingresa un correo válido.';
     }
     if (!formData.document.number.trim()) {
-      validationErrors.documentNumber = 'El número de documento es obligatorio.';
+      validationErrors.documentNumber = 'Este campo es obligatorio.';
     }
+    if (!formData.phone.trim()) {
+      validationErrors.phone = 'Este campo es obligatorio.';
+    }
+
+    // Validaciones específicas
     if (formData.password.length < 6) {
       validationErrors.password = 'La contraseña debe tener al menos 6 caracteres.';
     }
     if (formData.password !== formData.confirmPassword) {
       validationErrors.confirmPassword = 'Las contraseñas no coinciden.';
     }
+
     return validationErrors;
   };
 
@@ -168,7 +177,7 @@ const CreatePro = ({ toggleCreatePro }) => {
               onChange={handleChange}
               className={errors.fullName ? 'input-error' : ''}
             />
-            {errors.fullName && <p className="error-text">{errors.fullName}</p>}
+            {errors.fullName && <p className="error-text-crtp">{errors.fullName}</p>}
           </div>
           <div className="CreatePro-input-cont">
             <label>Nombre de Usuario:</label>
@@ -179,7 +188,7 @@ const CreatePro = ({ toggleCreatePro }) => {
               onChange={handleChange}
               className={errors.username ? 'input-error' : ''}
             />
-            {errors.username && <p className="error-text">{errors.username}</p>}
+            {errors.username && <p className="error-text-crtp">{errors.username}</p>}
           </div>
           <div className="CreatePro-input-cont">
             <label>Documento:</label>
@@ -201,7 +210,7 @@ const CreatePro = ({ toggleCreatePro }) => {
               className={errors.documentNumber ? 'input-error' : ''}
             />
             {errors.documentNumber && (
-              <p className="error-text">{errors.documentNumber}</p>
+              <p className="error-text-crtp">{errors.documentNumber}</p>
             )}
           </div>
           <div className="CreatePro-input-cont">
@@ -213,7 +222,7 @@ const CreatePro = ({ toggleCreatePro }) => {
               onChange={handleChange}
               className={errors.email ? 'input-error' : ''}
             />
-            {errors.email && <p className="error-text">{errors.email}</p>}
+            {errors.email && <p className="error-text-crtp">{errors.email}</p>}
           </div>
           <div className="CreatePro-input-cont">
             <label>Teléfono:</label>
@@ -223,6 +232,9 @@ const CreatePro = ({ toggleCreatePro }) => {
               value={formData.phone}
               onChange={handleChange}
             />
+            {errors.documentNumber && (
+              <p className="error-text-crtp">{errors.documentNumber}</p>
+            )}
           </div>
           <div className="CreatePro-input-cont">
             <label>Contraseña:</label>
@@ -233,7 +245,7 @@ const CreatePro = ({ toggleCreatePro }) => {
               onChange={handleChange}
               className={errors.password ? 'input-error' : ''}
             />
-            {errors.password && <p className="error-text">{errors.password}</p>}
+            {errors.password && <p className="error-text-crtp">{errors.password}</p>}
           </div>
           <div className="CreatePro-input-cont">
             <label>Confirmar Contraseña:</label>
@@ -245,7 +257,7 @@ const CreatePro = ({ toggleCreatePro }) => {
               className={errors.confirmPassword ? 'input-error' : ''}
             />
             {errors.confirmPassword && (
-              <p className="error-text">{errors.confirmPassword}</p>
+              <p className="error-text-crtp">{errors.confirmPassword}</p>
             )}
           </div>
           <div className="CreatePro-therapies">
