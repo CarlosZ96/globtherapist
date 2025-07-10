@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import {
-  collection, getDocs,
-} from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../firebase';
 import '../../stylesheets/procards.css';
@@ -14,39 +12,49 @@ const ProsCards = ({ onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    const fetchRandomPros = async () => {
+    const fetchHdvWithImages = async () => {
+      const allowedIds = [
+        'I0AULHKRBZYVAJ3JQ7rhWuBbxhe2',
+        'V5zxUoV4SrZYVyX1QA79UovUCVG2',
+        '5sQCDthzpIerAeLVMN2lYiO41AE2',
+      ];
+
       try {
-        const q = collection(db, 'pros');
-        const querySnapshot = await getDocs(q);
-        const allPros = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        const shuffled = allPros.sort(() => 0.5 - Math.random());
-        const selectedPros = shuffled.slice(0, Math.min(3, shuffled.length));
-        const prosWithImages = await Promise.all(selectedPros.map(async (pro) => {
-          const imageRef = ref(storage, `profileImages/${pro.id}`);
+        const proData = await Promise.all(allowedIds.map(async (proId) => {
+          // Obtener doc
+          const snap = await getDoc(doc(db, 'pros', proId));
+          if (!snap.exists()) return null;
+          const data = snap.data();
+
+          // Buscar imagen si existe
+          let imageUrl = null;
           try {
-            const files = await listAll(imageRef);
-            if (files.items.length > 0) {
-              const url = await getDownloadURL(files.items[0]);
-              return { ...pro, imageUrl: url };
+            const files = await listAll(ref(storage, `profileImages/${proId}`));
+            if (files.items.length) {
+              imageUrl = await getDownloadURL(files.items[0]);
             }
-          } catch (error) {
-            console.error('Error obteniendo imagen: ', error);
+          } catch (e) {
+            console.warn('No hay imagen para', proId);
           }
-          return { ...pro, imageUrl: null };
+
+          return {
+            id: proId,
+            username: data.username,
+            terapias: data.terapias,
+            Hdv: data.Hdv || {},
+            imageUrl,
+          };
         }));
 
-        setPros(prosWithImages);
-        setLoading(false);
+        setPros(proData.filter(Boolean));
       } catch (error) {
-        console.error('Error obteniendo profesionales: ', error);
+        console.error('Error cargando profesionales:', error);
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchRandomPros();
+    fetchHdvWithImages();
   }, []);
 
   const nextCard = () => {
