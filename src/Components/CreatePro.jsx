@@ -155,7 +155,7 @@ const CreatePro = ({ toggleCreatePro }) => {
         <form className="CreatePro-body" onSubmit={handleSubmit}>
           <div className="Create-title-cont">
             <h1>Crear cuenta</h1>
-            <div className="close-button" onClick={handleClose}>
+            <div className="close-button-crtp" onClick={handleClose}>
               &times;
             </div>
           </div>
@@ -255,7 +255,7 @@ const CreatePro = ({ toggleCreatePro }) => {
                 <button
                   key={therapy}
                   type="button"
-                  className={formData.therapies.includes(therapy) ? 'active' : ''}
+                  className={`therapy-button ${formData.therapies.includes(therapy) ? 'therapy-button-active' : ''}`}
                   onClick={() => toggleTherapy(therapy)}
                 >
                   {therapy}
