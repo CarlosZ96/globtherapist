@@ -49,5 +49,5 @@
     position: relative;
     min-height: 500px;
     border-radius: 8px;
-    overflow: hidden;
+    overflow: auto;
   }
