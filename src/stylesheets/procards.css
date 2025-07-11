@@ -92,8 +92,7 @@
 }
 
 .profile-image {
-   width: 100px;
-   height: 100px;
+   max-width: 10vw;
    border: solid 3px #fff;
    border-radius: 50%;
    background-color: #fff;
@@ -228,7 +227,7 @@
    border-radius: 15px;
    background-color: #EF5557;
    color: #fff;
-   font-size: 4vw;
+   font-size: 3.5vw;
    font-family: 'Poppins', sans-serif;
    font-weight: normal;
 }
@@ -269,6 +268,10 @@
       width: 60%;
    }
 
+   .profile-image {
+      width: 25vw;
+   }
+
    .proDescription-cont {
       width: 40%;
    }
@@ -304,7 +307,7 @@
 @media (min-width: 570px) {
 
    .ProTeras-cont h2 {
-     height: 25%;
+      height: 25%;
    }
 
    .ProTeras-list ul li:nth-child(2) {
