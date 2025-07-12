@@ -648,23 +648,19 @@ const Therapy = () => {
             </div>
 
             {showPayment && (
-              <div className="payment-modal">
-                <button
-                  type="button"
-                  className="close-payment-btn"
-                  onClick={() => setShowPayment(false)}
-                >
-                  X
-                </button>
-                <Mp
-                  key={retryPayment ? 'retry' : 'initial'}
-                  therapyType={formData.therapyType}
-                  onPaymentSuccess={handlePaymentSuccess}
-                  currentUser={currentUser}
-                  selectedPro={selectedPro}
-                  citaGlobal={citaGlobal}
-                  formData={formData}
-                />
+              <div className="payment-overlay">
+                <div className="payment-modal">
+                  <Mp
+                    key={retryPayment ? 'retry' : 'initial'}
+                    therapyType={formData.therapyType}
+                    onPaymentSuccess={handlePaymentSuccess}
+                    currentUser={currentUser}
+                    selectedPro={selectedPro}
+                    citaGlobal={citaGlobal}
+                    formData={formData}
+                    onClose={() => setShowPayment(false)}
+                  />
+                </div>
               </div>
             )}
 

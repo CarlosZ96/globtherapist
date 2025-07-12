@@ -12,6 +12,7 @@ const MP = ({
   selectedPro,
   citaGlobal,
   formData,
+  onClose,
 }) => {
   const [price, setPrice] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -205,6 +206,14 @@ const MP = ({
 
   return (
     <div className="payment-container">
+      <button
+        type="button"
+        className="close-payment-btn"
+        onClick={onClose}
+      >
+        ✕
+      </button>
+
       {loading && (
         <div className="processing-overlay">
           <div className="processing-spinner" />
@@ -303,6 +312,7 @@ MP.propTypes = {
     phone: PropTypes.string,
     description: PropTypes.string,
   }),
+  onClose: PropTypes.func,
 };
 
 MP.defaultProps = {
@@ -310,6 +320,7 @@ MP.defaultProps = {
   selectedPro: '',
   citaGlobal: {},
   formData: {},
+  onClose: () => {},
 };
 
 export default MP;
