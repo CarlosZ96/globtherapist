@@ -6,6 +6,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../AuthContext';
 import { auth, db } from '../../firebase';
 import submit from '../../img/submit.png';
+import clock from '../../img/clock.png';
 import StatusBrick from '../payments/StatusBrick';
 import '../../stylesheets/userInfo.css';
 
@@ -92,8 +93,9 @@ const UserInfo = ({ citas, title, emptyMessage }) => {
                   className={`status-${cita.status} status-button`}
                   onClick={() => handlePaymentClick(cita)}
                 >
+                  <img src={clock} alt="" className="payment-im" />
                   {cita.status === 'pay_pending' ? 'Pago Pendiente'
-                   : cita.status === 'pending' ? 'Pendiente' : 'Finalizada'}
+                    : cita.status === 'pending' ? 'Pendiente' : 'Finalizada'}
                 </button>
               </div>
             </div>
