@@ -35,6 +35,10 @@
     padding: 5px 0;
 }
 
+.cita-card.completed-cita {
+  opacity: 0.2;
+  transition: opacity 0.3s ease;
+}
 
 .user-win-name-cont {
     width: 100%;
@@ -189,4 +193,21 @@
     justify-content: center;
     align-items: center;
     background-color: #2B3E9D;
+}
+
+.cita-card.completed-cita .cita-status button,
+.cita-card.completed-cita .reunion-btn,
+.cita-card.completed-cita .completed-badge {
+  opacity: 1 !important;
+}
+
+.completed-badge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 8%;
+  height: 100%;
+  font-size: 4vw;
+  color: #28a745;
+  background-color: transparent;
 }

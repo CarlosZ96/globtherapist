@@ -68,7 +68,10 @@ const UserInfo = ({ citas, title, emptyMessage }) => {
       <h2>{title}</h2>
       <div className="citas-cont">
         {citas.map((cita) => (
-          <div key={cita.id} className="cita-card">
+          <div
+            key={cita.id}
+            className={`cita-card ${cita.status === 'end' ? 'completed-cita' : ''}`}
+          >
             <div className="cita-info">
               <div className="cita-field-date">
                 <p>
