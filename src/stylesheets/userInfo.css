@@ -113,3 +113,13 @@
     color: #041B5E;
     font-weight: lighter;
 }
+
+.dates-modal-content{
+    width: 90%;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #041B5E;
+}
