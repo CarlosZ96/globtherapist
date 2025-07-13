@@ -17,10 +17,12 @@ const MydatesPro = ({ citas }) => {
       <div className="user-win-name-cont">
         <h1>Citas de Pacientes</h1>
       </div>
-
       <div className="citas-cont">
         {citas.map((cita) => (
-          <div key={cita.id} className="cita-card">
+          <div
+            key={cita.id}
+            className={`cita-card ${cita.status === 'end' ? 'completed-cita' : ''}`}
+          >
             <div className="cita-info">
               <div className="cita-field-date">
                 <p>{cita.month}</p>
@@ -38,7 +40,7 @@ const MydatesPro = ({ citas }) => {
               </div>
               <button
                 type="button"
-                className="reunion-btn"
+                className="status-button"
                 onClick={() => {
                   setCitaGlobal({
                     uid: cita.uid,
