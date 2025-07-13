@@ -262,7 +262,7 @@ const Homepage = () => {
       {showDates && (
         <div className="modal-overlay">
           <div className="dates-modal-content">
-            <button type="button" className="close-button" onClick={toggleDates}>
+            <button type="button" className="close-button-dates" onClick={toggleDates}>
               &times;
             </button>
             <Dates />

@@ -14,7 +14,7 @@
 }
 
 .user-citas-container h2 {
-    font-size: 3.5vw;
+    font-size: 4.5vw;
     color: #fff;
     font-weight: lighter;
     font-family: Itim, serif;
@@ -36,8 +36,8 @@
 }
 
 .cita-card.completed-cita {
-  opacity: 0.2;
-  transition: opacity 0.3s ease;
+    opacity: 0.2;
+    transition: opacity 0.3s ease;
 }
 
 .user-win-name-cont {
@@ -198,16 +198,28 @@
 .cita-card.completed-cita .cita-status button,
 .cita-card.completed-cita .reunion-btn,
 .cita-card.completed-cita .completed-badge {
-  opacity: 1 !important;
+    opacity: 1 !important;
 }
 
 .completed-badge {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 8%;
-  height: 100%;
-  font-size: 4vw;
-  color: #28a745;
-  background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 8%;
+    height: 100%;
+    font-size: 4vw;
+    color: #28a745;
+    background-color: transparent;
+}
+
+.close-button-dates {
+    position: absolute;
+    top: 62px;
+    right: 14px;
+    color: #fff;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 1001;
 }
