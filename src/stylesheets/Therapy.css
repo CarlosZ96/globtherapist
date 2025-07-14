@@ -335,8 +335,8 @@
 
 .close-payment-btn {
     position: absolute;
-    top: 49%;
-    right: 10%;
+    top: 0%;
+    right: 0%;
     z-index: 101;
     background: none;
     color: white;

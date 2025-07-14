@@ -71,7 +71,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 80px;
+    min-height: 70px;
     width: 98%;
     background-color: #fff;
     border-radius: 5px;
@@ -151,7 +151,6 @@
     justify-content: flex-start;
     width: 100%;
     height: 38%;
-    background-color: #DD870F;
     font-size: 2.2vw;
     font-family: Itim, serif;
     font-weight: lighter;
@@ -162,7 +161,6 @@
 .payment-im {
     width: 20px;
     height: 20px;
-    margin-right: 5px;
 }
 
 .reunion-btn {
@@ -243,4 +241,36 @@
     font-weight: lighter;
     border: none;
     border-radius: 3px;
+}
+
+.status-pay_pending {
+  background-color: #ff9800;
+  color: white;
+}
+
+.status-pending {
+  background-color: #2196f3;
+  color: white;
+}
+
+.status-approved {
+  background-color: #40F246;
+  color: #041B5E;
+  font-weight: bold;
+}
+
+.status-end {
+  background-color: #7C95A6;
+  color: white;
+}
+
+.status-button span,
+.status-display span {
+  margin-right: 5px;
+  font-size: 1.2em;
+}
+
+.status-approved .payment-im,
+.status-end .payment-im {
+  display: none;
 }

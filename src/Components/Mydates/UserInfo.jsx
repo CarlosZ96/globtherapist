@@ -93,12 +93,32 @@ const UserInfo = ({ citas, title, emptyMessage }) => {
               <div className="cita-status">
                 <button
                   type="button"
-                  className={`status-${cita.status} status-button`}
+                  className={`status-button ${
+                    // Pago aprobado tiene prioridad
+                    cita.status === 'approved'
+                      ? 'status-approved'
+                      // Luego estado de la cita
+                      : cita.status === 'end'
+                        ? 'status-end'
+                        : `status-${cita.status}`
+                  }`}
                   onClick={() => handlePaymentClick(cita)}
                 >
-                  <img src={clock} alt="" className="payment-im" />
-                  {cita.status === 'pay_pending' ? 'Pago Pendiente'
-                    : cita.status === 'pending' ? 'Pendiente' : 'Finalizada'}
+                  {/* Icono: Emoji para aprobado, reloj para pendientes, nada para finalizado */}
+                  {cita.status === 'approved' ? (
+                    <span>✅</span>
+                  ) : cita.status !== 'end' ? (
+                    <img src={clock} alt="" className="payment-im" />
+                  ) : null}
+
+                  {/* Texto del estado */}
+                  {cita.status === 'approved'
+                    ? 'Aprobado'
+                    : cita.status === 'pay_pending'
+                      ? 'Pago Pendiente'
+                      : cita.status === 'pending'
+                        ? 'Pendiente'
+                        : 'Finalizada'}
                 </button>
               </div>
             </div>
