@@ -12,6 +12,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import Swal from 'sweetalert2';
 import User from '../img/user.png';
 import Upload from '../img/Upload.png';
+import edit from '../img/pencil.png';
 import '../stylesheets/prospace.css';
 import { useAuth } from '../AuthContext';
 import { storage, db } from '../firebase';
@@ -397,6 +398,7 @@ const ProData = ({ onFilesUploaded }) => {
           </div>
 
           <div className="hdv-cont">
+            <h2>Hoja de vida:</h2>
             {existingFiles.hdv && !editingFile ? (
               <div className="file-display">
                 <a
@@ -413,6 +415,7 @@ const ProData = ({ onFilesUploaded }) => {
                   onClick={() => setEditingFile('hdv')}
                   disabled={isLoading}
                 >
+                  <img src={edit} alt="" />
                   Editar
                 </button>
               </div>
@@ -437,6 +440,7 @@ const ProData = ({ onFilesUploaded }) => {
 
           {/* Sección Tarjeta Profesional */}
           <div className="pro-professional-card">
+            <h2>Tarjeta profesional:</h2>
             {existingFiles.professionalCard && !editingFile ? (
               <div className="file-display">
                 <a
@@ -453,6 +457,7 @@ const ProData = ({ onFilesUploaded }) => {
                   onClick={() => setEditingFile('professionalCard')}
                   disabled={isLoading}
                 >
+                  <img src={edit} alt="" />
                   Editar
                 </button>
               </div>
@@ -482,6 +487,7 @@ const ProData = ({ onFilesUploaded }) => {
           </div>
 
           <div className="pro-certificates-cont">
+            <h2>Certificados: </h2>
             {existingFiles.certificates.length > 0 && !editingCertificates ? (
               <div className="certificates-list">
                 {existingFiles.certificates.map((cert) => (
@@ -490,18 +496,19 @@ const ProData = ({ onFilesUploaded }) => {
                       href={cert.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="file-link"
+                      className="file-link-cert"
                     >
                       {cert.name}
                     </a>
                   </div>
                 ))}
                 <button
-                  className="edit-btn"
+                  className="edit-btn-certificates"
                   type="button"
                   onClick={handleEditCertificates}
                   disabled={isLoading}
                 >
+                  <img src={edit} alt="" />
                   Editar
                 </button>
               </div>

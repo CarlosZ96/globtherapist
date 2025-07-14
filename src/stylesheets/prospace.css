@@ -49,7 +49,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 96vh;
+    height: 100vh;
     width: 100%;
     background-color: #2b3e9d;
 }
@@ -72,15 +72,17 @@
 }
 
 .user-image-cont {
-    height: 99%;
+    height: max-content;
     width: 33%;
     display: flex;
     flex-direction: column;
-    border: solid #fff 4px;
-    border-radius: 4px;
     align-items: center;
     justify-content: center;
+    border: solid #fff 4px;
+    border-radius: 4px;
+    margin-left: 1%;
     cursor: pointer;
+    padding: 1%;
 }
 
 .pro-data-img {
@@ -142,9 +144,30 @@
     font-weight: 200;
 }
 
+.file-display,
+.certificates-list {
+    width: 70%;
+    height: 90%;
+}
+
+.file-display {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.certificates-list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 .pro-professional-card {
     width: 100%;
-    height: 25%;
+    height: 25vh;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -153,41 +176,130 @@
 
 .pro-certificates-cont {
     max-width: 100%;
-    height: 25%;
+    height: 25vh;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
+    overflow-x: hidden;
+}
+
+.hdv-cont h2,
+.pro-professional-card h2,
+.pro-certificates-cont h2 {
+    width: 30%;
+    height: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: #fff;
+    font-size: 4.5vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
 }
 
 .certificates-list {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    width: 80%;
+    width: 70%;
 }
 
 .pro-certificate {
-    width: 20%;
+    width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.file-link,
+.file-link-cert {
+    width: 70%;
+    height: 70%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-right: 2%;
+    background-color: #687AD7;
+    color: #fff;
+    font-size: 3.5vw;
+    font-family: Itim, serif;
+    font-weight: 200;
+    border-radius: 5px;
+}
+
+.file-link-cert {
+    width: 80%;
+    max-width: 80%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    overflow-x: auto;
+    padding-left: 2%;
 }
 
 .file-name {
     width: 75%;
 }
 
+.edit-btn,
+.edit-btn-certificates {
+    width: 20%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    color: #fff;
+    font-size: 3vw;
+    font-family: Itim, serif;
+    font-weight: 200;
+    border: none;
+}
+
+.edit-btn-certificates {
+    position: absolute;
+    right: 0%;
+}
+
+.edit-btn-certificates img {
+    width: 15px;
+    height: 15px;
+}
+
+.edit-btn img {
+    width: 15px;
+    height: 15px;
+    margin-right: 5%;
+}
+
+.save-btn {
+    width: 40%;
+    height: 18vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #041b5e;
+    color: #fff;
+    font-size: 4.5vw;
+    font-family: Itim, serif;
+    font-weight: 200;
+    border: none;
+    border-radius: 5px;
+    margin: 1% 0 1% 0;
+}
+
 .personal-info-files-cont {
     width: 100%;
-    height: 70%;
+    height: 46vh;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
+    gap: 10px;
 }
 
 .pro-personal-info-data {
@@ -206,6 +318,7 @@
     align-items: center;
     justify-content: flex-start;
     color: #fff;
+    font-size: 5vw;
     margin-right: 2%;
 }
 
@@ -511,7 +624,7 @@
 
 .hdv-cont {
     width: 100%;
-    height: 25%;
+    height: 25vh;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
