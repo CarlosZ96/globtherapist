@@ -33,7 +33,7 @@ const Therapies = () => {
   return (
     <div className="therapies">
       <div className="therapies-title">
-        <h1>Tus terapias disponibles:</h1>
+        <h1>Terapias disponibles:</h1>
       </div>
       <div className="Therapies-cont">
         {therapies.map((therapy) => {

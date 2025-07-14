@@ -470,10 +470,9 @@ const ProData = ({ onFilesUploaded }) => {
             )}
           </div>
 
-          {/* Sección Certificados */}
           <div className="pro-certificates-cont">
             {existingFiles.certificates.length > 0 && !editingCertificates ? (
-              <div>
+              <div className="certificates-list">
                 {existingFiles.certificates.map((cert) => (
                   <div key={cert.url} className="pro-certificate">
                     <a

@@ -50,7 +50,7 @@
     justify-content: center;
     align-items: center;
     height: 88vh;
-    width: 100vw;
+    width: 100%;
     background-color: #2b3e9d;
 }
 
@@ -147,12 +147,30 @@
 }
 
 .pro-certificates-cont {
-    width: 100%;
+    max-width: 100%;
     height: 25%;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
+}
+
+.certificates-list {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 80%;
+}
+
+.pro-certificate {
+    width: 20%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-right: 2%;
 }
 
 .file-name {
@@ -584,7 +602,7 @@
     color: #fff;
 }
 
-.therapies{
+.therapies {
     width: 100vw;
 }
 
@@ -605,11 +623,12 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    background-color: #2b3e9d;
 }
 
 .therapies-title h1 {
-    color: #041b5e;
-    font-size: 4.4vw;
+    color: #fff;
+    font-size: 6vw;
     font-family: Itim, serif;
     font-weight: lighter;
 }
@@ -643,4 +662,3 @@
     font-family: Itim, serif;
     font-weight: lighter;
 }
-
