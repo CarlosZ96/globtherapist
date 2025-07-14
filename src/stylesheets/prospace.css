@@ -72,8 +72,8 @@
 }
 
 .user-image-cont {
-    height: 84%;
-    width: 17%;
+    height: 99%;
+    width: 33%;
     display: flex;
     flex-direction: column;
     border: solid #fff 4px;
@@ -83,8 +83,13 @@
     cursor: pointer;
 }
 
+.pro-data-img {
+    max-width: 94px;
+    object-fit: cover;
+}
+
 .user-image-cont button {
-    margin-top: 9%;
+    margin-top: 5%;
     background: none;
     border: none;
     color: #fff;
@@ -96,7 +101,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3.5vw;
+    font-size: 5.5vw;
     color: #fff;
     font-family: Itim, serif;
     font-weight: 200;
@@ -179,13 +184,44 @@
 
 .personal-info-files-cont {
     width: 100%;
+    height: 70%;
     display: flex;
+    flex-direction: column;
+    justify-content: space-around;
 }
 
-.personal-info-files-cont p {
-    width: 50%;
-    background-color: #2b3e9d;
-    text-align: center;
+.pro-personal-info-data {
+    width: 100%;
+    height: 28%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.pro-personal-info-data h3 {
+    width: 30%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: #fff;
+    margin-right: 2%;
+}
+
+.pro-personal-info-data p {
+    width: 67%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: #041b5e;
+    font-size: 4vw;
+    font-family: Itim, serif;
+    font-weight: 200;
+    background-color: #687AD7;
+    padding: 0 2% 0 2%;
+    border-radius: 5px;
 }
 
 .prospace-apro {

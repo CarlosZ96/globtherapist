@@ -338,7 +338,7 @@ const ProData = ({ onFilesUploaded }) => {
             className="user-image-cont"
             onClick={() => !isLoading && document.getElementById('profileImageInput').click()}
           >
-            <img src={profileImageUrl} alt="user" className="pro-img" />
+            <img src={profileImageUrl} alt="user" className="pro-data-img" />
             <input
               type="file"
               accept="image/*"
