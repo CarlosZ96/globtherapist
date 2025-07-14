@@ -21,7 +21,7 @@
 }
 
 .prodata-title h1 {
-    font-size: 4vw;
+    font-size: 5vw;
     color: #fff;
     font-family: Itim, serif;
     font-weight: 200;
@@ -32,8 +32,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 63%;
-    width: 6%;
+    height: 66%;
+    width: 12%;
     border: solid 3px #fff;
     border-radius: 50%;
     margin-right: 2.5%;
@@ -41,7 +41,7 @@
 }
 
 .question-cont h1 {
-    font-size: 3vw;
+    font-size: 5.2vw;
 }
 
 .prodata-cont {
@@ -49,7 +49,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 88vh;
+    height: 96vh;
     width: 100%;
     background-color: #2b3e9d;
 }

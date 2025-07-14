@@ -365,26 +365,37 @@ const ProData = ({ onFilesUploaded }) => {
         </div>
         <div className="pro-personal-info">
           <div className="personal-info-files-cont">
-            <p>
-              Email:
-              {' '}
-              {currentPro?.email}
-            </p>
-            <p>
-              Teléfono:
-              {' '}
-              {currentPro?.telefono}
-            </p>
-            <p>
-              Documento:
-              {' '}
-              {currentPro?.Documento?.type}
-              {' '}
-              {currentPro?.Documento?.number}
-            </p>
+            <div className="pro-personal-info-data">
+              <h3>
+                Email:
+              </h3>
+              <p>
+                {' '}
+                {currentPro?.email}
+              </p>
+            </div>
+            <div className="pro-personal-info-data">
+              <h3>
+                Teléfono:
+              </h3>
+              <p>
+                {' '}
+                {currentPro?.telefono}
+              </p>
+            </div>
+            <div className="pro-personal-info-data">
+              <h3>
+                Documento:
+              </h3>
+              <p>
+                {' '}
+                {currentPro?.Documento?.type}
+                {' '}
+                {currentPro?.Documento?.number}
+              </p>
+            </div>
           </div>
 
-          {/* Sección HDV */}
           <div className="hdv-cont">
             {existingFiles.hdv && !editingFile ? (
               <div className="file-display">
