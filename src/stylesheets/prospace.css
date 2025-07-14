@@ -38,6 +38,7 @@
     border-radius: 50%;
     margin-right: 2.5%;
     cursor: pointer;
+    background: none;
 }
 
 .question-cont h1 {
@@ -279,7 +280,7 @@
 
 .save-btn {
     width: 40%;
-    height: 18vh;
+    height: 10vh;
     display: flex;
     align-items: center;
     justify-content: center;

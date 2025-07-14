@@ -40,13 +40,11 @@ const ProData = ({ onFilesUploaded }) => {
   const [editingFile, setEditingFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Obtener archivos existentes al cargar el componente
   useEffect(() => {
     const fetchExistingFiles = async () => {
       if (!currentUser) return;
 
       try {
-        // Obtener archivo de perfil más reciente
         const profileRef = ref(storage, `profileImages/${currentUser.uid}`);
         const profileList = await listAll(profileRef);
         if (profileList.items.length > 0) {
@@ -60,7 +58,6 @@ const ProData = ({ onFilesUploaded }) => {
           setProfileImageUrl(url);
         }
 
-        // Obtener HDV más reciente
         const hdvRef = ref(storage, `hdvFiles/${currentUser.uid}`);
         const hdvList = await listAll(hdvRef);
         if (hdvList.items.length > 0) {
@@ -73,7 +70,6 @@ const ProData = ({ onFilesUploaded }) => {
           }));
         }
 
-        // Obtener tarjeta profesional más reciente
         const proCardRef = ref(storage, `professionalCards/${currentUser.uid}`);
         const proCardList = await listAll(proCardRef);
         if (proCardList.items.length > 0) {
@@ -86,7 +82,6 @@ const ProData = ({ onFilesUploaded }) => {
           }));
         }
 
-        // Obtener todos los certificados
         const certRef = ref(storage, `certificates/${currentUser.uid}`);
         const certList = await listAll(certRef);
         if (certList.items.length > 0) {
@@ -107,7 +102,6 @@ const ProData = ({ onFilesUploaded }) => {
     fetchExistingFiles();
   }, [currentUser]);
 
-  // Eliminar todos los archivos en una ruta específica
   const deleteAllFilesInPath = async (path) => {
     try {
       const folderRef = ref(storage, `${path}/${currentUser.uid}`);
@@ -123,12 +117,9 @@ const ProData = ({ onFilesUploaded }) => {
 
   const handleFileUpload = async (file, path, isEditing = false) => {
     if (!file || !currentUser) return;
-
-    // Si estamos editando, eliminar archivos antiguos primero
     if (isEditing) {
       await deleteAllFilesInPath(path);
     }
-
     const fileRef = ref(storage, `${path}/${currentUser.uid}/${file.name}`);
     await uploadBytes(fileRef, file);
     return getDownloadURL(fileRef);
@@ -142,7 +133,6 @@ const ProData = ({ onFilesUploaded }) => {
       setProfileImageUrl(url);
       setProfileImageFile(file);
 
-      // Actualizar estado de archivo existente
       if (isEditing) {
         setExistingFiles((prev) => ({
           ...prev,
@@ -192,6 +182,30 @@ const ProData = ({ onFilesUploaded }) => {
     if (files.length > 0) {
       setCertificateFiles(files);
     }
+  };
+
+  const showInfoPopup = () => {
+    Swal.fire({
+      title: '¿Por qué me piden estos datos?',
+      html: `
+        <div style="text-align: left; padding: 10px;">
+          <p>Globtherapist requiere validar la autenticidad de los documentos y certificados de los profesionales de salud para garantizar:</p>
+          <ul>
+            <li>La calidad y seguridad de los servicios ofrecidos</li>
+            <li>El cumplimiento de estándares legales y éticos</li>
+            <li>La protección de los pacientes y usuarios</li>
+            <li>La credibilidad de nuestra plataforma</li>
+          </ul>
+          <p>Esta verificación es esencial para mantener la confianza en nuestros servicios y cumplir con las regulaciones del sector salud.</p>
+        </div>
+      `,
+      confirmButtonText: 'Entendido',
+      confirmButtonColor: '#fff',
+      width: '88%',
+      padding: '20px',
+      background: '#2b3e9d',
+      color: 'white',
+    });
   };
 
   const handleSubmit = async () => {
@@ -312,9 +326,14 @@ const ProData = ({ onFilesUploaded }) => {
   return (
     <div id="prodata-cont" className="prodata-cont">
       <div className="prodata-title">
-        <div className="question-cont">
+        <button
+          type="button"
+          className="question-cont"
+          onClick={showInfoPopup}
+          aria-label="Información sobre documentos requeridos"
+        >
           <h1>?</h1>
-        </div>
+        </button>
         <h1>Mis datos</h1>
       </div>
       <div className="data-cont">

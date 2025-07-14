@@ -482,9 +482,10 @@
 
 .swal2-title {
     color: #fff;
-    font-size: 4.5vw;
+    font-size: 5vw;
     font-family: Itim, serif;
     font-weight: 300;
+    padding: 0;
 }
 
 .swal2-confirm {
