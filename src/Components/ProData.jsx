@@ -212,8 +212,6 @@ const ProData = ({ onFilesUploaded }) => {
 
     try {
       setIsLoading(true);
-
-      // Mostrar notificación de carga
       Swal.fire({
         title: 'Subiendo archivos...',
         allowOutsideClick: false,
@@ -222,7 +220,6 @@ const ProData = ({ onFilesUploaded }) => {
         },
       });
 
-      // Eliminar archivos existentes en las carpetas que se actualizarán
       await Promise.all([
         profileImageFile && deleteAllFilesInPath('profileImages'),
         hdvFile && deleteAllFilesInPath('hdvFiles'),
@@ -230,7 +227,6 @@ const ProData = ({ onFilesUploaded }) => {
         (editingCertificates || certificateFiles.length > 0) && deleteAllFilesInPath('certificates'),
       ]);
 
-      // Subir archivos nuevos o usar existentes
       let profileUrl = existingFiles.profileImage?.url;
       let profileFileName = existingFiles.profileImage?.name;
       if (profileImageFile) {
@@ -252,12 +248,10 @@ const ProData = ({ onFilesUploaded }) => {
         professionalCardFileName = professionalCardFile.name;
       }
 
-      // Subir certificados nuevos
       const certificateUrls = await Promise.all(
         certificateFiles.map((file) => handleFileUpload(file, 'certificates')),
       );
 
-      // Preparar datos para Firestore
       const filesData = {
         profileImageFileName: profileFileName,
         profileImageUrl: profileUrl,
@@ -271,14 +265,9 @@ const ProData = ({ onFilesUploaded }) => {
         })),
       };
 
-      // Actualizar Firestore
       const userDocRef = doc(db, 'pros', currentUser.uid);
       await updateDoc(userDocRef, { files: filesData });
-
-      // Cerrar notificación de carga
       Swal.close();
-
-      // Mostrar notificación de éxito
       Swal.fire({
         icon: 'success',
         title: '¡Éxito!',
@@ -286,11 +275,10 @@ const ProData = ({ onFilesUploaded }) => {
         showConfirmButton: false,
         timer: 2000,
         timerProgressBar: true,
-        background: '#f0f9ff',
+        background: '#041B5E',
         iconColor: '#4ade80',
       });
 
-      // Resetear estados
       setProfileImageFile(null);
       setHdvFile(null);
       setProfessionalCardFile(null);
@@ -298,9 +286,8 @@ const ProData = ({ onFilesUploaded }) => {
       setEditingFile(null);
       setEditingCertificates(false);
 
-      // Recargar archivos existentes
       const fetchExistingFiles = async () => {
-        // ... (código de fetchExistingFiles)
+
       };
       fetchExistingFiles();
 
@@ -309,10 +296,7 @@ const ProData = ({ onFilesUploaded }) => {
       }
     } catch (error) {
       console.error('Error al guardar la información de archivos:', error);
-      // Cerrar notificación de carga
       Swal.close();
-
-      // Mostrar notificación de error
       Swal.fire({
         icon: 'error',
         title: 'Error',
