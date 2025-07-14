@@ -207,6 +207,7 @@ const MyCalendar = ({ onEdit }) => {
           type="button"
           onClick={goToNextMonth}
         >
+          <img src={arrow} alt="" className="arrow" />
         </button>
       </div>
 

@@ -1,3 +1,61 @@
+.MyCalendar-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 96%;
+}
+
+.MyCalendar-header {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 10%;
+    margin: 2% 0 2% 0;
+}
+
+.MyCalendar-header h1 {
+    font-size: 8vw;
+    color: #041B5E;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.MyCalendar-header button {
+    position: absolute;
+    right: 3%;
+    top: 6%;
+    width: 10%;
+    height: 100%;
+    background-color: #041B5E;
+    color: #fff;
+    font-size: 2.5vw;
+    font-family: Itim, serif;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 .arrow {
-    width: 50px;
+    width: 10px;
+}
+
+.Calendar-cont {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    place-items: center center;
+    gap: 10px;
+    width: 96%;
+    height: 30vh;
+    margin-top: 1%;
+    background-color: #fff;
+}
+
+.calendar-day {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
