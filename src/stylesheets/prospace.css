@@ -127,7 +127,7 @@
 
 .upload-hdv {
     width: 30%;
-    height: 100%;
+    height: 25vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -135,14 +135,14 @@
 }
 
 .upload-hdv img {
-    height: 60%;
+    height: 35%;
 }
 
 .upload-hdv h3 {
-    font-size: 2vw;
+    font-size: 4vw;
     color: #fff;
     font-family: Itim, serif;
-    font-weight: 200;
+    font-weight: 100;
 }
 
 .file-display,

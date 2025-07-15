@@ -37,7 +37,9 @@ const ProData = ({ onFilesUploaded }) => {
     professionalCard: null,
     certificates: [],
   });
-  const [editingFile, setEditingFile] = useState(null);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editingHdv, setEditingHdv] = useState(false);
+  const [editingProCard, setEditingProCard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -128,7 +130,7 @@ const ProData = ({ onFilesUploaded }) => {
   const handleProfileImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const isEditing = editingFile === 'profileImage';
+      const isEditing = editingProfile;
       const url = await handleFileUpload(file, 'profileImages', isEditing);
       setProfileImageUrl(url);
       setProfileImageFile(file);
@@ -138,7 +140,7 @@ const ProData = ({ onFilesUploaded }) => {
           ...prev,
           profileImage: { name: file.name, url },
         }));
-        setEditingFile(null);
+        setEditingProfile(false);
       }
     }
   };
@@ -146,7 +148,7 @@ const ProData = ({ onFilesUploaded }) => {
   const handleHdvChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const isEditing = editingFile === 'hdv';
+      const isEditing = editingHdv;
       const url = await handleFileUpload(file, 'hdvFiles', isEditing);
       setHdvFile(file);
 
@@ -155,7 +157,7 @@ const ProData = ({ onFilesUploaded }) => {
           ...prev,
           hdv: { name: file.name, url },
         }));
-        setEditingFile(null);
+        setEditingHdv(false);
       }
     }
   };
@@ -163,7 +165,7 @@ const ProData = ({ onFilesUploaded }) => {
   const handleProfessionalCardChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const isEditing = editingFile === 'professionalCard';
+      const isEditing = editingProCard;
       const url = await handleFileUpload(file, 'professionalCards', isEditing);
       setProfessionalCardFile(file);
 
@@ -172,7 +174,7 @@ const ProData = ({ onFilesUploaded }) => {
           ...prev,
           professionalCard: { name: file.name, url },
         }));
-        setEditingFile(null);
+        setEditingProCard(false);
       }
     }
   };
@@ -297,7 +299,6 @@ const ProData = ({ onFilesUploaded }) => {
       setHdvFile(null);
       setProfessionalCardFile(null);
       setCertificateFiles([]);
-      setEditingFile(null);
       setEditingCertificates(false);
 
       const fetchExistingFiles = async () => {
@@ -351,10 +352,10 @@ const ProData = ({ onFilesUploaded }) => {
               id="profileImageInput"
               disabled={isLoading}
             />
-            {existingFiles.profileImage && !editingFile ? (
+            {existingFiles.profileImage && !editingProfile ? (
               <button
                 type="button"
-                onClick={() => setEditingFile('profileImage')}
+                onClick={() => setEditingProfile(true)}
                 disabled={isLoading}
               >
                 Editar imagen
@@ -402,7 +403,7 @@ const ProData = ({ onFilesUploaded }) => {
 
           <div className="hdv-cont">
             <h2>Hoja de vida:</h2>
-            {existingFiles.hdv && !editingFile ? (
+            {existingFiles.hdv && !editingHdv ? (
               <div className="file-display">
                 <a
                   href={existingFiles.hdv.url}
@@ -415,7 +416,7 @@ const ProData = ({ onFilesUploaded }) => {
                 <button
                   className="edit-btn"
                   type="button"
-                  onClick={() => setEditingFile('hdv')}
+                  onClick={() => setEditingHdv(true)}
                   disabled={isLoading}
                 >
                   <img src={edit} alt="" />
@@ -426,7 +427,7 @@ const ProData = ({ onFilesUploaded }) => {
               <>
                 <label htmlFor="hdvInput" className="upload-hdv">
                   <img src={Upload} alt="" />
-                  <h3>{editingFile === 'hdv' ? 'Reemplazar HDV' : 'Subir HDV'}</h3>
+                  <h3>{editingHdv ? 'Reemplazar HDV' : 'Subir HDV'}</h3>
                 </label>
                 <input
                   id="hdvInput"
@@ -441,10 +442,9 @@ const ProData = ({ onFilesUploaded }) => {
             {hdvFile && <p className="file-name">{hdvFile.name}</p>}
           </div>
 
-          {/* Sección Tarjeta Profesional */}
           <div className="pro-professional-card">
             <h2>Tarjeta profesional:</h2>
-            {existingFiles.professionalCard && !editingFile ? (
+            {existingFiles.professionalCard && !editingProCard ? (
               <div className="file-display">
                 <a
                   href={existingFiles.professionalCard.url}
@@ -457,7 +457,7 @@ const ProData = ({ onFilesUploaded }) => {
                 <button
                   className="edit-btn"
                   type="button"
-                  onClick={() => setEditingFile('professionalCard')}
+                  onClick={() => setEditingProCard(true)}
                   disabled={isLoading}
                 >
                   <img src={edit} alt="" />
@@ -468,11 +468,7 @@ const ProData = ({ onFilesUploaded }) => {
               <>
                 <label htmlFor="proCardInput" className="upload-hdv">
                   <img src={Upload} alt="" />
-                  <h3>
-                    {editingFile === 'professionalCard'
-                      ? 'Reemplazar tarjeta'
-                      : 'Subir tarjeta profesional'}
-                  </h3>
+                  <h3>{editingProCard ? 'Reemplazar tarjeta' : 'Subir tarjeta profesional'}</h3>
                 </label>
                 <input
                   id="proCardInput"
