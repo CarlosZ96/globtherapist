@@ -9,7 +9,7 @@
 .user-citas-container {
     display: flex;
     flex-direction: column;
-    flex: 1;
+    align-items: center;
     min-height: 0;
     padding: 10px 0;
 }
@@ -21,6 +21,20 @@
     font-family: Itim, serif;
     text-align: center;
     padding: 10px 0;
+    margin: 0;
+}
+
+.no-citas {
+    height: 48vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 4.2vw;
+    color: #ffffff52;
+    font-weight: lighter;
+    font-family: Itim, serif;
+    text-align: center;
     margin: 0;
 }
 
@@ -244,33 +258,33 @@
 }
 
 .status-pay_pending {
-  background-color: #ff9800;
-  color: white;
+    background-color: #ff9800;
+    color: white;
 }
 
 .status-pending {
-  background-color: #2196f3;
-  color: white;
+    background-color: #2196f3;
+    color: white;
 }
 
 .status-approved {
-  background-color: #40F246;
-  color: #041B5E;
-  font-weight: bold;
+    background-color: #40F246;
+    color: #041B5E;
+    font-weight: bold;
 }
 
 .status-end {
-  background-color: #7C95A6;
-  color: white;
+    background-color: #7C95A6;
+    color: white;
 }
 
 .status-button span,
 .status-display span {
-  margin-right: 5px;
-  font-size: 1.2em;
+    margin-right: 5px;
+    font-size: 1.2em;
 }
 
 .status-approved .payment-im,
 .status-end .payment-im {
-  display: none;
+    display: none;
 }

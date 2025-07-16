@@ -41,7 +41,7 @@
 }
 
 .arrow {
-    width: 10px;
+    width: 13px;
 }
 
 .calendar-month-cont {
@@ -62,7 +62,7 @@
     place-items: center center;
     gap: 10px;
     width: 90%;
-    height: 30vh;
+    height: 40vh;
     margin-top: 1%;
     background-color: #fff;
 }
