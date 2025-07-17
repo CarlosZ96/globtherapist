@@ -439,7 +439,6 @@ const ProData = ({ onFilesUploaded }) => {
                 />
               </>
             )}
-            {hdvFile && <p className="file-name">{hdvFile.name}</p>}
           </div>
 
           <div className="pro-professional-card">
@@ -479,9 +478,6 @@ const ProData = ({ onFilesUploaded }) => {
                   disabled={isLoading}
                 />
               </>
-            )}
-            {professionalCardFile && (
-              <p className="file-name">{professionalCardFile.name}</p>
             )}
           </div>
 
