@@ -21,7 +21,7 @@
 }
 
 .prodata-title h1 {
-    font-size: 4vw;
+    font-size: 5vw;
     color: #fff;
     font-family: Itim, serif;
     font-weight: 200;
@@ -32,16 +32,17 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 63%;
-    width: 6%;
+    height: 66%;
+    width: 12%;
     border: solid 3px #fff;
     border-radius: 50%;
     margin-right: 2.5%;
     cursor: pointer;
+    background: none;
 }
 
 .question-cont h1 {
-    font-size: 3vw;
+    font-size: 5.2vw;
 }
 
 .prodata-cont {
@@ -49,8 +50,8 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 88vh;
-    width: 100vw;
+    height: 100vh;
+    width: 100%;
     background-color: #2b3e9d;
 }
 
@@ -72,19 +73,26 @@
 }
 
 .user-image-cont {
-    height: 84%;
-    width: 17%;
+    height: max-content;
+    width: 33%;
     display: flex;
     flex-direction: column;
-    border: solid #fff 4px;
-    border-radius: 4px;
     align-items: center;
     justify-content: center;
+    border: solid #fff 4px;
+    border-radius: 4px;
+    margin-left: 1%;
     cursor: pointer;
+    padding: 1%;
+}
+
+.pro-data-img {
+    max-width: 94px;
+    object-fit: cover;
 }
 
 .user-image-cont button {
-    margin-top: 9%;
+    margin-top: 5%;
     background: none;
     border: none;
     color: #fff;
@@ -96,7 +104,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3.5vw;
+    font-size: 5.5vw;
     color: #fff;
     font-family: Itim, serif;
     font-weight: 200;
@@ -118,7 +126,7 @@
 }
 
 .upload-hdv {
-    width: 30%;
+    width: 70%;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -127,19 +135,40 @@
 }
 
 .upload-hdv img {
-    height: 60%;
+    height: 35%;
 }
 
 .upload-hdv h3 {
-    font-size: 2vw;
+    font-size: 4vw;
     color: #fff;
     font-family: Itim, serif;
-    font-weight: 200;
+    font-weight: 100;
+}
+
+.file-display,
+.certificates-list {
+    width: 70%;
+    height: 90%;
+}
+
+.file-display {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.certificates-list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .pro-professional-card {
     width: 100%;
-    height: 25%;
+    height: 15vh;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -148,26 +177,171 @@
 
 .pro-certificates-cont {
     width: 100%;
-    height: 25%;
+    height: 25vh;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
+    overflow-x: hidden;
+}
+
+.hdv-cont h2,
+.pro-professional-card h2,
+.pro-certificates-cont h2 {
+    width: 30%;
+    height: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: #fff;
+    font-size: 4.5vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.certificates-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 70%;
+}
+
+.pro-certificate {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.file-link {
+    max-width: 70%;
+    overflow-x: auto;
+    padding-left: 2%;
+}
+
+.file-link,
+.file-link-cert {
+    width: 80%;
+    height: 70%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: #687AD7;
+    color: #fff;
+    font-size: 3.5vw;
+    font-family: Itim, serif;
+    font-weight: 200;
+    border-radius: 5px;
+}
+
+.file-link-cert, .file-link {
+    width: 80%;
+    max-width: 80%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    overflow-x: auto;
+    padding-left: 2%;
 }
 
 .file-name {
     width: 75%;
 }
 
-.personal-info-files-cont {
-    width: 100%;
+.edit-btn,
+.edit-btn-certificates {
+    width: 20%;
+    height: 100%;
     display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    color: #fff;
+    font-size: 3vw;
+    font-family: Itim, serif;
+    font-weight: 200;
+    border: none;
 }
 
-.personal-info-files-cont p {
-    width: 50%;
-    background-color: #2b3e9d;
-    text-align: center;
+.edit-btn-certificates {
+    position: absolute;
+    right: 0%;
+}
+
+.edit-btn-certificates img {
+    width: 15px;
+    height: 15px;
+}
+
+.edit-btn img {
+    width: 15px;
+    height: 15px;
+    margin-right: 5%;
+}
+
+.save-btn {
+    width: 40%;
+    height: 10vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #041b5e;
+    color: #fff;
+    font-size: 4.5vw;
+    font-family: Itim, serif;
+    font-weight: 200;
+    border: none;
+    border-radius: 5px;
+    margin: 1% 0 1% 0;
+}
+
+.personal-info-files-cont {
+    width: 100%;
+    height: 46vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 10px;
+}
+
+.pro-personal-info-data {
+    width: 100%;
+    height: 28%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.pro-personal-info-data h3 {
+    width: 30%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: #fff;
+    font-size: 5vw;
+    margin-right: 2%;
+}
+
+.pro-personal-info-data p {
+    width: 67%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: #041b5e;
+    font-size: 4vw;
+    font-family: Itim, serif;
+    font-weight: 200;
+    background-color: #687AD7;
+    padding: 0 2% 0 2%;
+    border-radius: 5px;
 }
 
 .prospace-apro {
@@ -436,20 +610,25 @@
 
 .pp-cont {
     width: 100vw;
-    height: 66vh;
+    height: 80vh;
     display: flex;
     flex-direction: column;
     align-items: center;
+    background-color: #2B3E9D;
 }
 
 .PP-Title {
+    display: flex;
     width: 100%;
-    height: 10%;
+    height: 15%;
     background-color: #041b5e;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .PP-Title h1 {
-    font-size: 4vw;
+    font-size: 5vw;
     color: #fff;
     font-family: Itim, serif;
     font-weight: lighter;
@@ -457,7 +636,7 @@
 
 .hdv-cont {
     width: 100%;
-    height: 25%;
+    height: 15vh;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -469,10 +648,13 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+    background-color: #2B3E9D;
 }
 
 .hdv-name-cont {
     width: 100%;
+    height: 10vh;
+    background-color: #2B3E9D;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -490,9 +672,49 @@
     border: none;
 }
 
+.hdv-button-cont {
+    width: 20%;
+    height: 10vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.hdv-name-cont h2 {
+    width: 60%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-left: 2%;
+    color: #fff;
+    font-size: 5.5vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.hdv-name-cont .edit-btn {
+    color: #fff;
+    font-size: 4vw;
+    font-family: Itim, serif;
+    font-weight: 200;
+    border: none;
+}
+
 .fields-cont {
-    height: 80%;
+    height: 86%;
     width: 100%;
+}
+
+.fields-cont h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 5vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
 }
 
 .hdv-field-cont {
@@ -507,6 +729,7 @@
 .hdv-field-cont h3 {
     width: 38%;
     height: 100%;
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -516,6 +739,11 @@
 .specialization {
     width: 58%;
     height: 60%;
+    background-color: #687AD7;
+    color: #041b5e;
+    border: none;
+    margin: 0;
+    padding-left: 2%;
 }
 
 .hdv-years-cont {
@@ -536,11 +764,15 @@
 }
 
 .hdv-year {
-    width: 5%;
+    width: 8%;
     height: 60%;
     display: flex;
     align-items: center;
-    padding-left: 1.5%;
+    padding: 3%;
+    background-color: #687AD7;
+    border: none;
+    margin: 0;
+    color: #041b5e;
 }
 
 .hdv-desc-cont {
@@ -562,8 +794,11 @@
 }
 
 .hdv-desc {
-    height: 70%;
-    width: 60%;
+    height: 66%;
+    width: 80%;
+    color: #041b5e;
+    padding: 2%;
+    background-color: #687AD7;
 }
 
 .pp-submit {
@@ -584,7 +819,7 @@
     color: #fff;
 }
 
-.therapies{
+.therapies {
     width: 100vw;
 }
 
@@ -605,11 +840,12 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    background-color: #2b3e9d;
 }
 
 .therapies-title h1 {
-    color: #041b5e;
-    font-size: 4.4vw;
+    color: #fff;
+    font-size: 6vw;
     font-family: Itim, serif;
     font-weight: lighter;
 }
@@ -643,4 +879,3 @@
     font-family: Itim, serif;
     font-weight: lighter;
 }
-

@@ -12,6 +12,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import Swal from 'sweetalert2';
 import User from '../img/user.png';
 import Upload from '../img/Upload.png';
+import edit from '../img/pencil.png';
 import '../stylesheets/prospace.css';
 import { useAuth } from '../AuthContext';
 import { storage, db } from '../firebase';
@@ -36,16 +37,16 @@ const ProData = ({ onFilesUploaded }) => {
     professionalCard: null,
     certificates: [],
   });
-  const [editingFile, setEditingFile] = useState(null);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editingHdv, setEditingHdv] = useState(false);
+  const [editingProCard, setEditingProCard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Obtener archivos existentes al cargar el componente
   useEffect(() => {
     const fetchExistingFiles = async () => {
       if (!currentUser) return;
 
       try {
-        // Obtener archivo de perfil más reciente
         const profileRef = ref(storage, `profileImages/${currentUser.uid}`);
         const profileList = await listAll(profileRef);
         if (profileList.items.length > 0) {
@@ -59,7 +60,6 @@ const ProData = ({ onFilesUploaded }) => {
           setProfileImageUrl(url);
         }
 
-        // Obtener HDV más reciente
         const hdvRef = ref(storage, `hdvFiles/${currentUser.uid}`);
         const hdvList = await listAll(hdvRef);
         if (hdvList.items.length > 0) {
@@ -72,7 +72,6 @@ const ProData = ({ onFilesUploaded }) => {
           }));
         }
 
-        // Obtener tarjeta profesional más reciente
         const proCardRef = ref(storage, `professionalCards/${currentUser.uid}`);
         const proCardList = await listAll(proCardRef);
         if (proCardList.items.length > 0) {
@@ -85,7 +84,6 @@ const ProData = ({ onFilesUploaded }) => {
           }));
         }
 
-        // Obtener todos los certificados
         const certRef = ref(storage, `certificates/${currentUser.uid}`);
         const certList = await listAll(certRef);
         if (certList.items.length > 0) {
@@ -106,7 +104,6 @@ const ProData = ({ onFilesUploaded }) => {
     fetchExistingFiles();
   }, [currentUser]);
 
-  // Eliminar todos los archivos en una ruta específica
   const deleteAllFilesInPath = async (path) => {
     try {
       const folderRef = ref(storage, `${path}/${currentUser.uid}`);
@@ -122,12 +119,9 @@ const ProData = ({ onFilesUploaded }) => {
 
   const handleFileUpload = async (file, path, isEditing = false) => {
     if (!file || !currentUser) return;
-
-    // Si estamos editando, eliminar archivos antiguos primero
     if (isEditing) {
       await deleteAllFilesInPath(path);
     }
-
     const fileRef = ref(storage, `${path}/${currentUser.uid}/${file.name}`);
     await uploadBytes(fileRef, file);
     return getDownloadURL(fileRef);
@@ -136,18 +130,17 @@ const ProData = ({ onFilesUploaded }) => {
   const handleProfileImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const isEditing = editingFile === 'profileImage';
+      const isEditing = editingProfile;
       const url = await handleFileUpload(file, 'profileImages', isEditing);
       setProfileImageUrl(url);
       setProfileImageFile(file);
 
-      // Actualizar estado de archivo existente
       if (isEditing) {
         setExistingFiles((prev) => ({
           ...prev,
           profileImage: { name: file.name, url },
         }));
-        setEditingFile(null);
+        setEditingProfile(false);
       }
     }
   };
@@ -155,7 +148,7 @@ const ProData = ({ onFilesUploaded }) => {
   const handleHdvChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const isEditing = editingFile === 'hdv';
+      const isEditing = editingHdv;
       const url = await handleFileUpload(file, 'hdvFiles', isEditing);
       setHdvFile(file);
 
@@ -164,7 +157,7 @@ const ProData = ({ onFilesUploaded }) => {
           ...prev,
           hdv: { name: file.name, url },
         }));
-        setEditingFile(null);
+        setEditingHdv(false);
       }
     }
   };
@@ -172,7 +165,7 @@ const ProData = ({ onFilesUploaded }) => {
   const handleProfessionalCardChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const isEditing = editingFile === 'professionalCard';
+      const isEditing = editingProCard;
       const url = await handleFileUpload(file, 'professionalCards', isEditing);
       setProfessionalCardFile(file);
 
@@ -181,7 +174,7 @@ const ProData = ({ onFilesUploaded }) => {
           ...prev,
           professionalCard: { name: file.name, url },
         }));
-        setEditingFile(null);
+        setEditingProCard(false);
       }
     }
   };
@@ -191,6 +184,30 @@ const ProData = ({ onFilesUploaded }) => {
     if (files.length > 0) {
       setCertificateFiles(files);
     }
+  };
+
+  const showInfoPopup = () => {
+    Swal.fire({
+      title: '¿Por qué me piden estos datos?',
+      html: `
+        <div style="text-align: left; padding: 10px;">
+          <p>Globtherapist requiere validar la autenticidad de los documentos y certificados de los profesionales de salud para garantizar:</p>
+          <ul>
+            <li>La calidad y seguridad de los servicios ofrecidos</li>
+            <li>El cumplimiento de estándares legales y éticos</li>
+            <li>La protección de los pacientes y usuarios</li>
+            <li>La credibilidad de nuestra plataforma</li>
+          </ul>
+          <p>Esta verificación es esencial para mantener la confianza en nuestros servicios y cumplir con las regulaciones del sector salud.</p>
+        </div>
+      `,
+      confirmButtonText: 'Entendido',
+      confirmButtonColor: '#fff',
+      width: '88%',
+      padding: '20px',
+      background: '#2b3e9d',
+      color: 'white',
+    });
   };
 
   const handleSubmit = async () => {
@@ -211,8 +228,6 @@ const ProData = ({ onFilesUploaded }) => {
 
     try {
       setIsLoading(true);
-
-      // Mostrar notificación de carga
       Swal.fire({
         title: 'Subiendo archivos...',
         allowOutsideClick: false,
@@ -221,7 +236,6 @@ const ProData = ({ onFilesUploaded }) => {
         },
       });
 
-      // Eliminar archivos existentes en las carpetas que se actualizarán
       await Promise.all([
         profileImageFile && deleteAllFilesInPath('profileImages'),
         hdvFile && deleteAllFilesInPath('hdvFiles'),
@@ -229,7 +243,6 @@ const ProData = ({ onFilesUploaded }) => {
         (editingCertificates || certificateFiles.length > 0) && deleteAllFilesInPath('certificates'),
       ]);
 
-      // Subir archivos nuevos o usar existentes
       let profileUrl = existingFiles.profileImage?.url;
       let profileFileName = existingFiles.profileImage?.name;
       if (profileImageFile) {
@@ -251,12 +264,10 @@ const ProData = ({ onFilesUploaded }) => {
         professionalCardFileName = professionalCardFile.name;
       }
 
-      // Subir certificados nuevos
       const certificateUrls = await Promise.all(
         certificateFiles.map((file) => handleFileUpload(file, 'certificates')),
       );
 
-      // Preparar datos para Firestore
       const filesData = {
         profileImageFileName: profileFileName,
         profileImageUrl: profileUrl,
@@ -270,14 +281,9 @@ const ProData = ({ onFilesUploaded }) => {
         })),
       };
 
-      // Actualizar Firestore
       const userDocRef = doc(db, 'pros', currentUser.uid);
       await updateDoc(userDocRef, { files: filesData });
-
-      // Cerrar notificación de carga
       Swal.close();
-
-      // Mostrar notificación de éxito
       Swal.fire({
         icon: 'success',
         title: '¡Éxito!',
@@ -285,21 +291,18 @@ const ProData = ({ onFilesUploaded }) => {
         showConfirmButton: false,
         timer: 2000,
         timerProgressBar: true,
-        background: '#f0f9ff',
+        background: '#041B5E',
         iconColor: '#4ade80',
       });
 
-      // Resetear estados
       setProfileImageFile(null);
       setHdvFile(null);
       setProfessionalCardFile(null);
       setCertificateFiles([]);
-      setEditingFile(null);
       setEditingCertificates(false);
 
-      // Recargar archivos existentes
       const fetchExistingFiles = async () => {
-        // ... (código de fetchExistingFiles)
+
       };
       fetchExistingFiles();
 
@@ -308,10 +311,7 @@ const ProData = ({ onFilesUploaded }) => {
       }
     } catch (error) {
       console.error('Error al guardar la información de archivos:', error);
-      // Cerrar notificación de carga
       Swal.close();
-
-      // Mostrar notificación de error
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -327,9 +327,14 @@ const ProData = ({ onFilesUploaded }) => {
   return (
     <div id="prodata-cont" className="prodata-cont">
       <div className="prodata-title">
-        <div className="question-cont">
+        <button
+          type="button"
+          className="question-cont"
+          onClick={showInfoPopup}
+          aria-label="Información sobre documentos requeridos"
+        >
           <h1>?</h1>
-        </div>
+        </button>
         <h1>Mis datos</h1>
       </div>
       <div className="data-cont">
@@ -338,7 +343,7 @@ const ProData = ({ onFilesUploaded }) => {
             className="user-image-cont"
             onClick={() => !isLoading && document.getElementById('profileImageInput').click()}
           >
-            <img src={profileImageUrl} alt="user" className="pro-img" />
+            <img src={profileImageUrl} alt="user" className="pro-data-img" />
             <input
               type="file"
               accept="image/*"
@@ -347,10 +352,10 @@ const ProData = ({ onFilesUploaded }) => {
               id="profileImageInput"
               disabled={isLoading}
             />
-            {existingFiles.profileImage && !editingFile ? (
+            {existingFiles.profileImage && !editingProfile ? (
               <button
                 type="button"
-                onClick={() => setEditingFile('profileImage')}
+                onClick={() => setEditingProfile(true)}
                 disabled={isLoading}
               >
                 Editar imagen
@@ -365,28 +370,40 @@ const ProData = ({ onFilesUploaded }) => {
         </div>
         <div className="pro-personal-info">
           <div className="personal-info-files-cont">
-            <p>
-              Email:
-              {' '}
-              {currentPro?.email}
-            </p>
-            <p>
-              Teléfono:
-              {' '}
-              {currentPro?.telefono}
-            </p>
-            <p>
-              Documento:
-              {' '}
-              {currentPro?.Documento?.type}
-              {' '}
-              {currentPro?.Documento?.number}
-            </p>
+            <div className="pro-personal-info-data">
+              <h3>
+                Email:
+              </h3>
+              <p>
+                {' '}
+                {currentPro?.email}
+              </p>
+            </div>
+            <div className="pro-personal-info-data">
+              <h3>
+                Teléfono:
+              </h3>
+              <p>
+                {' '}
+                {currentPro?.telefono}
+              </p>
+            </div>
+            <div className="pro-personal-info-data">
+              <h3>
+                Documento:
+              </h3>
+              <p>
+                {' '}
+                {currentPro?.Documento?.type}
+                {' '}
+                {currentPro?.Documento?.number}
+              </p>
+            </div>
           </div>
 
-          {/* Sección HDV */}
           <div className="hdv-cont">
-            {existingFiles.hdv && !editingFile ? (
+            <h2>Hoja de vida:</h2>
+            {existingFiles.hdv && !editingHdv ? (
               <div className="file-display">
                 <a
                   href={existingFiles.hdv.url}
@@ -399,9 +416,10 @@ const ProData = ({ onFilesUploaded }) => {
                 <button
                   className="edit-btn"
                   type="button"
-                  onClick={() => setEditingFile('hdv')}
+                  onClick={() => setEditingHdv(true)}
                   disabled={isLoading}
                 >
+                  <img src={edit} alt="" />
                   Editar
                 </button>
               </div>
@@ -409,7 +427,7 @@ const ProData = ({ onFilesUploaded }) => {
               <>
                 <label htmlFor="hdvInput" className="upload-hdv">
                   <img src={Upload} alt="" />
-                  <h3>{editingFile === 'hdv' ? 'Reemplazar HDV' : 'Subir HDV'}</h3>
+                  <h3>{editingHdv ? 'Reemplazar HDV' : 'Subir HDV'}</h3>
                 </label>
                 <input
                   id="hdvInput"
@@ -421,12 +439,11 @@ const ProData = ({ onFilesUploaded }) => {
                 />
               </>
             )}
-            {hdvFile && <p className="file-name">{hdvFile.name}</p>}
           </div>
 
-          {/* Sección Tarjeta Profesional */}
           <div className="pro-professional-card">
-            {existingFiles.professionalCard && !editingFile ? (
+            <h2>Tarjeta profesional:</h2>
+            {existingFiles.professionalCard && !editingProCard ? (
               <div className="file-display">
                 <a
                   href={existingFiles.professionalCard.url}
@@ -439,9 +456,10 @@ const ProData = ({ onFilesUploaded }) => {
                 <button
                   className="edit-btn"
                   type="button"
-                  onClick={() => setEditingFile('professionalCard')}
+                  onClick={() => setEditingProCard(true)}
                   disabled={isLoading}
                 >
+                  <img src={edit} alt="" />
                   Editar
                 </button>
               </div>
@@ -449,11 +467,7 @@ const ProData = ({ onFilesUploaded }) => {
               <>
                 <label htmlFor="proCardInput" className="upload-hdv">
                   <img src={Upload} alt="" />
-                  <h3>
-                    {editingFile === 'professionalCard'
-                      ? 'Reemplazar tarjeta'
-                      : 'Subir tarjeta profesional'}
-                  </h3>
+                  <h3>{editingProCard ? 'Reemplazar tarjeta' : 'Subir tarjeta profesional'}</h3>
                 </label>
                 <input
                   id="proCardInput"
@@ -465,33 +479,31 @@ const ProData = ({ onFilesUploaded }) => {
                 />
               </>
             )}
-            {professionalCardFile && (
-              <p className="file-name">{professionalCardFile.name}</p>
-            )}
           </div>
 
-          {/* Sección Certificados */}
           <div className="pro-certificates-cont">
+            <h2>Certificados: </h2>
             {existingFiles.certificates.length > 0 && !editingCertificates ? (
-              <div>
+              <div className="certificates-list">
                 {existingFiles.certificates.map((cert) => (
                   <div key={cert.url} className="pro-certificate">
                     <a
                       href={cert.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="file-link"
+                      className="file-link-cert"
                     >
                       {cert.name}
                     </a>
                   </div>
                 ))}
                 <button
-                  className="edit-btn"
+                  className="edit-btn-certificates"
                   type="button"
                   onClick={handleEditCertificates}
                   disabled={isLoading}
                 >
+                  <img src={edit} alt="" />
                   Editar
                 </button>
               </div>

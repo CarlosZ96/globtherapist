@@ -6,6 +6,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../AuthContext';
 import { auth, db } from '../../firebase';
 import submit from '../../img/submit.png';
+import clock from '../../img/clock.png';
 import StatusBrick from '../payments/StatusBrick';
 import '../../stylesheets/userInfo.css';
 
@@ -67,7 +68,10 @@ const UserInfo = ({ citas, title, emptyMessage }) => {
       <h2>{title}</h2>
       <div className="citas-cont">
         {citas.map((cita) => (
-          <div key={cita.id} className="cita-card">
+          <div
+            key={cita.id}
+            className={`cita-card ${cita.status === 'end' ? 'completed-cita' : ''}`}
+          >
             <div className="cita-info">
               <div className="cita-field-date">
                 <p>
@@ -89,11 +93,32 @@ const UserInfo = ({ citas, title, emptyMessage }) => {
               <div className="cita-status">
                 <button
                   type="button"
-                  className={`status-${cita.status} status-button`}
+                  className={`status-button ${
+                    // Pago aprobado tiene prioridad
+                    cita.status === 'approved'
+                      ? 'status-approved'
+                      // Luego estado de la cita
+                      : cita.status === 'end'
+                        ? 'status-end'
+                        : `status-${cita.status}`
+                  }`}
                   onClick={() => handlePaymentClick(cita)}
                 >
-                  {cita.status === 'pay_pending' ? 'Pago Pendiente'
-                   : cita.status === 'pending' ? 'Pendiente' : 'Finalizada'}
+                  {/* Icono: Emoji para aprobado, reloj para pendientes, nada para finalizado */}
+                  {cita.status === 'approved' ? (
+                    <span>✅</span>
+                  ) : cita.status !== 'end' ? (
+                    <img src={clock} alt="" className="payment-im" />
+                  ) : null}
+
+                  {/* Texto del estado */}
+                  {cita.status === 'approved'
+                    ? 'Aprobado'
+                    : cita.status === 'pay_pending'
+                      ? 'Pago Pendiente'
+                      : cita.status === 'pending'
+                        ? 'Pendiente'
+                        : 'Finalizada'}
                 </button>
               </div>
             </div>

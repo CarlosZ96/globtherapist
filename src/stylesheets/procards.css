@@ -1,10 +1,43 @@
-.Create-overlay{
+.Create-overlay {
    margin: 0;
 }
 
-.profile-image {
-   width: 100px;
-   height: 100px;
+.modal-content {
+   height: 51vh;
+   width: 98vw;
+}
+
+.ProsCards-cont {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   height: 100%;
+   width: 100%;
+   background-color: #041B5E;
+}
+
+.close-button-procrd {
+   width: 7vw;
+   position: absolute;
+   top: 10px;
+   right: 10px;
+   background-color: transparent;
+   border: none;
+   cursor: pointer;
+}
+
+.close-button-procrd img {
+   width: 65%;
+}
+
+.carousel-controls {
+   position: absolute;
+   top: 95%;
+   width: 41%;
+   display: flex;
+   justify-content: space-between;
+   transform: translateY(-50%);
 }
 
 .therapy-info-cont {
@@ -12,7 +45,7 @@
    flex-direction: column;
    align-items: center;
    justify-content: center;
-   height: 60%;
+   height: 43%;
    width: 80%;
    border-radius: 25px;
 }
@@ -25,4 +58,314 @@
    color: #fff;
    font-size: 1.2em;
    text-align: center;
+}
+
+.therapy-info-text {
+   width: 100%;
+   height: 60%;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   color: #fff;
+   font-size: 1.2em;
+   font-weight: 500;
+   text-align: center;
+}
+
+.therapy-close-button {
+   width: 7vw;
+   position: absolute;
+   top: 31%;
+   right: 15%;
+   background-color: transparent;
+   border: none;
+   cursor: pointer;
+}
+
+.therapy-info-title {
+   width: 100%;
+   height: 20%;
+   display: flex;
+   flex-direction: row;
+   justify-content: center;
+   align-items: center;
+   color: #fff;
+   font-size: 1.2em;
+   font-family: Itim, serif;
+   font-weight: lighter;
+}
+
+.therapy-close-button img {
+   width: 82%;
+}
+
+.ProCard-cont {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   justify-content: center;
+   width: 100%;
+   height: 100%;
+   background-color: #fff;
+}
+
+.ProCard-sec1,
+.ProCard-sec2 {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   width: 50%;
+   height: 100%;
+}
+
+.proInfo-cont {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   width: 100%;
+   height: 50%;
+   background-color: #041B5E;
+   border-bottom-right-radius: 76px;
+}
+
+.profile-image {
+   width: 20vw;
+   max-width: 83px;
+   border: solid 3px #fff;
+   border-radius: 50%;
+   background-color: #fff;
+}
+
+.proInfo-cont h1 {
+   color: #fff;
+   font-size: 2em;
+}
+
+.proInfo-cont h3 {
+   color: #fff;
+   font-size: 1em;
+}
+
+.proDescription-cont {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   width: 100%;
+   height: 50%;
+}
+
+.proDescription-cont p {
+   width: 80%;
+   color: #000;
+   font-size: 1.2em;
+   font-weight: 500;
+   text-align: center;
+}
+
+.GlobProDescription-cont {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   width: 100%;
+   height: 50%;
+}
+
+.ProTeras-cont {
+   display: flex;
+   flex-direction: column;
+   align-items: flex-end;
+   justify-content: space-around;
+   width: 100%;
+   height: 50%;
+}
+
+.GlobProDescription-cont p {
+   width: 80%;
+   color: #000;
+   font-size: clamp(16px, 4.2vw, 18px);
+   font-weight: 500;
+   text-align: center;
+}
+
+.ProTeras-cont h2 {
+   width: 100%;
+   height: 23%;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   color: #fff;
+   font-size: 1.1em;
+   background-color: #041B5E;
+   text-align: center;
+   border-bottom-left-radius: 30px;
+   border-top-left-radius: 30px;
+   margin: 0;
+   padding: 0;
+}
+
+.ProTeras-list {
+   width: 100%;
+   height: 70%;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: flex-start;
+}
+
+.ProTeras-list ul {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   grid-template-rows: 1fr 1fr;
+   place-items: center center;
+   list-style: none;
+   padding: 0;
+   margin: 0;
+   width: 100%;
+   height: 80%;
+}
+
+.ProTeras-list ul li:nth-child(1) {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   height: 50%;
+   width: 85%;
+   border-radius: 15px;
+   background-color: #38DDE3;
+   color: #041B5E;
+   font-family: 'Poppins', sans-serif;
+   font-weight: normal;
+}
+
+.ProTeras-list ul li:nth-child(2) {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   height: 50%;
+   width: 85%;
+   border-radius: 15px;
+   background-color: #041B5E;
+   color: #fff;
+   font-size: 3.2vw;
+   font-family: 'Poppins', sans-serif;
+   font-weight: normal;
+}
+
+.ProTeras-list ul li:nth-child(3) {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   height: 50%;
+   width: 85%;
+   border-radius: 15px;
+   background-color: #EF5557;
+   color: #fff;
+   font-size: 3.5vw;
+   font-family: 'Poppins', sans-serif;
+   font-weight: normal;
+}
+
+.ProTeras-list ul li:nth-child(4) {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   height: 50%;
+   width: 85%;
+   border-radius: 15px;
+   background-color: #687AD7;
+   color: #fff;
+   font-size: 4vw;
+   font-family: 'Poppins', sans-serif;
+   font-weight: normal;
+}
+
+@media (max-width: 370px) {
+   .modal-content {
+      height: 60vh;
+   }
+
+
+   .ProCard-cont {
+      flex-direction: column;
+   }
+
+   .ProCard-sec1,
+   .ProCard-sec2 {
+      flex-direction: row;
+      width: 100%;
+   }
+
+   .ProCard-sec1 {
+      align-items: flex-start;
+      height: 90%;
+   }
+
+   .proInfo-cont {
+      height: 90%;
+      width: 60%;
+   }
+
+   .profile-image {
+      max-width: 25vw;
+   }
+
+   .proDescription-cont {
+      width: 40%;
+   }
+
+   .proDescription-cont {
+      height: 100%;
+   }
+
+   .GlobProDescription-cont {
+      height: 100%;
+      width: 70%;
+   }
+
+   .GlobProDescription-cont p {
+      height: 80%;
+      margin-bottom: 10%;
+      font-size: 1em;
+   }
+
+   .ProTeras-cont {
+      height: 100%;
+   }
+
+   .ProTeras-cont h2 {
+      height: 20%;
+   }
+
+   .proInfo-cont h1 {
+      font-size: 1.5em;
+   }
+}
+
+@media (min-width: 570px) {
+
+   .ProTeras-cont h2 {
+      height: 25%;
+   }
+
+   .ProTeras-list ul li:nth-child(2) {
+      font-size: 2.4vw;
+   }
+
+   .ProTeras-list ul li:nth-child(3) {
+      font-size: 2.4vw;
+   }
+
+   .ProTeras-list ul li:nth-child(4) {
+      font-size: 2.4vw;
+   }
+
 }

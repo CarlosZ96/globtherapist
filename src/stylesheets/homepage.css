@@ -1,7 +1,10 @@
-.Home-Page {
-    height: max-content;
+.Home-Roof {
+    display: flex;
+    margin: 0;
+    padding: 0;
     width: 100%;
-    position: relative;
+    height: 11vh;
+    background-color: #01268d;
 }
 
 .Home-txt {
@@ -14,27 +17,111 @@
     margin: 0;
 }
 
-.Home-txt h1 {
+.text-button {
+    background: none;
+    border: none;
+    color: #fff;
     font-family: Itim, serif;
-    font-size: 4vw;
-    margin-left: 1%;
+    font-size: 3vw;
+    font-weight: lighter;
 }
 
-.Home-Roof {
+.text-button:hover {
+    text-decoration: underline;
+    text-shadow: #7C95A6;
+}
+
+.Log-Btn-Cont {
     display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 20%;
+    border-radius: 5px;
+}
+
+.Log-Btn {
+    width: 90%;
+    height: 40%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    background-color: #fff;
+    border-radius: 2px;
+}
+
+.Log-Btn:last-child {
+    background: none;
+    height: 20%;
+}
+
+.Log-Btn img {
+    max-width: 10px;
+}
+
+.Log-Btn-txt {
     margin: 0;
-    padding: 0;
     width: 100%;
-    height: 8vh;
-    background-color: #01268d;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    color: #2B3A67;
+    font-size: 2vw;
+}
+
+.Log-Btn:last-child .Log-Btn-txt {
+    font-size: 1.4vw;
+    height: 30%;
+    background: none;
+    color: #fff;
 }
 
 .Home-windows {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-end;
-    width: 78%;
+    justify-content: space-around;
+    width: 68%;
+}
+
+@media (max-width: 370px) {
+
+    /* 370px and less */
+    .text-button {
+        font-size: 4vw;
+    }
+
+    .Glob-title {
+        height: 20%;
+        font-size: 10vw;
+    }
+
+    .GlobThera-body {
+        height: 80%;
+    }
+
+    .Glob-img-cont {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 65%;
+        height: 100%;
+    }
+}
+
+.Home-Page {
+    height: max-content;
+    width: 100%;
+    position: relative;
+}
+
+
+.Home-txt h1 {
+    font-family: Itim, serif;
+    font-size: 4vw;
+    margin-left: 1%;
 }
 
 .Home-windows h2 {
@@ -85,43 +172,9 @@
     text-decoration: underline;
 }
 
-
-.Log-Btn-Cont {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    width: 12%;
-    border-radius: 5px;
-}
-
-.Log-Btn {
-    height: 60%;
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
 .Log-Btn:hover {
     background: none;
     border: 2px #fff solid;
-}
-
-
-.Log-Btn img {
-    height: 20%;
-}
-
-
-.Log-Btn h3 {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 1.8vw;
 }
 
 .Home-body {
@@ -141,17 +194,15 @@
 
 .GlobThera {
     width: 90vw;
-    height: 36vh;
+    height: 32vh;
     background-color: #2b3e9d;
     border-radius: 5px;
 }
 
 .Glob-title {
     width: 100%;
-    height: 28%;
     margin: 0;
     color: #ffffffb4;
-    font-size: 9.5vw;
     font-family: Itim, serif;
     font-weight: 400;
     font-style: normal;
@@ -161,16 +212,8 @@
 .GlobThera-body {
     display: flex;
     width: 100%;
-    height: 70%;
 }
 
-.Glob-img-cont {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30%;
-    height: 100%;
-}
 
 .Glob-img {
     max-width: 86%;
@@ -181,6 +224,7 @@
     flex-flow: column wrap;
     place-content: center space-around;
     align-items: center;
+    justify-content: center;
     width: 70%;
     height: 100%;
     color: #fff;
@@ -192,6 +236,7 @@
     flex-flow: column wrap;
     place-content: center end;
     height: 49%;
+    width: 100%;
     font-family: Itim, serif;
     font-weight: lighter;
     align-content: center;
@@ -199,28 +244,34 @@
 }
 
 .Glob-btn-cont {
-    width: 90%;
+    width: 100%;
     height: 22%;
     display: flex;
     flex-direction: column;
-    align-items: end;
+    align-items: center;
 }
 
 .Glob-btn {
     height: 100%;
-    width: 56%;
+    width: 90%;
     background-color: #ffffffb4;
     color: #2b3e9d;
     border: none;
-    border-radius: 50px;
+    border-radius: 2px;
     font-family: Itim, serif;
     font-weight: 400;
     font-style: normal;
     font-size: 2.4vw;
 }
 
+.Glob-btn h3 {
+    font-size: 3.1vw;
+    font-family: Itim, serif;
+}
+
 .Glob-txt-cont p {
     margin: 0;
+    font-size: 4.5vw;
 }
 
 .Theras-cont {
@@ -230,22 +281,33 @@
     place-items: center center;
     gap: 1% 0;
     width: 90vw;
+    height: 49vh;
+    margin: 0;
+}
+
+.Therapy {
+    height: 86%;
+    border-radius: 20px;
 }
 
 .Theras-cont>.Therapy:nth-child(1) {
-    background-color: #7C95A6;
+    width: 96%;
+    background-color: #687AD7;
 }
 
 .Theras-cont>.Therapy:nth-child(2) {
-    background-color: #DEB841;
+    width: 90%;
+    background-color: #EF5557;
 }
 
 .Theras-cont>.Therapy:nth-child(3) {
-    background-color: #40F246;
+    width: 90%;
+    background-color: #38DDE3;
 }
 
 .Theras-cont>.Therapy:nth-child(4) {
-    background-color: #2B3A67;
+    width: 96%;
+    background-color: #FFD904;
 }
 
 .Theras-body {
@@ -256,16 +318,17 @@
 }
 
 .Theras-img {
-    max-width: 58%;
-    margin-left: 2%;
+    max-width: 50%;
+    margin-left: 4%;
+    margin-bottom: 8%;
 }
 
 .Therapy-title {
-    color: #01268d;
+    color: #041B5E;
     font-family: Itim, serif;
     font-weight: 400;
     font-style: normal;
-    font-size: 6vw;
+    font-size: 8vw;
     margin: 0;
     height: 29%;
     text-align: center;
@@ -286,10 +349,12 @@
     border-radius: 50%;
     border: none;
     background-color: #2B3A67;
+    margin-bottom: 21%;
+    margin-right: 20%;
 }
 
 .Theras-btn p {
-    height: 100%;
+    height: 75%;
     margin: 0;
     font-size: 4vw;
     color: #fff;
@@ -298,28 +363,16 @@
     font-style: normal;
 }
 
-.Therapy {
-    width: 88%;
-    height: 96%;
-    border-radius: 20px;
-}
-
 .Therapy:last-child .Therapy-title {
-    color: #fff;
-}
-
-.Therapy:last-child .Theras-btn {
-    background-color: #fff;
-}
-
-.Therapy:last-child .Theras-btn p {
-    color: #01268d;
+    font-size: 7vw;
+    color: #041B5E;
 }
 
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
+    z-index: 101;
     width: 100%;
     height: 100%;
     background-color: rgb(0 0 0 / 50%);

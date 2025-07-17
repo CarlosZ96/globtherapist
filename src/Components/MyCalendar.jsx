@@ -1,14 +1,18 @@
+/* eslint-disable react/self-closing-comp */
+/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { doc, getDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '../AuthContext';
 import { db } from '../firebase';
+import arrow from '../img/right-arrow.png';
 import '../stylesheets/MyCalendar.css';
 
 const MyCalendar = ({ onEdit }) => {
   const { currentUser } = useAuth();
   const [horarios, setHorarios] = useState({});
+  // eslint-disable-next-line no-unused-vars
   const [lunch, setLunch] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeMonth, setActiveMonth] = useState('');
@@ -186,7 +190,7 @@ const MyCalendar = ({ onEdit }) => {
   return (
     <div className="MyCalendar-cont">
       <div className="MyCalendar-header">
-        <h1>Mis horarios</h1>
+        <h1>Calendario laboral</h1>
         <button type="button" onClick={onEdit}>Editar</button>
       </div>
 
@@ -196,7 +200,7 @@ const MyCalendar = ({ onEdit }) => {
           type="button"
           onClick={goToPreviousMonth}
         >
-          ←
+          <img src={arrow} alt="" className="arrow" />
         </button>
         <h2 className="calendar-title">{activeMonth}</h2>
         <button
@@ -204,7 +208,7 @@ const MyCalendar = ({ onEdit }) => {
           type="button"
           onClick={goToNextMonth}
         >
-          →
+          <img src={arrow} alt="" className="arrow" />
         </button>
       </div>
 
@@ -230,21 +234,24 @@ const MyCalendar = ({ onEdit }) => {
           </div>
         ))}
       </div>
-
+      <h2>Mi horario será:</h2>
       <div className="schedule-info">
-        <div>
-          <h2>Horario de trabajo:</h2>
+        <div className="work-schedule">
+          <h3>De</h3>
+          {' '}
           <p>
             {workSchedule.start || 'No encontrado'}
             {' '}
-            -
+          </p>
+          <h3>A</h3>
+          <p>
             {' '}
             {workSchedule.end || 'No encontrado'}
           </p>
         </div>
-        <div>
-          <h2>Lunch:</h2>
-          <p>{lunch || 'No encontrado'}</p>
+        <div className="lunch-info">
+          <h3>Lunch:</h3>
+          <p>12:00pm</p>
         </div>
       </div>
     </div>

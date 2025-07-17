@@ -19,6 +19,7 @@ const ProSpace = () => {
   const [loading, setLoading] = useState(true);
   const [hasHorarios, setHasHorarios] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -29,8 +30,7 @@ const ProSpace = () => {
           if (docSnap.exists()) {
             const userData = docSnap.data();
             setStatus(userData.status);
-
-            // Verificar si tiene horarios
+            setUsername(userData.username || '');
             const hasHorario = userData.horarios && Object.keys(userData.horarios).length > 0;
             setHasHorarios(hasHorario);
           } else {
@@ -60,6 +60,8 @@ const ProSpace = () => {
         const userData = docSnap.data();
         const hasHorario = userData.horarios && Object.keys(userData.horarios).length > 0;
         setHasHorarios(hasHorario);
+        console.log('Nombre de usuario:', userData.username);
+        setUsername(userData.username || '');
       }
     });
   };
@@ -97,7 +99,10 @@ const ProSpace = () => {
                   </div>
                   <div className="prospace-request-txt-cont">
                     <div className="prospace-request-txt">
-                      <h1>Hola, usuario</h1>
+                      <h1>
+                        Hola,
+                        {username || 'usuario'}
+                      </h1>
                       <p>
                         Antes de continuar, necesitamos validar tus datos.
                       </p>

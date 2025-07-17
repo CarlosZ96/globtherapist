@@ -603,73 +603,72 @@ const Therapy = () => {
             </div>
           )}
         </div>
-        <div className="DynamiCanlendar-btn-cont">
-          {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName && (
+        {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName && (
+          <div className="DynamiCanlendar-btn-cont">
             <div className="Date-info-cont">
               <div className="Date-info-txt">
                 <h3>Tu cita quedó para el:</h3>
               </div>
               <div className="Date-info-description">
-                {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName ? (
-                  <p>
-                    {citaGlobal.date}
-                    {' '}
-                    de
-                    {citaGlobal.month}
-                    {' '}
-                    del
-                    {new Date().getFullYear()}
-                    {' '}
-                    a las
-                    {citaGlobal.time}
-                    {' '}
-                    con el doctor
-                    {citaGlobal.proName}
-                    .
-                  </p>
-                ) : (
-                  <p>No hay una cita seleccionada.</p>
-                )}
+                <p className="appointment-date">
+                  {citaGlobal.date}
+                  {' '}
+                  de
+                  {' '}
+                  {citaGlobal.month}
+                  {' '}
+                  del
+                  {' '}
+                  {new Date().getFullYear()}
+                </p>
+                <p className="appointment-time">
+                  de
+                  {' '}
+                  {citaGlobal.time}
+                  {' '}
+                  a
+                  {' '}
+                  {calculateEndTime(normalizeTime(citaGlobal.time), 40)}
+                </p>
+                <p className="appointment-doctor">
+                  Asignada a:
+                  {' '}
+                  {citaGlobal.proName}
+                </p>
                 <div className="therapy-price-info">
-                  <p>
-                    <strong>Terapia:</strong>
+                  <p className="appointment-therapy">
+                    Terapia
                     {' '}
                     {formData.therapyType}
-                  </p>
-                  <p>
-                    <strong>Precio:</strong>
-                    {' '}
-                    $
+                    : $
                     {therapyPrices[formData.therapyType]?.toLocaleString('es-CO')}
                   </p>
                 </div>
               </div>
             </div>
-          )}
-          {showPayment && (
-            <div className="payment-modal">
-              <button
-                type="button"
-                className="close-payment-btn"
-                onClick={() => setShowPayment(false)}
-              >
-                X
-              </button>
-              <Mp
-                key={retryPayment ? 'retry' : 'initial'}
-                therapyType={formData.therapyType}
-                onPaymentSuccess={handlePaymentSuccess}
-                currentUser={currentUser}
-                selectedPro={selectedPro}
-                citaGlobal={citaGlobal}
-                formData={formData}
-              />
-            </div>
-          )}
-          <button type="submit" className="DynamiCanlendar-btn">
-            <h4>Confirmar e ir a pagar</h4>
-          </button>
-        </div>
+
+            {showPayment && (
+              <div className="payment-overlay">
+                <div className="payment-modal">
+                  <Mp
+                    key={retryPayment ? 'retry' : 'initial'}
+                    therapyType={formData.therapyType}
+                    onPaymentSuccess={handlePaymentSuccess}
+                    currentUser={currentUser}
+                    selectedPro={selectedPro}
+                    citaGlobal={citaGlobal}
+                    formData={formData}
+                    onClose={() => setShowPayment(false)}
+                  />
+                </div>
+              </div>
+            )}
+
+            <button type="submit" className="DynamiCanlendar-btn">
+              <h4>Confirmar e ir a pagar</h4>
+            </button>
+          </div>
+        )}
       </div>
 
       {paymentStatus === 'success' && paymentDetails && (

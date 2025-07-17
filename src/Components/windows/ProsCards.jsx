@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import {
-  collection, getDocs,
-} from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../firebase';
 import '../../stylesheets/procards.css';
-import close from '../../img/Closegt.png';
+import close from '../../img/close.png';
 
 const ProsCards = ({ onClose }) => {
   const [pros, setPros] = useState([]);
@@ -14,39 +12,46 @@ const ProsCards = ({ onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    const fetchRandomPros = async () => {
+    const fetchHdvWithImages = async () => {
+      const allowedIds = [
+        'I0AULHKRBZYVAJ3JQ7rhWuBbxhe2',
+        'V5zxUoV4SrZYVyX1QA79UovUCVG2',
+        '5sQCDthzpIerAeLVMN2lYiO41AE2',
+      ];
+
       try {
-        const q = collection(db, 'pros');
-        const querySnapshot = await getDocs(q);
-        const allPros = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        const shuffled = allPros.sort(() => 0.5 - Math.random());
-        const selectedPros = shuffled.slice(0, Math.min(3, shuffled.length));
-        const prosWithImages = await Promise.all(selectedPros.map(async (pro) => {
-          const imageRef = ref(storage, `profileImages/${pro.id}`);
+        const proData = await Promise.all(allowedIds.map(async (proId) => {
+          const snap = await getDoc(doc(db, 'pros', proId));
+          if (!snap.exists()) return null;
+          const data = snap.data();
+          let imageUrl = null;
           try {
-            const files = await listAll(imageRef);
-            if (files.items.length > 0) {
-              const url = await getDownloadURL(files.items[0]);
-              return { ...pro, imageUrl: url };
+            const files = await listAll(ref(storage, `profileImages/${proId}`));
+            if (files.items.length) {
+              imageUrl = await getDownloadURL(files.items[0]);
             }
-          } catch (error) {
-            console.error('Error obteniendo imagen: ', error);
+          } catch (e) {
+            console.warn('No hay imagen para', proId);
           }
-          return { ...pro, imageUrl: null };
+
+          return {
+            id: proId,
+            username: data.username,
+            terapias: data.terapias,
+            Hdv: data.Hdv || {},
+            imageUrl,
+          };
         }));
 
-        setPros(prosWithImages);
-        setLoading(false);
+        setPros(proData.filter(Boolean));
       } catch (error) {
-        console.error('Error obteniendo profesionales: ', error);
+        console.error('Error cargando profesionales:', error);
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchRandomPros();
+    fetchHdvWithImages();
   }, []);
 
   const nextCard = () => {
@@ -84,64 +89,64 @@ const ProsCards = ({ onClose }) => {
 
   return (
     <div className="ProsCards-cont">
-      <button type="button" className="close-button" onClick={onClose}>
+      <button type="button" className="close-button-procrd" onClick={onClose}>
         <img src={close} alt="Cerrar" />
       </button>
-
       <div className="ProCard-cont">
-        <div className="proInfo-cont">
-          <h1>{currentPro.username || 'Profesional'}</h1>
-          {currentPro.imageUrl ? (
-            <img
-              src={currentPro.imageUrl}
-              alt="Perfil profesional"
-              className="profile-image"
-            />
-          ) : (
-            <div className="profile-placeholder">Sin imagen</div>
-          )}
-          <h3>{hdv.profession || 'Profesión no especificada'}</h3>
+        <div className="ProCard-sec1">
+          <div className="proInfo-cont">
+            {currentPro.imageUrl ? (
+              <img
+                src={currentPro.imageUrl}
+                alt="Perfil profesional"
+                className="profile-image"
+              />
+            ) : (
+              <div className="profile-placeholder">Sin imagen</div>
+            )}
+            <h1>{currentPro.username || 'Profesional'}</h1>
+            <h3>{hdv.profession || 'Profesión no especificada'}</h3>
+          </div>
+          <div className="proDescription-cont">
+            <p>{hdv.professionalHistory || 'Historia profesional no disponible'}</p>
+          </div>
         </div>
-
-        <div className="proDescription-cont">
-          <p>{hdv.professionalHistory || 'Historia profesional no disponible'}</p>
-        </div>
-
-        <div className="GlobProDescription-cont">
-          <p>
-            Profesional especializado/a en
-            {' '}
-            {hdv.specialization || 'su campo'}
-            egresado en la universidad
-            {' '}
-            {hdv.university || 'no especificada'}
-            con
-            {' '}
-            {hdv.yearsOfExperience || 'varios'}
-            {' '}
-            años de experiencia
-          </p>
-        </div>
-
-        <div className="ProTeras-cont">
-          <h2>Terapias Disponibles:</h2>
-          <div className="ProTeras-list">
-            <ul>
-              {currentPro.terapias?.map((terapia) => (
-                <li key={`${currentPro.id}-${terapia}`}>{terapia}</li>
-              ))}
-            </ul>
+        <div className="ProCard-sec2">
+          <div className="GlobProDescription-cont">
+            <p>
+              Profesional especializado/a en
+              {' '}
+              {hdv.specialization || 'su campo'}
+              {' '}
+              egresado en la universidad
+              {' '}
+              {hdv.university || 'no especificada'}
+              con
+              {' '}
+              {hdv.yearsOfExperience || 'varios'}
+              {' '}
+              años de experiencia
+            </p>
+          </div>
+          <div className="ProTeras-cont">
+            <h2>Terapias Disponibles:</h2>
+            <div className="ProTeras-list">
+              <ul>
+                {currentPro.terapias?.map((terapia) => (
+                  <li key={`${currentPro.id}-${terapia}`}>{terapia}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Controles del carrusel */}
       <div className="carousel-controls">
         <button type="button" onClick={prevCard} disabled={pros.length <= 1}>‹</button>
         <span>
           {currentIndex + 1}
           {' '}
-          /
+          -
           {' '}
           {pros.length}
         </span>

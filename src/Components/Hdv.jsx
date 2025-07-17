@@ -189,7 +189,7 @@ const Hdv = () => {
           </div>
 
           <div className="hdv-desc-cont">
-            <h3>Cuéntanos brevemente tu historia profesional:</h3>
+            <h3>Historia profesional:</h3>
             <textarea
               className="hdv-desc"
               value={professionalHistory}

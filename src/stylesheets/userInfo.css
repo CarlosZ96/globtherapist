@@ -1,10 +1,58 @@
 .Dates-info-mcont {
-    height: 60vh;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
 }
 
 .user-citas-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 0;
+    padding: 10px 0;
+}
+
+.user-citas-container h2 {
+    font-size: 4.5vw;
+    color: #fff;
+    font-weight: lighter;
+    font-family: Itim, serif;
+    text-align: center;
+    padding: 10px 0;
+    margin: 0;
+}
+
+.no-citas {
+    height: 48vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 4.2vw;
+    color: #ffffff52;
+    font-weight: lighter;
+    font-family: Itim, serif;
+    text-align: center;
+    margin: 0;
+}
+
+.citas-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
-    height: 50%;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 100px;
+    gap: 15px;
+    padding: 5px 0;
+}
+
+.cita-card.completed-cita {
+    opacity: 0.2;
+    transition: opacity 0.3s ease;
 }
 
 .user-win-name-cont {
@@ -24,33 +72,24 @@
     width: max-content;
 }
 
-.citas-cont {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 50%;
-    row-gap: 10px;
-}
-
 .cita-info {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
     height: 100%;
-    width: 96%;
+    width: 90%;
 }
 
 .cita-card {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 25%;
-    width: 96%;
+    min-height: 70px;
+    width: 98%;
     background-color: #fff;
     border-radius: 5px;
+    flex-shrink: 0;
 }
 
 .cita-field-date {
@@ -58,22 +97,31 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 80%;
-    width: 12%;
+    height: 72%;
+    width: 16%;
     background-color: #041B5E;
     border-radius: 5px;
 }
 
 .cita-field-date p {
     color: #fff;
-    font-size: 3vw;
+    font-size: 2.5vw;
     font-family: Itim, serif;
     font-weight: lighter;
 }
 
+.cita-field-date,
+.cita-time-cont {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+}
+
 .cita-pro-cont {
-    width: 70%;
-    margin-left: 5%;
+    width: 35%;
+    margin-left: 1%;
 }
 
 .cita-time-cont {
@@ -81,11 +129,52 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 10%;
+    width: 18%;
+    height: 36%;
     color: #fff;
     background-color: #041B5E;
     padding: 0.2%;
     border-radius: 5px;
+    margin: 0 1% 0 1%;
+}
+
+.cita-time-cont p {
+    font-size: 2.5vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
+.cita-status {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 25%;
+    height: 100%;
+    color: #fff;
+    font-size: 3vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    margin-left: 1%;
+}
+
+.cita-status button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 38%;
+    font-size: 2.2vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    border: none;
+    border-radius: 3px;
+}
+
+.payment-im {
+    width: 20px;
+    height: 20px;
 }
 
 .reunion-btn {
@@ -94,7 +183,7 @@
     justify-content: center;
     align-items: center;
     height: 100%;
-    width: 8%;
+    width: 10%;
     background-color: #041B5E;
     border: none;
     border-top-right-radius: 5px;
@@ -102,14 +191,100 @@
 }
 
 .reunion-btn img {
-    width: 58%;
+    width: 70%;
     height: 58%;
     object-fit: contain;
 }
 
-.cita-pro-name{
+.cita-pro-name {
     font-size: 3.5vw;
     font-family: Itim, serif;
     color: #041B5E;
     font-weight: lighter;
+}
+
+.dates-modal-content {
+    width: 96%;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #2B3E9D;
+}
+
+.cita-card.completed-cita .cita-status button,
+.cita-card.completed-cita .reunion-btn,
+.cita-card.completed-cita .completed-badge {
+    opacity: 1 !important;
+}
+
+.completed-badge {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 8%;
+    height: 100%;
+    font-size: 4vw;
+    color: #28a745;
+    background-color: transparent;
+}
+
+.close-button-dates {
+    position: absolute;
+    top: 62px;
+    right: 14px;
+    color: #fff;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.status-display {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 38%;
+    background-color: #DD870F;
+    font-size: 2.2vw;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    border: none;
+    border-radius: 3px;
+}
+
+.status-pay_pending {
+    background-color: #ff9800;
+    color: white;
+}
+
+.status-pending {
+    background-color: #2196f3;
+    color: white;
+}
+
+.status-approved {
+    background-color: #40F246;
+    color: #041B5E;
+    font-weight: bold;
+}
+
+.status-end {
+    background-color: #7C95A6;
+    color: white;
+}
+
+.status-button span,
+.status-display span {
+    margin-right: 5px;
+    font-size: 1.2em;
+}
+
+.status-approved .payment-im,
+.status-end .payment-im {
+    display: none;
 }

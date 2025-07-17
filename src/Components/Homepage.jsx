@@ -41,13 +41,12 @@ const Homepage = () => {
 
   const noUserStyles = {
     homeWindows: { width: '70%' },
-    logBtnCont: { width: '20%', position: 'relative' },
-    logBtn: { width: '50%' },
+    logBtnCont: { position: 'relative', flexDirection: 'column' },
   };
 
   const userStyles = {
     homeWindows: { width: '78%' },
-    logBtnCont: { width: '12%', position: 'relative' },
+    logBtnCont: { position: 'relative' },
   };
 
   const pendingAppointmentsCount = currentPro
@@ -194,7 +193,7 @@ const Homepage = () => {
             onClick={togglePros}
             className="text-button"
           >
-            <h2>Especialistas</h2>
+            Especialistas
           </button>
           <button type="button" onClick={toggleWho} className="text-button">¿Quiénes somos?</button>
         </div>
@@ -206,7 +205,7 @@ const Homepage = () => {
               style={noUserStyles.logBtn}
               onClick={toggleLogin}
             >
-              <h3>Loguearse</h3>
+              <h3 className="Log-Btn-txt">Loguearse</h3>
             </button>
             <button
               type="button"
@@ -214,7 +213,7 @@ const Homepage = () => {
               style={noUserStyles.logBtn}
               onClick={toggleCreate}
             >
-              <h3>Crear Cuenta</h3>
+              <h3 className="Log-Btn-txt">Crear Cuenta</h3>
             </button>
           </div>
         ) : (
@@ -262,8 +261,8 @@ const Homepage = () => {
       )}
       {showDates && (
         <div className="modal-overlay">
-          <div className="modal-content">
-            <button type="button" className="close-button" onClick={toggleDates}>
+          <div className="dates-modal-content">
+            <button type="button" className="close-button-dates" onClick={toggleDates}>
               &times;
             </button>
             <Dates />
