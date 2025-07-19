@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable consistent-return */
 import React, { useEffect, useRef, useState } from 'react';
 import AgoraRTC from 'agora-rtc-sdk-ng';
@@ -8,7 +9,11 @@ import ChatComponent from './ChatComponent';
 import '../../stylesheets/videocall.css';
 import home from '../../img/home 1.png';
 import wait from '../../img/Iconjam.png';
+import endCallIcon from '../../img/phone.png';
 import chatIcon from '../../img/bubble-chat.png';
+import MicroIcon from '../../img/mic (1).png';
+import ShareIcon from '../../img/share.png';
+import CamIcon from '../../img/videocam (1) 1.svg';
 
 const UserView = ({ meetingParams }) => {
   const { meetingAccess, setMeetingAccess } = useAuth();
@@ -100,6 +105,41 @@ const UserView = ({ meetingParams }) => {
     };
   }, [meetingAccess, meetingParams]);
 
+  const cleanupAgoraResources = async () => {
+    try {
+      // Cerrar todas las pistas locales
+      if (micTrack) {
+        micTrack.close();
+        setMicTrack(null);
+        setMicOn(false);
+      }
+      if (cameraTrack) {
+        cameraTrack.close();
+        setCameraTrack(null);
+        setCameraOn(false);
+      }
+      if (screenTrack) {
+        screenTrack.close();
+        setScreenTrack(null);
+        setSharingScreen(false);
+      }
+
+      // Dejar el canal
+      if (client) {
+        await client.leave();
+        setClient(null);
+      }
+
+      // Limpiar el reproductor de video remoto
+      setRemoteCameraOn(false);
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.innerHTML = '';
+      }
+    } catch (error) {
+      console.error('Error al limpiar recursos de Agora:', error);
+    }
+  };
+
   const handleToggleCamera = async () => {
     if (!cameraOn) {
       try {
@@ -169,6 +209,11 @@ const UserView = ({ meetingParams }) => {
     }
   };
 
+  const handleEndCall = async () => {
+    await cleanupAgoraResources();
+    navigate('/');
+  };
+
   const requestAccess = () => {
     setMeetingAccess('pay_pending');
     console.log('Solicitud de acceso enviada');
@@ -179,7 +224,7 @@ const UserView = ({ meetingParams }) => {
       <header className="video-header">
         <h1>GLOBTHERAPIST</h1>
         <button type="button" onClick={() => navigate('/')}>
-          <img src={home} alt="" />
+          <img src={home} alt="" className="video-header-img" />
           <h5>Home</h5>
         </button>
       </header>
@@ -210,43 +255,53 @@ const UserView = ({ meetingParams }) => {
               La cámara está apagada
             </div>
           )}
-          {/* Contenedor remoto siempre renderizado; se muestra u oculta mediante CSS */}
           <div className="video-pre-view-cont" style={{ display: remoteCameraOn ? 'block' : 'none' }}>
             <div className="video-pre-view" ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
           </div>
-          <div style={{
-            position: 'absolute',
-            bottom: '1rem',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            padding: '0.5rem',
-            borderRadius: '0.5rem',
-            display: 'flex',
-            gap: '0.5rem',
-          }}
-          >
-            <button type="button" onClick={handleToggleCamera}>
-              {cameraOn ? 'Apagar cámara' : 'Encender cámara'}
-            </button>
-            <button type="button" onClick={handleToggleMic}>
-              {micOn ? 'Apagar micrófono' : 'Encender micrófono'}
-            </button>
-            <button type="button" onClick={handleScreenShare}>
-              {sharingScreen ? 'Detener pantalla' : 'Compartir pantalla'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowChat(!showChat)}
-              style={{ background: showChat ? '#4CAF50' : '' }}
-            >
-              <img src={chatIcon} alt="Chat" width="20" height="20" />
-            </button>
+          <div className="video-controls-cont">
+            <div className="video-controls">
+              <button type="button" className="video-buttons" onClick={handleToggleCamera}>
+                <img src={CamIcon} className="video-button-img" />
+                {cameraOn ? 'Apagar cámara' : 'Encender cámara'}
+              </button>
+              <button type="button" className="video-buttons" onClick={handleToggleMic}>
+                <img src={MicroIcon} className="video-button-img" />
+                {micOn ? 'Apagar micrófono' : 'Encender micrófono'}
+              </button>
+              <button type="button" className="video-buttons" onClick={handleScreenShare}>
+                <img src={ShareIcon} className="video-button-img" />
+                {sharingScreen ? 'Detener pantalla' : 'Compartir pantalla'}
+              </button>
+              <button
+                type="button"
+                className="video-buttons"
+                onClick={() => setShowChat(!showChat)}
+                style={{ background: showChat ? '#233cb5' : '' }}
+              >
+                <img src={chatIcon} className="video-button-img" />
+                Abrir chat
+              </button>
+              <button
+                type="button"
+                className="video-buttons"
+                onClick={handleEndCall}
+              >
+                <img src={endCallIcon} alt="Colgar" width="20" height="20" />
+                Cerrar llamada
+              </button>
+            </div>
+            <div className="video-user-info">
+              <p>
+                {currentUser.username || 'Usuario'}
+              </p>
+              <p>
+                ProUserame
+              </p>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Modal del chat */}
       {showChat && (
         <div style={{
           position: 'fixed',

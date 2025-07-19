@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text */
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import AgoraRTC from 'agora-rtc-sdk-ng';
@@ -6,10 +7,13 @@ import { useAuth } from '../../AuthContext';
 import ChatComponent from './ChatComponent';
 import home from '../../img/home 1.png';
 import chatIcon from '../../img/bubble-chat.png';
-import formIcon from '../../img/contact-form.png';
+import formIcon from '../../img/contact-form.svg';
 import endCallIcon from '../../img/phone.png';
 import '../../stylesheets/videocall.css';
 import ProInfo from '../windows/ProInfo';
+import MicroIcon from '../../img/mic (1).png';
+import ShareIcon from '../../img/share.png';
+import CamIcon from '../../img/videocam (1) 1.svg';
 
 const HostNotification = () => {
   const { meetingAccess, setMeetingAccess } = useAuth();
@@ -170,7 +174,7 @@ const ProView = ({ meetingParams }) => {
     initAgora();
 
     // SOLUCIÓN: Remover el cleanup automático
-    return () => {};
+    return () => { };
   }, [meetingParams]);
 
   // Función para colgar la llamada y regresar al inicio
@@ -265,7 +269,7 @@ const ProView = ({ meetingParams }) => {
       <header className="video-header">
         <h1>GLOBTHERAPIST</h1>
         <button type="button" onClick={handleGoHome}>
-          <img src={home} alt="" />
+          <img src={home} alt="" className="video-header-img" />
           <h5>Home</h5>
         </button>
       </header>
@@ -282,52 +286,56 @@ const ProView = ({ meetingParams }) => {
         <div className="video-pre-view-cont" style={{ display: remoteCameraOn ? 'block' : 'none' }}>
           <div className="video-pre-view" ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
         </div>
-      </div>
-
-      <div
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '53%',
-          transform: 'translateX(-50%)',
-          backgroundColor: 'rgba(0,0,0,0.6)',
-          padding: '0.5rem',
-          borderRadius: '0.5rem',
-          display: 'flex',
-          gap: '0.5rem',
-        }}
-      >
-        <button type="button" onClick={handleToggleCamera}>
-          {cameraOn ? 'Apagar cámara' : 'Encender cámara'}
-        </button>
-        <button type="button" onClick={handleToggleMic}>
-          {micOn ? 'Apagar micrófono' : 'Encender micrófono'}
-        </button>
-        <button type="button" onClick={handleScreenShare}>
-          {sharingScreen ? 'Detener pantalla' : 'Compartir pantalla'}
-        </button>
-        <button
-          type="button"
-          onClick={() => setShowChat(!showChat)}
-          style={{ background: showChat ? '#4CAF50' : '' }}
-        >
-          <img src={chatIcon} alt="Chat" width="20" height="20" />
-        </button>
-        <button
-          type="button"
-          onClick={() => setShowProInfo(true)}
-          style={{ background: showProInfo ? '#4CAF50' : '' }}
-        >
-          <img src={formIcon} alt="Formulario" width="20" height="20" />
-        </button>
-        {/* Botón para colgar la llamada */}
-        <button
-          type="button"
-          onClick={handleEndCall}
-          style={{ backgroundColor: '#ff0000' }}
-        >
-          <img src={endCallIcon} alt="Colgar" width="20" height="20" />
-        </button>
+        <div className="video-controls-cont">
+          <div className="video-controls">
+            <button type="button" className="video-buttons" onClick={handleToggleCamera}>
+              <img src={CamIcon} className="video-button-img" />
+              {cameraOn ? 'Apagar cámara' : 'Encender cámara'}
+            </button>
+            <button type="button" className="video-buttons" onClick={handleToggleMic}>
+              <img src={MicroIcon} className="video-button-img" />
+              {micOn ? 'Apagar micrófono' : 'Encender micrófono'}
+            </button>
+            <button type="button" className="video-buttons" onClick={handleScreenShare}>
+              <img src={ShareIcon} className="video-button-img" />
+              {sharingScreen ? 'Detener pantalla' : 'Compartir pantalla'}
+            </button>
+            <button
+              type="button"
+              className="video-buttons"
+              onClick={() => setShowChat(!showChat)}
+              style={{ background: showChat ? '#4CAF50' : '' }}
+            >
+              <img src={chatIcon} alt="Chat" width="20" height="20" />
+              Abrir chat
+            </button>
+            <button
+              type="button"
+              className="user-medical-info"
+              onClick={() => setShowProInfo(true)}
+              style={{ background: showProInfo ? '#4CAF50' : '' }}
+            >
+              <img src={formIcon} alt="Formulario" width="20" height="20" />
+              Historial Clinico
+            </button>
+            <button
+              type="button"
+              className="video-buttons"
+              onClick={handleEndCall}
+            >
+              <img src={endCallIcon} alt="Colgar" width="20" height="20" />
+              Cerrar llamada
+            </button>
+          </div>
+          <div className="video-user-info">
+            <p>
+              {currentUser.username || 'Usuario'}
+            </p>
+            <p>
+              ProUserame
+            </p>
+          </div>
+        </div>
       </div>
 
       {showChat && (

@@ -19,8 +19,14 @@
 }
 
 .video-header button {
+    width: 8vw;
+    height: 8vh;
     background: none;
     border: none;
+}
+
+.video-header-img {
+    max-width: 76%;
 }
 
 .video-header h5 {
@@ -31,18 +37,19 @@
 }
 
 .UserView-video-container {
-    flex: 1 1;
     display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
     width: 100%;
+    height: 90%;
     background-Color: #2b3e9d;
     position: relative;
-    justify-content: center;
-    align-items: center;
 }
 
 .video-cont {
-    width: 92%;
-    height: 80%;
+    width: 96%;
+    height: 76%;
     border-radius: 20px;
     background-color: #4F63C2;
 }
@@ -50,7 +57,7 @@
 .cam-txt {
     position: absolute;
     width: 60%;
-    top: 50%;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
     color: #ffffff91;
@@ -132,6 +139,80 @@
     font-family: Itim, serif;
     font-weight: lighter;
     margin-right: 0.4rem;
+}
+
+.video-controls-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 96%;
+    height: 15%;
+    background-color: #4F63C2;
+    border-radius: 6px;
+    margin-bottom: 1%;
+}
+
+.video-controls {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 0 1% 0 1%;
+}
+
+
+.video-buttons {
+    display: flex;
+    width: 20%;
+    height: 100%;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    font-size: 2.5vw;
+    background: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-medical-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 10vh;
+    position: absolute;
+    top: 3%;
+    right: 4%;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    font-size: 2.5vw;
+    background: none;
+    border: none;
+}
+
+.video-user-info {
+    width: 30%;
+    height: 10%;
+    position: absolute;
+    top: 2%;
+    left: 4%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+    font-size: 3vw;
+}
+
+.video-button-img {
+    width: 7.5vw;
+    height: 7.5vw;
 }
 
 .chat-txt-field-cont {
