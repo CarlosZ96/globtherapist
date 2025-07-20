@@ -69,86 +69,88 @@ const Globody = forwardRef((props, ref) => {
           onClose={closeTherapyInfo}
         />
       )}
-      <div className="GlobThera">
-        <h1 className="Glob-title">GLOBTHERAPIST</h1>
-        <div className="GlobThera-body">
-          <div className="Glob-img-cont">
-            <img src={med} alt="" className="Glob-img" />
-          </div>
-          <div className="Glob-txt-btn-conts">
-            <div className="Glob-txt-cont">
-              <p>Solicita tu cita en línea desde cualquier lugar.</p>
+      <div className="GlobFront">
+        <div className="GlobThera">
+          <h1 className="Glob-title">GLOBTHERAPIST</h1>
+          <div className="GlobThera-body">
+            <div className="Glob-img-cont">
+              <img src={med} alt="" className="Glob-img" />
             </div>
-            <div className="Glob-btn-cont">
-              <button
-                type="button"
-                className="Glob-btn"
-                onClick={props.onScheduleClick}
-              >
-                <h3>¡Agenda tu cita ahora!</h3>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="Theras-cont">
-        <div className="Therapy">
-          <h3 className="Therapy-title">Lenguaje</h3>
-          <div className="Theras-body">
-            <img src={len} alt="lenguaje" className="Theras-img" />
-            <div className="Theras-btn-cont">
-              <button
-                type="button"
-                className="Theras-btn"
-                onClick={() => handleTherapyClick('lenguaje')}
-              >
-                <p>+</p>
-              </button>
+            <div className="Glob-txt-btn-conts">
+              <div className="Glob-txt-cont">
+                <p>Solicita tu cita en línea desde cualquier lugar.</p>
+              </div>
+              <div className="Glob-btn-cont">
+                <button
+                  type="button"
+                  className="Glob-btn"
+                  onClick={props.onScheduleClick}
+                >
+                  <h3>¡Agenda tu cita ahora!</h3>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-        <div className="Therapy">
-          <h3 className="Therapy-title">Fisica</h3>
-          <div className="Theras-body">
-            <img src={exe} alt="fisica" className="Theras-img" />
-            <div className="Theras-btn-cont">
-              <button
-                type="button"
-                className="Theras-btn"
-                onClick={() => handleTherapyClick('fisica')}
-              >
-                <p>+</p>
-              </button>
+        <div className="Theras-cont">
+          <div className="Therapy">
+            <h3 className="Therapy-title">Lenguaje</h3>
+            <div className="Theras-body">
+              <img src={len} alt="lenguaje" className="Theras-img" />
+              <div className="Theras-btn-cont">
+                <button
+                  type="button"
+                  className="Theras-btn"
+                  onClick={() => handleTherapyClick('lenguaje')}
+                >
+                  <p>+</p>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="Therapy">
-          <h3 className="Therapy-title">Mental</h3>
-          <div className="Theras-body">
-            <img src={bra} alt="mental" className="Theras-img" />
-            <div className="Theras-btn-cont">
-              <button
-                type="button"
-                className="Theras-btn"
-                onClick={() => handleTherapyClick('mental')}
-              >
-                <p>+</p>
-              </button>
+          <div className="Therapy">
+            <h3 className="Therapy-title">Fisica</h3>
+            <div className="Theras-body">
+              <img src={exe} alt="fisica" className="Theras-img" />
+              <div className="Theras-btn-cont">
+                <button
+                  type="button"
+                  className="Theras-btn"
+                  onClick={() => handleTherapyClick('fisica')}
+                >
+                  <p>+</p>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="Therapy">
-          <h3 className="Therapy-title">Ocupacional</h3>
-          <div className="Theras-body">
-            <img src={cas} alt="ocupacional" className="Theras-img" />
-            <div className="Theras-btn-cont">
-              <button
-                type="button"
-                className="Theras-btn"
-                onClick={() => handleTherapyClick('ocupacional')}
-              >
-                <p>+</p>
-              </button>
+          <div className="Therapy">
+            <h3 className="Therapy-title">Mental</h3>
+            <div className="Theras-body">
+              <img src={bra} alt="mental" className="Theras-img" />
+              <div className="Theras-btn-cont">
+                <button
+                  type="button"
+                  className="Theras-btn"
+                  onClick={() => handleTherapyClick('mental')}
+                >
+                  <p>+</p>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="Therapy">
+            <h3 className="Therapy-title">Ocupacional</h3>
+            <div className="Theras-body">
+              <img src={cas} alt="ocupacional" className="Theras-img" />
+              <div className="Theras-btn-cont">
+                <button
+                  type="button"
+                  className="Theras-btn"
+                  onClick={() => handleTherapyClick('ocupacional')}
+                >
+                  <p>+</p>
+                </button>
+              </div>
             </div>
           </div>
         </div>
