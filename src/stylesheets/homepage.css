@@ -421,21 +421,37 @@
     }
 
     .Therapy:last-child .Therapy-title {
-        font-size: 4vw;
+        font-size: 3.5vw;
     }
 
     .Glob-img-cont {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         width: 50%;
     }
 
     .Theras-cont {
-        width: 50vw;
+        width: 45vw;
         height: 46vh;
     }
 
     .GlobThera {
-        width: 46vw;
-        height: 60vw;
+        width: 50%;
+        height: 46vw;
+    }
+
+    .Glob-img {
+        max-width: 100%;
+    }
+
+    .Glob-title {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 22%
     }
 
     .Therapy {
@@ -443,4 +459,25 @@
         height: 78%;
     }
 
+    .GlobThera-body {
+        height: 78%;
+    }
+
+    .Glob-txt-btn-conts {
+        width: 46%;
+        justify-content: space-around;
+    }
+
+    .Glob-txt-btn-conts p {
+        font-size: 3vw;
+        text-align: center;
+    }
+
+    .Theras-btn p {
+        font-size: 2vw;
+    }
+
+    .Glob-btn h3 {
+        font-size: 2vw;
+    }
 }
