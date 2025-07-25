@@ -163,7 +163,6 @@
     align-items: center;
     max-height: calc(100vh - 8vh);
     height: max-content;
-    overflow-y: auto;
     background-color: #fff;
 }
 
@@ -448,6 +447,7 @@
     .Theras-cont {
         width: 45vw;
         height: 46vh;
+        max-height: 100%;
     }
 
     .GlobThera {
@@ -492,5 +492,25 @@
 
     .Glob-btn h3 {
         font-size: 2vw;
+    }
+}
+
+@media (min-width: 571px) {
+    .GlobFront {
+        align-items: center;
+        justify-content: space-around;
+    }
+
+    .GlobThera {
+        width: 46%;
+        height: 36vw;
+    }
+
+    .Glob-img {
+        max-width: 86%;
+    }
+
+    .Glob-btn h3 {
+        font-size: 1.8vw;
     }
 }
