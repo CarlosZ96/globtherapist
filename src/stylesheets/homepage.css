@@ -88,7 +88,7 @@
 
 .GlobFront {
     display: flex;
-    height: 66vw;
+    height: 48vw;
 }
 
 .Home-Page {
@@ -411,13 +411,26 @@
 
     .GlobFront {
         flex-direction: row;
-        align-items: center;
+        align-items: start;
         justify-content: space-around;
         width: 100vw;
     }
 
     .Therapy-title {
         font-size: 4vw;
+    }
+
+    .Home-windows {
+        width: 60%;
+    }
+
+    .Log-Btn-Cont {
+        flex-direction: row;
+        width: 30%;
+    }
+
+    .Log-Btn {
+        width: 50%;
     }
 
     .Therapy:last-child .Therapy-title {

@@ -348,5 +348,20 @@
 }
 
 .DynamiCanlendar-btn-cont.hidden {
-  display: none;
+    display: none;
+}
+
+@media (min-width: 571px) {
+    .Ask-Therapy-subtittle h2 {
+        font-size: 5vw;
+    }
+
+
+    .Ask-Therapy-fields-conts {
+        height: 46vh;
+    }
+
+    .Ask-Therapy-subtittle {
+        margin-bottom: 5%;
+    }
 }

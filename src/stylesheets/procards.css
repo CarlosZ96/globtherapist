@@ -55,7 +55,8 @@
 }
 
 .therapy-info-cont p {
-   color: #fff;
+   width: 72%;
+   color: #041b5e;
    font-size: 1.2em;
    text-align: center;
 }
