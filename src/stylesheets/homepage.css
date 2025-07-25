@@ -378,11 +378,11 @@
     }
 
     .Therapy-title {
-        font-size: 4vw;
+        font-size: 5.5vw;
     }
 
     .Therapy:last-child .Therapy-title {
-        font-size: 4vw;
+        font-size: 5vw;
     }
 
     .text-button {
