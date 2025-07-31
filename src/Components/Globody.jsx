@@ -155,7 +155,7 @@ const Globody = forwardRef((props, ref) => {
           </div>
         </div>
       </div>
-      <div ref={therapyRef}>
+      <div className="Body-therapie" ref={therapyRef}>
         <Therapy />
       </div>
     </div>

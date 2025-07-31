@@ -91,6 +91,16 @@
     height: 48vw;
 }
 
+.Body-therapie {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: max-content;
+    background-color: #fff;
+}
+
 .Home-Page {
     height: max-content;
     width: 100%;
@@ -409,10 +419,12 @@
 @media (min-width: 571px) {
 
     .GlobFront {
+        display: flex;
         flex-direction: row;
         align-items: start;
         justify-content: space-around;
-        width: 100vw;
+        width: 95vw;
+        height: 58vh;
     }
 
     .Therapy-title {
@@ -445,14 +457,14 @@
     }
 
     .Theras-cont {
-        width: 45vw;
-        height: 46vh;
+        width: 45%;
+        height: 90%;
         max-height: 100%;
     }
 
     .GlobThera {
-        width: 50%;
-        height: 46vw;
+        width: 40%;
+        height: 85%;
     }
 
     .Glob-img {
@@ -464,12 +476,13 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 22%
+        height: 22%;
+        font-size: 4vw;
     }
 
     .Therapy {
         width: 84%;
-        height: 78%;
+        height: 94%;
     }
 
     .GlobThera-body {
@@ -482,7 +495,7 @@
     }
 
     .Glob-txt-btn-conts p {
-        font-size: 3vw;
+        font-size: 2.2vw;
         text-align: center;
     }
 
@@ -499,18 +512,23 @@
     .GlobFront {
         align-items: center;
         justify-content: space-around;
+        margin-top: 5%;
     }
 
     .GlobThera {
         width: 46%;
-        height: 36vw;
+        height: 84%;
     }
 
     .Glob-img {
-        max-width: 86%;
+        max-width: 75%;
     }
 
     .Glob-btn h3 {
         font-size: 1.8vw;
+    }
+
+    .Theras-body {
+        justify-content: space-around;
     }
 }
