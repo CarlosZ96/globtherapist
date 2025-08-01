@@ -522,7 +522,7 @@
     }
 
     .Glob-img {
-        max-width: 100%;
+        max-width: 96%;
     }
 
     .Glob-btn h3 {
@@ -567,5 +567,15 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+    }
+}
+
+@media (max-width: 922px) {
+    .GlobFront {
+        height: 33vh;
+    }
+
+    .Glob-img {
+        max-width: 80%;
     }
 }
