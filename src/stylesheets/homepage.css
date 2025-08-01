@@ -579,3 +579,9 @@
         max-width: 80%;
     }
 }
+
+@media (max-width: 370px) {
+    .GlobFront {
+        height: 60vh;
+    }
+}
