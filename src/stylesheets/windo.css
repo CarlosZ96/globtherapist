@@ -588,7 +588,7 @@
     height: 70%;
 }
 
-.Who-title-cont h1{
+.Who-title-cont h1 {
     width: 90%;
     font-size: 9.5vw;
     color: #ffffff4a;
@@ -598,7 +598,6 @@
 }
 
 
-
 .Who-txt-cont p {
     width: 90%;
     font-size: 4vw;
@@ -606,4 +605,12 @@
     font-family: Itim, serif;
     font-weight: 300;
     text-align: center;
+}
+
+@media (min-width: 571px) {
+    .pending-dates {
+        top: 15%;
+        left: 33%;
+        height: 21px;
+    }
 }

@@ -294,7 +294,6 @@
       height: 60vh;
    }
 
-
    .ProCard-cont {
       flex-direction: column;
    }
@@ -349,9 +348,33 @@
    .proInfo-cont h1 {
       font-size: 1.5em;
    }
+
+   .therapy-info-cont p {
+      font-size: 1em;
+      color: #000;
+   }
+
+   .therapy-icon {
+      font-size: 7vw;
+   }
 }
 
-@media (min-width: 570px) {
+@media (min-width: 371px) {
+   .therapy-info-cont p {
+      font-size: 1em;
+      color: #fff;
+   }
+
+   .therapy-icon {
+      font-size: 5vw;
+   }
+
+   .therapy-close-button {
+      width: 5vw;
+   }
+}
+
+@media (min-width: 571px) {
 
    .ProTeras-cont h2 {
       height: 25%;
@@ -369,4 +392,27 @@
       font-size: 2.4vw;
    }
 
+   .therapy-info-cont {
+      height: 57%;
+      width: 43%;
+   }
+
+   .therapy-info-text p {
+      font-size: clamp(16px, 2.8vw, 28px);
+      color: #000;
+   }
+
+   .therapy-info-cont h1 {
+      font-size: clamp(20px, 4vw, 50px);
+   }
+
+   .therapy-close-button {
+      top: 24%;
+      right: 30%;
+      width: 3vw;
+   }
+
+   .therapy-icon {
+      font-size: 3vw;
+   }
 }

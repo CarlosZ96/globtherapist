@@ -452,7 +452,10 @@
     }
 
     .Log-Btn {
-        width: 50%;
+        width: 20%;
+        position: absolute;
+        left: 57%;
+        top: 27%;
     }
 
     .Glob-img-cont {
@@ -556,4 +559,13 @@
         width: 90%;
     }
 
+    .Theras-btn p {
+        font-size: 2vw;
+    }
+
+    .Theras-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 }
