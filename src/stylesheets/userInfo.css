@@ -213,6 +213,16 @@
     background-color: #2B3E9D;
 }
 
+.modal-content-who {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #2B3E9D;
+    width: 80%;
+    height: 94%;
+}
+
 .cita-card.completed-cita .cita-status button,
 .cita-card.completed-cita .reunion-btn,
 .cita-card.completed-cita .completed-badge {
@@ -287,4 +297,28 @@
 .status-approved .payment-im,
 .status-end .payment-im {
     display: none;
+}
+
+.user-citas-container {
+    height: 48%;
+}
+
+@media (max-width: 370px) {
+    .modal-content-who {
+        width: 90%;
+        height: 56%;
+    }
+}
+
+@media (min-width: 900px) {
+    .dates-modal-content {
+        height: 90%;
+        width: 70%;
+    }
+
+    .close-button-dates {
+        top: 5%;
+        left: 65%;
+        font-size: 3rem;
+    }
 }

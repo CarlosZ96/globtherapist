@@ -254,7 +254,7 @@ const Homepage = () => {
       </header>
       {showWho && (
         <div className="modal-overlay" onClick={toggleWho}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content-who" onClick={(e) => e.stopPropagation()}>
             <Who onClose={toggleWho} />
           </div>
         </div>

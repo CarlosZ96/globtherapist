@@ -349,6 +349,12 @@
       font-size: 1.5em;
    }
 
+   .therapy-info-cont {
+      height: 53%;
+      width: 93%;
+   }
+
+
    .therapy-info-cont p {
       font-size: 1em;
       color: #000;
@@ -356,6 +362,11 @@
 
    .therapy-icon {
       font-size: 7vw;
+   }
+
+   .therapy-close-button {
+      top: 27%;
+      right: 8%;
    }
 }
 

@@ -508,6 +508,7 @@
         justify-content: space-around;
         margin-top: 5%;
         margin-bottom: 8%;
+        height: 35vh;
     }
 
     .GlobThera {
@@ -570,18 +571,18 @@
     }
 }
 
-@media (max-width: 922px) {
+@media (min-width: 800px) {
     .GlobFront {
-        height: 33vh;
+        height: 46vh;
     }
 
     .Glob-img {
-        max-width: 80%;
+        max-width: 78%;
     }
 }
 
 @media (max-width: 370px) {
     .GlobFront {
-        height: 60vh;
+        height: 65vh;
     }
 }
