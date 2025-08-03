@@ -1,5 +1,7 @@
 .Home-Roof {
     display: flex;
+    flex-direction: row;
+    align-items: center;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -9,12 +11,16 @@
 
 .Home-txt {
     width: 10%;
+    height: 80%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     color: #fff;
     margin: 0;
+    border: 2px solid #fff;
+    margin-left: 1%;
+    border-radius: 5%;
 }
 
 .text-button {
@@ -111,6 +117,7 @@
 .Home-txt h1 {
     font-family: Itim, serif;
     font-size: 4vw;
+    font-weight: lighter;
     margin-left: 1%;
 }
 
@@ -569,6 +576,20 @@
         flex-direction: column;
         align-items: center;
     }
+
+    .Body-therapie {
+        width: 98%;
+    }
+
+    .Therapy-title-cont h1 {
+        font-size: clamp(16px, 2.8vw, 50px);
+    }
+}
+
+@media (max-width: 370px) {
+    .GlobFront {
+        height: 65vh;
+    }
 }
 
 @media (min-width: 800px) {
@@ -579,10 +600,8 @@
     .Glob-img {
         max-width: 78%;
     }
-}
 
-@media (max-width: 370px) {
-    .GlobFront {
-        height: 65vh;
+    .Body-therapie {
+        width: 100%;
     }
 }

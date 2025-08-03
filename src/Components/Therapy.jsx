@@ -510,179 +510,185 @@ const Therapy = () => {
   };
 
   return (
-    <form className="Therapy-body" onSubmit={handleSubmit}>
-      <div className="Therapy-title-cont">
-        <h1>GLOBTHERAPIST</h1>
-      </div>
-      <div className="Ask-Therapy">
-        <div className="Ask-Therapy-subtittle">
-          <h2>Agenda tu terapia</h2>
-        </div>
-        <div className="Ask-Therapy-fields-conts">
-          <div className="Ask-Therapy-field-cont">
-            <h3>Nombre completo:</h3>
-            <input
-              ref={fieldRefs.name}
-              className="Ask-Therapy-fields-input"
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-            {errors.name && <h5 className="error-text">{errors.name}</h5>}
+    <>
+      <form className="Therapy-body" onSubmit={handleSubmit}>
+        <div className="Ask-Therapy">
+          <div className="Ask-Therapy-data-cont">
+            <div className="Therapy-title-cont">
+              <h1>GLOBTHERAPIST</h1>
+            </div>
+            <div className="Ask-Therapy-subtittle">
+              <h2>Agenda tu terapia</h2>
+            </div>
+            <div className="Ask-Therapy-fields-conts">
+              <div className="Ask-Therapy-field-cont">
+                <h3>Nombre completo:</h3>
+                <input
+                  ref={fieldRefs.name}
+                  className="Ask-Therapy-fields-input"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+                {errors.name && <h5 className="error-text">{errors.name}</h5>}
+              </div>
+              <div className="Ask-Therapy-field-cont">
+                <h3>Teléfono:</h3>
+                <input
+                  ref={fieldRefs.phone}
+                  className="Ask-Therapy-fields-input"
+                  type="text"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
+                {errors.phone && <h5 className="error-text">{errors.phone}</h5>}
+              </div>
+              <div className="Ask-Therapy-field-cont">
+                <h3>Email:</h3>
+                <input
+                  ref={fieldRefs.email}
+                  className="Ask-Therapy-fields-input"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+                {errors.email && <h5 className="error-text">{errors.email}</h5>}
+              </div>
+            </div>
           </div>
-          <div className="Ask-Therapy-field-cont">
-            <h3>Teléfono:</h3>
-            <input
-              ref={fieldRefs.phone}
-              className="Ask-Therapy-fields-input"
-              type="text"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            />
-            {errors.phone && <h5 className="error-text">{errors.phone}</h5>}
+          <hr className="white-line" />
+          <div className="Therapy-selection-cont">
+            <div className="Ask-Therapy-txt">
+              <h3>Elige el tipo de terapia que deseas:</h3>
+            </div>
+            <div className="Therapies-cont">
+              {['Fisica', 'Lenguaje', 'Mental', 'Ocupacional'].map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  className={
+                    formData.therapyType === type
+                      ? 'Therapy-tittle-cont Therapy-tittle'
+                      : 'inactive-cont inactive-txt'
+                  }
+                  onClick={() => handleTherapyTypeClick(type)}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+            {errors.therapyType && (
+              <div className="error-container">
+                <h5 className="error-text">{errors.therapyType}</h5>
+              </div>
+            )}
+            <div className="Therapy-info">
+              <textarea
+                className="Therapy-txt-field"
+                placeholder="Explícanos brevemente por qué requieres tu terapia."
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
           </div>
-          <div className="Ask-Therapy-field-cont">
-            <h3>Email:</h3>
-            <input
-              ref={fieldRefs.email}
-              className="Ask-Therapy-fields-input"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            />
-            {errors.email && <h5 className="error-text">{errors.email}</h5>}
+          <hr className="white-line" />
+          <div className="Ask-Therapy-txt">
+            <h3>¿Qué día y a qué horas quieres tu cita?</h3>
           </div>
-        </div>
-        <hr className="white-line" />
-        <div className="Ask-Therapy-txt">
-          <h3>Elige el tipo de terapia que deseas:</h3>
-        </div>
-        <div className="Therapies-cont">
-          {['Fisica', 'Lenguaje', 'Mental', 'Ocupacional'].map((type) => (
-            <button
-              key={type}
-              type="button"
-              className={
-                formData.therapyType === type
-                  ? 'Therapy-tittle-cont Therapy-tittle'
-                  : 'inactive-cont inactive-txt'
-              }
-              onClick={() => handleTherapyTypeClick(type)}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
-        {errors.therapyType && (
-          <div className="error-container">
-            <h5 className="error-text">{errors.therapyType}</h5>
-          </div>
-        )}
-        <div className="Therapy-info">
-          <textarea
-            className="Therapy-txt-field"
-            placeholder="Explícanos brevemente por qué requieres tu terapia."
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          />
-        </div>
-        <hr className="white-line" />
-        <div className="Ask-Therapy-txt">
-          <h3>¿Qué día y a qué horas quieres tu cita?</h3>
-        </div>
-        <div className="calendar-cont">
-          <Calendar
-            collection="users"
-            onDateSelection={handleDateSelection}
-            therapyType={formData.therapyType}
-            onProSelection={handleProSelection}
-          />
-          {showAppointmentError && (
-            <div className="appointment-error">
-              <h5 className="error-text">Por favor, selecciona al menos una cita.</h5>
+          {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName && (
+            <div className="DynamiCanlendar-btn-cont">
+              <div className="Date-info-cont">
+                <div className="Date-info-txt">
+                  <h3>Tu cita quedó para el:</h3>
+                </div>
+                <div className="Date-info-description">
+                  <p className="appointment-date">
+                    {citaGlobal.date}
+                    {' '}
+                    de
+                    {' '}
+                    {citaGlobal.month}
+                    {' '}
+                    del
+                    {' '}
+                    {new Date().getFullYear()}
+                  </p>
+                  <p className="appointment-time">
+                    de
+                    {' '}
+                    {citaGlobal.time}
+                    {' '}
+                    a
+                    {' '}
+                    {calculateEndTime(normalizeTime(citaGlobal.time), 40)}
+                  </p>
+                  <p className="appointment-doctor">
+                    Asignada a:
+                    {' '}
+                    {citaGlobal.proName}
+                  </p>
+                  <div className="therapy-price-info">
+                    <p className="appointment-therapy">
+                      Terapia
+                      {' '}
+                      {formData.therapyType}
+                      : $
+                      {therapyPrices[formData.therapyType]?.toLocaleString('es-CO')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {showPayment && (
+                <div className="payment-overlay">
+                  <div className="payment-modal">
+                    <Mp
+                      key={retryPayment ? 'retry' : 'initial'}
+                      therapyType={formData.therapyType}
+                      onPaymentSuccess={handlePaymentSuccess}
+                      currentUser={currentUser}
+                      selectedPro={selectedPro}
+                      citaGlobal={citaGlobal}
+                      formData={formData}
+                      onClose={() => setShowPayment(false)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <button type="submit" className="DynamiCanlendar-btn">
+                <h4>Confirmar e ir a pagar</h4>
+              </button>
             </div>
           )}
         </div>
-        {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName && (
-          <div className="DynamiCanlendar-btn-cont">
-            <div className="Date-info-cont">
-              <div className="Date-info-txt">
-                <h3>Tu cita quedó para el:</h3>
-              </div>
-              <div className="Date-info-description">
-                <p className="appointment-date">
-                  {citaGlobal.date}
-                  {' '}
-                  de
-                  {' '}
-                  {citaGlobal.month}
-                  {' '}
-                  del
-                  {' '}
-                  {new Date().getFullYear()}
-                </p>
-                <p className="appointment-time">
-                  de
-                  {' '}
-                  {citaGlobal.time}
-                  {' '}
-                  a
-                  {' '}
-                  {calculateEndTime(normalizeTime(citaGlobal.time), 40)}
-                </p>
-                <p className="appointment-doctor">
-                  Asignada a:
-                  {' '}
-                  {citaGlobal.proName}
-                </p>
-                <div className="therapy-price-info">
-                  <p className="appointment-therapy">
-                    Terapia
-                    {' '}
-                    {formData.therapyType}
-                    : $
-                    {therapyPrices[formData.therapyType]?.toLocaleString('es-CO')}
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            {showPayment && (
-              <div className="payment-overlay">
-                <div className="payment-modal">
-                  <Mp
-                    key={retryPayment ? 'retry' : 'initial'}
-                    therapyType={formData.therapyType}
-                    onPaymentSuccess={handlePaymentSuccess}
-                    currentUser={currentUser}
-                    selectedPro={selectedPro}
-                    citaGlobal={citaGlobal}
-                    formData={formData}
-                    onClose={() => setShowPayment(false)}
-                  />
-                </div>
-              </div>
-            )}
-
-            <button type="submit" className="DynamiCanlendar-btn">
-              <h4>Confirmar e ir a pagar</h4>
-            </button>
+        {paymentStatus === 'success' && paymentDetails && (
+          <StatusBrick
+            paymentDetails={paymentDetails}
+            onClose={handleCloseStatus}
+            onRetry={() => {
+              setPaymentStatus(null);
+              setShowPayment(true);
+              setRetryPayment(true);
+            }}
+          />
+        )}
+      </form>
+      <div className="calendar-cont">
+        <Calendar
+          collection="users"
+          onDateSelection={handleDateSelection}
+          therapyType={formData.therapyType}
+          onProSelection={handleProSelection}
+        />
+        {showAppointmentError && (
+          <div className="appointment-error">
+            <h5 className="error-text">Por favor, selecciona al menos una cita.</h5>
           </div>
         )}
       </div>
-
-      {paymentStatus === 'success' && paymentDetails && (
-        <StatusBrick
-          paymentDetails={paymentDetails}
-          onClose={handleCloseStatus}
-          onRetry={() => {
-            setPaymentStatus(null);
-            setShowPayment(true);
-            setRetryPayment(true);
-          }}
-        />
-      )}
-    </form>
+    </>
   );
 };
 

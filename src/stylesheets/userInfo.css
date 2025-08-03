@@ -242,8 +242,8 @@
 
 .close-button-dates {
     position: absolute;
-    top: 62px;
-    right: 14px;
+    top: 10%;
+    right: 5%;
     color: #fff;
     background: none;
     border: none;
