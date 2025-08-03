@@ -396,6 +396,35 @@
     }
 
     .Ask-Therapy {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .Ask-Therapy hr {
+        display: none;
+    }
+
+    .Ask-Therapy-data-cont {
+        width: 50%;
+    }
+
+    .Therapy-selection-cont {
+        width: 50%;
+    }
+
+    .Ask-Therapy-fields-conts {
+        width: 98%;
+        margin-left: 2%;
+    }
+
+    .Ask-Therapy-txt h3{
+        font-size: clamp(20px, 3.5vw, 35px);
+    }
+
+    .calendar-cont {
         width: 100%;
     }
 }

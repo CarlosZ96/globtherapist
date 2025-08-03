@@ -512,11 +512,11 @@ const Therapy = () => {
   return (
     <>
       <form className="Therapy-body" onSubmit={handleSubmit}>
+        <div className="Therapy-title-cont">
+          <h1>GLOBTHERAPIST</h1>
+        </div>
         <div className="Ask-Therapy">
           <div className="Ask-Therapy-data-cont">
-            <div className="Therapy-title-cont">
-              <h1>GLOBTHERAPIST</h1>
-            </div>
             <div className="Ask-Therapy-subtittle">
               <h2>Agenda tu terapia</h2>
             </div>
@@ -592,9 +592,6 @@ const Therapy = () => {
             </div>
           </div>
           <hr className="white-line" />
-          <div className="Ask-Therapy-txt">
-            <h3>¿Qué día y a qué horas quieres tu cita?</h3>
-          </div>
           {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName && (
             <div className="DynamiCanlendar-btn-cont">
               <div className="Date-info-cont">
@@ -662,7 +659,9 @@ const Therapy = () => {
             </div>
           )}
         </div>
-
+        <div className="Ask-Therapy-txt">
+          <h3>¿Qué día y a qué horas quieres tu cita?</h3>
+        </div>
         {paymentStatus === 'success' && paymentDetails && (
           <StatusBrick
             paymentDetails={paymentDetails}
