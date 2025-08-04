@@ -271,7 +271,7 @@ const Homepage = () => {
       )}
       {showPros && (
         <div className="modal-overlay" onClick={togglePros}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content-procards" onClick={(e) => e.stopPropagation()}>
             <ProsCards onClose={togglePros} />
           </div>
         </div>

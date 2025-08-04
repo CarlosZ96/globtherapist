@@ -18,10 +18,10 @@
 }
 
 .close-button-procrd {
-   width: 7vw;
+   width: 5vw;
    position: absolute;
-   top: 10px;
-   right: 10px;
+   top: 24%;
+   right: 1%;
    background-color: transparent;
    border: none;
    cursor: pointer;
@@ -33,11 +33,25 @@
 
 .carousel-controls {
    position: absolute;
-   top: 95%;
+   top: 76%;
    width: 41%;
    display: flex;
    justify-content: space-between;
    transform: translateY(-50%);
+}
+
+.carousel-controls button {
+   font-size: 7vw;
+   background-color: transparent;
+   border: none;
+   cursor: pointer;
+   color: #041B5E;
+}
+
+.carousel-controls span {
+   display: flex;
+   align-items: center;
+   font-size: clamp(16px, 2.8vw, 28px);
 }
 
 .therapy-info-cont {
@@ -230,6 +244,10 @@
    height: 80%;
 }
 
+.ProTeras-list ul li {
+   border-radius: 5px;
+}
+
 .ProTeras-list ul li:nth-child(1) {
    display: flex;
    flex-direction: column;
@@ -237,7 +255,7 @@
    justify-content: center;
    height: 50%;
    width: 85%;
-   border-radius: 15px;
+   font-size: 2.5vw;
    background-color: #38DDE3;
    color: #041B5E;
    font-family: 'Poppins', sans-serif;
@@ -251,10 +269,9 @@
    justify-content: center;
    height: 50%;
    width: 85%;
-   border-radius: 15px;
    background-color: #041B5E;
    color: #fff;
-   font-size: 3.2vw;
+   font-size: 2.6vw;
    font-family: 'Poppins', sans-serif;
    font-weight: normal;
 }
@@ -266,10 +283,9 @@
    justify-content: center;
    height: 50%;
    width: 85%;
-   border-radius: 15px;
    background-color: #EF5557;
    color: #fff;
-   font-size: 3.5vw;
+   font-size: 2.6vw;
    font-family: 'Poppins', sans-serif;
    font-weight: normal;
 }
@@ -281,10 +297,9 @@
    justify-content: center;
    height: 50%;
    width: 85%;
-   border-radius: 15px;
    background-color: #687AD7;
    color: #fff;
-   font-size: 4vw;
+   font-size: 3.2vw;
    font-family: 'Poppins', sans-serif;
    font-weight: normal;
 }
@@ -368,6 +383,10 @@
       top: 27%;
       right: 8%;
    }
+
+   .modal-content-procards {
+      height: 55%;
+   }
 }
 
 @media (min-width: 371px) {
@@ -382,6 +401,10 @@
 
    .therapy-close-button {
       width: 5vw;
+   }
+
+   .modal-content-procards {
+      height: 60%;
    }
 }
 
@@ -425,5 +448,43 @@
 
    .therapy-icon {
       font-size: 3vw;
+   }
+}
+
+@media (min-width: 800px) {
+   .modal-content-procards {
+      height: 80%;
+      width: 80%;
+   }
+
+   .close-button-procrd {
+      top: 13%;
+      left: 85%;
+      width: 3.2vw;
+   }
+
+   .profile-image {
+      width: 15vw;
+      max-width: 150px;
+   }
+
+   .carousel-controls {
+      top: 86%;
+   }
+
+   .carousel-controls button {
+      font-size: 5vw;
+   }
+
+   .proDescription-cont p {
+      font-size: 2em;
+   }
+
+   .ProTeras-cont h2 {
+      font-size: 2.2vw;
+   }
+
+   .GlobProDescription-cont p {
+      font-size: 2.2vw;
    }
 }
