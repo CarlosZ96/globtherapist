@@ -3,7 +3,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 76%;
+    width: 96%;
     background-color: #2b3e9d;
     margin: 0;
     padding: 0;
@@ -39,6 +39,7 @@
     align-items: center;
     justify-content: center;
     width: 96%;
+    height: 96%;
 }
 
 .Ask-Therapy-data-cont {
@@ -372,6 +373,28 @@
     height: 100vh;
 }
 
+@media (max-width: 370px) {
+    .Therapy-body {
+        height: 100vh;
+    }
+
+    .Therapy-title-cont {
+        height: 10%;
+    }
+
+    .Ask-Therapy {
+        height: 90%;
+    }
+
+    .Calendar-cont {
+        width: 100%;
+    }
+
+    .Choose-Day-Cont {
+        height: 40vh;
+    }
+}
+
 @media (min-width: 571px) {
     .Ask-Therapy-subtittle h2 {
         font-size: clamp(16px, 3.5vw, 40px);
@@ -420,7 +443,7 @@
         margin-left: 2%;
     }
 
-    .Ask-Therapy-txt h3{
+    .Ask-Therapy-txt h3 {
         font-size: clamp(20px, 3.5vw, 35px);
     }
 

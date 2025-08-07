@@ -385,6 +385,17 @@
     position: absolute;
 }
 
+@media (max-width: 370px) {
+
+    .GlobFront {
+        max-height: 498px;
+    }
+
+    .Theras-cont {
+        max-height: 305px;
+    }
+}
+
 @media (max-width: 570px) {
 
     .GlobFront {

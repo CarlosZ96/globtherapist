@@ -347,7 +347,7 @@
 }
 
 .inactive {
-    background-color: #bdbdbd;
+    background-color: #12193f5d;
     color: #fff;
     border: none;
     width: 100%;
@@ -609,6 +609,12 @@
     justify-content: center;
     align-items: center;
     position: relative;
+}
+
+@media (min-width: 370px) {
+    .Ask-Therapy-txt h3 {
+        margin: 2% 0 8% 0;
+    }
 }
 
 @media (min-width: 571px) {
