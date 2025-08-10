@@ -524,6 +524,7 @@
         margin-top: 5%;
         margin-bottom: 8%;
         height: 35vh;
+        min-height: 200px;
     }
 
     .GlobThera {
