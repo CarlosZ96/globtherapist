@@ -308,14 +308,16 @@
 }
 
 .Theras-body {
-    height: 70%;
+    height: 80%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
 }
 
 .Theras-img {
-    max-width: 50%;
+    max-width: 62%;
+    height: 80%;
     margin-left: 4%;
     margin-bottom: 8%;
 }
@@ -331,11 +333,11 @@
 
 .Theras-btn-cont {
     height: 100%;
-    width: 29%;
+    width: 36%;
     display: flex;
     flex-direction: column;
     justify-content: end;
-    align-items: center;
+    align-items: flex-end;
 }
 
 .Theras-btn {
@@ -386,13 +388,8 @@
 }
 
 @media (max-width: 370px) {
-
-    .GlobFront {
-        max-height: 498px;
-    }
-
-    .Theras-cont {
-        max-height: 305px;
+    .Body-therapie {
+        height: 1100px;
     }
 }
 
@@ -597,12 +594,6 @@
     }
 }
 
-@media (max-width: 370px) {
-    .GlobFront {
-        height: 65vh;
-    }
-}
-
 @media (min-width: 800px) {
     .GlobFront {
         height: 46vh;
@@ -613,6 +604,22 @@
     }
 
     .Body-therapie {
+        height: 100vh;
         width: 100%;
+    }
+}
+
+@media (max-width: 370px) {
+
+    .GlobFront {
+        height: 439px;
+    }
+
+    .Theras-cont {
+        max-height: 305px;
+    }
+
+    .GlobThera {
+        height: 50%;
     }
 }

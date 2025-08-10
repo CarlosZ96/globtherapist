@@ -375,15 +375,24 @@
 
 @media (max-width: 370px) {
     .Therapy-body {
-        height: 100vh;
+        height: 60%;
+    }
+
+    .calendar-cont {
+        height: 40%;
+        width: 100%;
     }
 
     .Therapy-title-cont {
-        height: 10%;
+        height: 6%;
+    }
+
+    .Ask-Therapy-txt {
+        height: 6%;
     }
 
     .Ask-Therapy {
-        height: 90%;
+        height: 83%;
     }
 
     .Calendar-cont {
@@ -392,6 +401,26 @@
 
     .Choose-Day-Cont {
         height: 40vh;
+    }
+
+    .Ask-Therapy-data-cont {
+        height: 50%;
+        margin-top: 2%;
+    }
+
+    .Therapy-selection-cont {
+        height: 50%;
+    }
+
+    .Ask-Therapy-fields-conts {
+        height: 80%;
+    }
+
+    .Ask-Therapy-txt h3 {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-size: 5.3vw;
     }
 }
 

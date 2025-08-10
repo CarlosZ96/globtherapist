@@ -612,6 +612,10 @@
 }
 
 @media (min-width: 370px) {
+    .DynamiCanlendar-cont {
+        height: 100%;
+    }
+
     .Ask-Therapy-txt h3 {
         margin: 2% 0 8% 0;
     }
