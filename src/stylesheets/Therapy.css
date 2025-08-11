@@ -436,8 +436,17 @@
 
 @media (min-width: 571px) {
     .Ask-Therapy-data-cont {
+        justify-content: flex-start;
         height: 100vh;
         width: 80%;
+    }
+
+    .Therapy-title-cont {
+        height: 10%;
+    }
+
+    .Therapy-title-cont h1 {
+        font-size: clamp(20px, 10vw, 36px);
     }
 }
 
@@ -451,7 +460,7 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         width: 100%;
     }
 
@@ -461,6 +470,7 @@
 
     .Ask-Therapy-data-cont {
         width: 50%;
+        height: 80vh;
     }
 
     .Therapy-selection-cont {
@@ -472,8 +482,42 @@
         margin-left: 2%;
     }
 
+    .Therapies-cont {
+        height: 35%;
+    }
+
+    .inactive-cont,
+    .Therapy-tittle {
+        width: 90%;
+        height: 63%;
+    }
+
+    .Ask-Therapy-txt {
+        height: 6%;
+    }
+
+    .Therapy-title-cont h1 {
+        font-size: clamp(20px, 15vw, 49px);
+    }
+
     .Ask-Therapy-txt h3 {
-        font-size: clamp(20px, 3.5vw, 35px);
+        font-size: clamp(20px, 2.5vw, 35px);
+    }
+
+    .Therapy-info {
+        justify-content: flex-start;
+        width: 90%;
+        height: 48%
+    }
+
+    .Therapy-txt-field {
+        height: 80%;
+
+    }
+
+    .inactive-txt,
+    .Therapy-tittle {
+        font-size: clamp(20px, 3vw, 36px);
     }
 
     .calendar-cont {
