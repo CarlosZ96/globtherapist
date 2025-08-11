@@ -345,7 +345,6 @@ const Calendar = ({
             </div>
           ) : (
             <div className="Hours-selector">
-              <h3>¿A que hora?:</h3>
               <div className="Time-control">
                 <button type="button" onClick={() => decrementTime(setSelectedTime, selectedTime, 6)}>-</button>
                 <div className="Time-hour-txt">
