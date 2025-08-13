@@ -600,6 +600,10 @@
     .Body-therapie {
         width: 100%;
     }
+
+    .Log-Btn-Cont-User {
+        width: 30%;
+    }
 }
 
 @media (max-width: 370px) {

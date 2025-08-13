@@ -557,11 +557,11 @@
     height: 100%;
 }
 
-.WhoIm-cont button {
+.close-button-who {
     position: absolute;
-    top: 5%;
+    top: 16%;
     right: 10%;
-    max-width: 10vw;
+    max-width: 8vw;
     background: none;
     border: none;
 }
@@ -600,24 +600,53 @@
 
 .Who-txt-cont p {
     width: 90%;
-    font-size: 4vw;
+    font-size: clamp(2.5vw, 4vw, 28px);
     color: #fff;
     font-family: Itim, serif;
     font-weight: 300;
     text-align: center;
 }
 
-@media (min-width: 370px) {
-    .WhoIm-cont button {
+@media (max-width: 370px) {
+
+    .pending-dates {
+        top: -73%;
+        left: -20%;
+        height: 16px;
+    }
+
+    .close-button-who {
         top: 24%;
         right: 6%;
     }
 }
 
-@media (min-width: 571px) {
+@media (max-width: 570px) {
     .pending-dates {
-        top: 15%;
-        left: 33%;
-        height: 21px;
+        top: -76%;
+        left: -15%;
+        height: 16px;
+    }
+
+    .modal-content-who {
+        width: 80%;
+        height: 71%;
+    }
+
+    .close-button-who {
+        top: 16%;
+        right: 10%;
+        opacity: 0.8;
+    }
+}
+
+@media (min-width: 800px) {
+
+    .Who-title-cont h1 {
+        font-size: 7vw;
+    }
+
+    .Who-txt-cont p {
+        font-size: clamp(2.5vw, 5vw, 30px);
     }
 }
