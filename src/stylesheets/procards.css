@@ -311,6 +311,7 @@
 
    .ProCard-cont {
       flex-direction: column;
+      min-height: 290px;
    }
 
    .ProCard-sec1,

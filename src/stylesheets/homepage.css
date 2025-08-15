@@ -604,6 +604,10 @@
     .Log-Btn-Cont-User {
         width: 30%;
     }
+
+    .Log-Btn-user h3 {
+        font-size: 3vw;
+    }
 }
 
 @media (max-width: 370px) {

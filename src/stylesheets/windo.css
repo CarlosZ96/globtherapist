@@ -621,22 +621,21 @@
     }
 }
 
-@media (max-width: 570px) {
+@media (min-width: 371px) and (max-width: 570px) {
     .pending-dates {
         top: -76%;
         left: -15%;
         height: 16px;
     }
 
-    .modal-content-who {
-        width: 80%;
-        height: 71%;
+    .close-button-who {
+        top: 26%;
+        right: 11%;
+        opacity: 0.8;
     }
 
-    .close-button-who {
-        top: 16%;
-        right: 10%;
-        opacity: 0.8;
+    .Who-txt-cont p {
+        font-size: clamp(2.5vw, 4vw, 18px);
     }
 }
 
@@ -648,5 +647,15 @@
 
     .Who-txt-cont p {
         font-size: clamp(2.5vw, 5vw, 30px);
+    }
+
+    .modal-content-who {
+        width: 90%;
+        height: 84%;
+    }
+
+    .close-button-who {
+        top: 11%;
+        right: 7%;
     }
 }

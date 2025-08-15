@@ -310,6 +310,13 @@
     }
 }
 
+@media (min-width: 371px) and (max-width: 570px) {
+    .modal-content-who {
+        width: 80%;
+        height: 52%;
+    }
+}
+
 @media (min-width: 900px) {
     .dates-modal-content {
         height: 90%;
