@@ -121,6 +121,12 @@
     height: 100%;
 }
 
+@media (min-width: 371px) and (max-width: 570px) {
+    .calendar-month-cont {
+        height: 9vh;
+    }
+}
+
 @media (min-width: 571px) {
     .calendar-month-cont {
         height: 11vh;
