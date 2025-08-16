@@ -121,15 +121,16 @@
     height: 100%;
 }
 
-@media (min-width: 371px) and (max-width: 570px) {
+@media (min-width: 371px) and (max-width: 799px) {
     .calendar-month-cont {
-        height: 9vh;
-    }
-}
-
-@media (min-width: 571px) {
-    .calendar-month-cont {
-        height: 11vh;
+        height: 8%;
     }
 
+    .Calendar-cont {
+        height: 80%;
+    }
+
+    .Choose-Day-btns-cont {
+        height: 20%;
+    }
 }

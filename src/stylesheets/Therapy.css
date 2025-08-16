@@ -424,14 +424,19 @@
     }
 }
 
-@media (min-width: 571px) {
-    .Ask-Therapy-subtittle h2 {
-        font-size: clamp(16px, 3.5vw, 40px);
-    }
+@media (min-width: 371px) and (max-width: 799px) {
 
     .Ask-Therapy-subtittle {
         margin-bottom: 3%;
     }
+
+    .calendar-cont {
+        display: flex;
+        justify-content: center;
+        height: 100vh;
+        width: 96vw;
+    }
+
 }
 
 @media (min-width: 571px) {

@@ -637,4 +637,64 @@
     .Hours-cont {
         height: 35vh;
     }
+
+    .DynamiCanlendar-cont {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+@media (min-width: 371px) and (max-width: 799px) {
+    .DynamiCanlendar-cont {
+        width: 80%;
+    }
+
+    .calendar-week-cont {
+        height: 6%;
+    }
+
+    .Choose-Day-Cont {
+        height: 67%;
+    }
+
+    .Hours-cont {
+        height: 15%;
+    }
+
+    .inactive,
+    .active {
+        border-radius: 0;
+    }
+
+    .Hours-selector-cont {
+        height: 65%;
+    }
+
+    .Confirm-button {
+        height: 35%;
+    }
+
+    .Hours-selector {
+        height: 100%;
+    }
+
+    .Time-control {
+        height: 80%;
+    }
+
+    .Time-hour-txt h3 {
+        font-size: 4vw;
+    }
+
+    .Time-control button {
+        font-size: 3.2vw;
+    }
+
+    .See-Hours h3 {
+        font-size: 3.5vw;
+    }
+
+    .Choose-Day-txt {
+        font-size: 3vw;
+    }
 }
