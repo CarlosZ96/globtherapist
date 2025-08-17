@@ -537,4 +537,13 @@
     .calendar-cont {
         width: 100%;
     }
+
+    .Ask-Therapy-subtittle {
+        height: 20%;
+    }
+
+    .Ask-Therapy-subtittle h2 {
+        font-size: 3.5vw;
+        color: #fff;
+    }
 }
