@@ -116,7 +116,7 @@
 
 .Home-txt h1 {
     font-family: Itim, serif;
-    font-size: 4vw;
+    font-size: 3vw;
     font-weight: lighter;
     margin-left: 1%;
 }
@@ -391,6 +391,10 @@
     .Body-therapie {
         height: 1100px;
     }
+
+    .Home-txt {
+        height: 56%;
+    }
 }
 
 @media (max-width: 570px) {
@@ -589,6 +593,12 @@
 }
 
 @media (min-width: 800px) {
+
+    .Home-txt {
+        width: 8%;
+        height: 75%;
+    }
+
     .GlobFront {
         height: 60vh;
     }

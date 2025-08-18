@@ -454,23 +454,23 @@
 
 @media (min-width: 800px) {
    .modal-content-procards {
-      height: 80%;
-      width: 80%;
+      height: 70%;
+      width: 70%;
    }
 
    .close-button-procrd {
-      top: 13%;
-      left: 85%;
+      top: 17%;
+      left: 81%;
       width: 3.2vw;
    }
 
    .profile-image {
-      width: 15vw;
+      width: 11vw;
       max-width: 150px;
    }
 
    .carousel-controls {
-      top: 86%;
+      top: 81%;
    }
 
    .carousel-controls button {

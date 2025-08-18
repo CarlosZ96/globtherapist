@@ -641,8 +641,83 @@
 
 @media (min-width: 800px) {
 
+    .Login-cont {
+        left: 19%;
+        top: 12%;
+        width: 68vw;
+        height: 65vh;
+    }
+
+    .log-txt-h {
+        font-size: 3.5vw;
+    }
+
+    .Login-input {
+        height: 70%;
+        border: #2B3A67 4px solid;
+        font-size: 2.8vw;
+    }
+
+    .Login-submit-cont button {
+        font-family: 'font-family: Itim, serif';
+        font-size: 3vw;
+    }
+
+    .Create-cont {
+        top: 5%;
+        height: 89vh;
+    }
+
+    .Create-title-cont {
+        height: 10%;
+    }
+
+    .Create-title-cont h1 {
+        font-size: 3.5vw;
+    }
+
+    .Crt-input-cont h3 {
+        font-size: 3vw;
+    }
+
+    .Create-input {
+        height: 70%;
+        font-size: 2vw;
+    }
+
+    .create-submit-cont button {
+        width: 30%;
+        height: 70%;
+        margin: 0;
+    }
+
+    .Create-pro-popup {
+        height: 10%;
+    }
+
+    .Create-pro-popup h4 {
+        font-size: 2.2vw;
+        margin: 0;
+    }
+
+    .Create-pro-popup button {
+        width: 14%;
+        height: 65%;
+        font-size: 1.5vw;
+    }
+
+    .create-submit-cont button h3 {
+        font-size: 3vw;
+    }
+
     .Who-title-cont h1 {
         font-size: 7vw;
+    }
+
+    .close-button-crt {
+        top: -4%;
+        left: 93%;
+        font-size: 5vw;
     }
 
     .Who-txt-cont p {
@@ -655,7 +730,65 @@
     }
 
     .close-button-who {
-        top: 11%;
-        right: 7%;
+        top: 6%;
+        right: 10%;
+    }
+
+    .CreatePro-cont {
+        top: 2%;
+        height: 96vh;
+    }
+
+    .CreatePro-input-cont label {
+        font-size: 2.8vw;
+    }
+
+
+    .CreatePro-input-cont input,
+    .CreatePro-input-cont select {
+        height: 70%;
+        font-size: 2vw;
+    }
+
+    .CreatePro-input-cont select {
+        position: absolute;
+        left: 41.5%;
+        width: 10%;
+        height: 6vh;
+    }
+
+    .CreatePro-therapies label {
+        font-size: 2.8vw;
+    }
+
+    .therapy-buttons {
+        display: flex;
+        width: 80%;
+    }
+
+    .therapy-button {
+        font-size: 2vw;
+        width: 60%;
+        height: 60%;
+    }
+
+    .CreatePro-submit {
+        height: 7%;
+    }
+
+    .CreatePro-submit button {
+        height: 88%;
+        width: 15%;
+        font-size: 2vw;
+    }
+
+    .close-button-crtp {
+        top: -3%;
+        left: 93%;
+        font-size: 5vw;
+    }
+
+    .CreatePro-input-cont:nth-of-type(4) {
+        justify-content: space-between;
     }
 }

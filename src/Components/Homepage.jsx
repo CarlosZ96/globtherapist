@@ -98,26 +98,16 @@ const Homepage = () => {
         diciembre: 11,
       };
 
-      // Obtener fecha y hora actual en Colombia (UTC-5)
       const now = new Date();
-      const offsetColombia = -5 * 60; // UTC-5 en minutos
+      const offsetColombia = -5 * 60;
       const nowColombia = new Date(now.getTime() + offsetColombia * 60000);
-
-      // Crear fecha de la cita
       const citaMonth = monthMap[cita.month.toLowerCase()];
       const citaDay = parseInt(cita.date, 10);
       const citaYear = nowColombia.getFullYear();
-
-      // Normalizar hora de la cita
       const normalizedTime = normalizeTime(cita.time);
       if (!normalizedTime) return false;
-
       const [citaHours, citaMinutes] = normalizedTime.split(':').map(Number);
-
-      // Crear objeto Date para la cita (en UTC-5)
       const citaDate = new Date(citaYear, citaMonth, citaDay, citaHours, citaMinutes);
-
-      // Comparar con la hora actual en Colombia
       return citaDate < nowColombia;
     } catch (error) {
       console.error('Error verificando cita:', error);
@@ -155,8 +145,6 @@ const Homepage = () => {
         if (needsUpdate) {
           await updateDoc(docRef, { [citasField]: updatedCitas });
           console.log('Citas pasadas actualizadas a "end"');
-
-          // Recargar la página para reflejar cambios
           window.location.reload();
         }
       }
@@ -165,14 +153,12 @@ const Homepage = () => {
     }
   };
 
-  // Verificar citas pasadas al cargar el componente y cuando cambia el usuario
   useEffect(() => {
     if (currentUser && !appointmentsUpdated) {
       updatePastAppointments();
       setAppointmentsUpdated(true);
     }
 
-    // Resetear cuando el usuario cierre sesión
     if (!currentUser) {
       setAppointmentsUpdated(false);
     }

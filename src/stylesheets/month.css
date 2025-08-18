@@ -647,6 +647,7 @@
 @media (min-width: 371px) and (max-width: 799px) {
     .DynamiCanlendar-cont {
         width: 80%;
+        min-width: 370px;
     }
 
     .calendar-week-cont {
@@ -659,6 +660,7 @@
 
     .Hours-cont {
         height: 15%;
+        margin-bottom: 1%;
     }
 
     .inactive,
@@ -696,5 +698,80 @@
 
     .Choose-Day-txt {
         font-size: 3vw;
+    }
+
+    .calendar-day-header {
+        font-size: 3.5vw;
+    }
+
+    .calendar-day {
+        font-size: 4vw;
+    }
+}
+
+@media (min-width: 371px) and (max-width: 799px) {
+    .DynamiCanlendar-cont {
+        width: 75%;
+    }
+}
+
+@media (min-width: 800px) {
+    .calendar-week-cont {
+        height: 7%;
+    }
+
+    .Choose-Day-Cont {
+        height: 63%;
+    }
+
+    .Hours-cont {
+        height: 20%;
+        margin-bottom: 0.5%;
+    }
+
+    .calendar-day {
+        font-size: 3vw;
+    }
+
+    .Choose-Day-txt {
+        font-size: 2.5vw;
+    }
+
+    .calendar-cont {
+        width: 88vw;
+    }
+
+    .calendar-day-header {
+        font-size: 3vw;
+        padding: 0;
+    }
+
+    .Time-control {
+        height: 90%;
+        width: 60%;
+    }
+
+    .Time-hour-txt h3 {
+        font-size: 3.5vw;
+    }
+
+    .Time-control button {
+        font-size: 3.5vw;
+    }
+
+    .Hours-selector-cont {
+        height: 70%;
+    }
+
+    .Confirm-button {
+        height: 30%;
+    }
+
+    .See-Hours h3 {
+        font-size: 2.5vw;
+    }
+
+    .See-Hours {
+        width: 40%;
     }
 }
