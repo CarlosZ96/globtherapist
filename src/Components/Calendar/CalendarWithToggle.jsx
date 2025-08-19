@@ -368,7 +368,7 @@ const Calendar = ({
         </div>
         <div
           className="Confirm-button"
-          style={{ display: isConfirmed ? 'none' : 'block' }}
+          style={{ display: isConfirmed ? 'none' : 'flex' }}
         >
           <button
             type="button"
