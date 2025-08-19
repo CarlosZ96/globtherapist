@@ -311,7 +311,10 @@ const Calendar = ({
       </div>
       <hr className="date-blue-line" />
       <div className="Hours-cont">
-        <div className="Hours-selector-cont">
+        <div
+          className="Hours-selector-cont"
+          style={isConfirmed ? { height: '90%' } : {}}
+        >
           {collectionName === 'pros' ? (
             <div className="Hours-selector-pro">
               <div className="Time-selector-pro">
@@ -344,8 +347,14 @@ const Calendar = ({
               </div>
             </div>
           ) : (
-            <div className="Hours-selector">
-              <div className="Time-control">
+            <div
+              className="Hours-selector"
+              style={isConfirmed ? { height: '100%' } : {}}
+            >
+              <div
+                className="Time-control"
+                style={isConfirmed ? { height: '90%' } : {}}
+              >
                 <button type="button" onClick={() => decrementTime(setSelectedTime, selectedTime, 6)}>-</button>
                 <div className="Time-hour-txt">
                   <h3>
@@ -367,24 +376,6 @@ const Calendar = ({
             <h3>{collectionName === 'pros' ? 'Confirmar mis horarios' : 'Confirmar hora'}</h3>
           </button>
 
-          {isConfirmed && !onReturn && (
-            <>
-              <button type="button" className="Edit-Hours" onClick={handleEditClick}>
-                <img src={edit} className="edit-btn" alt="" />
-                Editar
-              </button>
-              {isPro && (
-                <button
-                  type="button"
-                  className="Lunch-btn"
-                  onClick={handleLunchClick}
-                  style={{ display: showLunchButton ? 'block' : 'none' }}
-                >
-                  <h3>+ Hora de Almuerzo</h3>
-                </button>
-              )}
-            </>
-          )}
           {isConfirmed && onReturn && (
             <button
               type="button"
@@ -395,6 +386,24 @@ const Calendar = ({
             </button>
           )}
         </div>
+        {isConfirmed && !onReturn && (
+          <>
+            <button type="button" className="Edit-Hours" onClick={handleEditClick}>
+              <img src={edit} className="edit-btn" alt="" />
+              Editar
+            </button>
+            {isPro && (
+              <button
+                type="button"
+                className="Lunch-btn"
+                onClick={handleLunchClick}
+                style={{ display: showLunchButton ? 'block' : 'none' }}
+              >
+                <h3>+ Hora de Almuerzo</h3>
+              </button>
+            )}
+          </>
+        )}
       </div>
       {showLunchDialog && (
         <div className="Lunch-dialog">
