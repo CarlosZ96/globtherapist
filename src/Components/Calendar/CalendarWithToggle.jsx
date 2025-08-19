@@ -366,7 +366,10 @@ const Calendar = ({
             </div>
           )}
         </div>
-        <div className="Confirm-button">
+        <div
+          className="Confirm-button"
+          style={{ display: isConfirmed ? 'none' : 'block' }}
+        >
           <button
             type="button"
             className={`See-Hours ${isConfirmed ? 'disable' : ''}`}
