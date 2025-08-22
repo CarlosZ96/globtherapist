@@ -317,7 +317,7 @@
     }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 800px) {
     .dates-modal-content {
         height: 90%;
         width: 70%;
@@ -327,5 +327,14 @@
         top: 5%;
         left: 65%;
         font-size: 3rem;
+    }
+
+
+    .user-citas-container h2 {
+        font-size: 3.5vw;
+    }
+
+    .no-citas {
+        font-size: 3.5vw;
     }
 }

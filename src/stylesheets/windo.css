@@ -648,6 +648,10 @@
         height: 65vh;
     }
 
+    .pending-dates {
+        left: 14%;
+    }
+
     .log-txt-h {
         font-size: 3.5vw;
     }

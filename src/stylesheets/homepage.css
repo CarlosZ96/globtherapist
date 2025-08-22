@@ -585,6 +585,8 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
+        height: 26%;
     }
 
     .Body-therapie {
@@ -612,11 +614,15 @@
     }
 
     .Log-Btn-Cont-User {
-        width: 30%;
+        width: 22%;
     }
 
     .Log-Btn-user h3 {
-        font-size: 3vw;
+        font-size: 2.5vw;
+    }
+
+    .Log-Btn {
+        width: 25%;
     }
 }
 
