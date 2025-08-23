@@ -787,4 +787,8 @@
     .See-Hours {
         width: 40%;
     }
+
+    .calendar-title {
+        font-size: 2vw;
+    }
 }

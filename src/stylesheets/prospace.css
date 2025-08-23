@@ -238,7 +238,8 @@
     border-radius: 5px;
 }
 
-.file-link-cert, .file-link {
+.file-link-cert,
+.file-link {
     width: 80%;
     max-width: 80%;
     display: flex;
@@ -868,4 +869,73 @@
     font-size: 4vw;
     font-family: Itim, serif;
     font-weight: lighter;
+}
+
+@media (min-width: 800px) {
+    .therapies {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 50vh;
+    }
+
+    .therapies-title {
+        height: 30%;
+    }
+
+    .therapies-title h1 {
+        font-size: 3vw;
+    }
+
+    .Therapies-cont {
+        width: 100%;
+        height: 70%;
+    }
+
+    .thera-cont-act {
+        font-size: 2vw;
+        width: 40%;
+        height: 70%;
+    }
+
+    .prodata-title {
+        height: 10%;
+    }
+
+    .data-cont {
+        height: 90%;
+    }
+
+    .prodata-title h1 {
+        font-size: 3vw;
+    }
+
+    .pro-name {
+        font-size: 2.8vw;
+    }
+
+    .user-image-cont {
+        width: 16%;
+    }
+
+    .pro-data-img {
+        max-width: 20%;
+    }
+
+    .pro-personal-info {
+        height: 56%;
+    }
+
+    .save-btn {
+        height: 10%;
+    }
+
+    .pro-personal-info-data h3 {
+        font-size: 2.5vw;
+    }
+
+    .hdv-cont h2, .pro-professional-card h2, .pro-certificates-cont h2 {
+        font-size: 2.5vw;
+    }
 }

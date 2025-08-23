@@ -234,7 +234,6 @@ const MyCalendar = ({ onEdit }) => {
           </div>
         ))}
       </div>
-      <h2>Mi horario será:</h2>
       <div className="schedule-info">
         <div className="work-schedule">
           <h3>De</h3>
