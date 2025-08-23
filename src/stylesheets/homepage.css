@@ -146,6 +146,10 @@
     border: 2px #fff solid;
 }
 
+.Log-Btn-txt:hover {
+    color: #fff;
+}
+
 .Log-Btn-user {
     width: 100%;
     height: 100%;
@@ -639,4 +643,10 @@
     .GlobThera {
         height: 50%;
     }
+}
+
+@media (min-width: 800px) {
+  .Home-Page.no-user .Log-Btn {
+    width: 41%;
+  }
 }

@@ -165,7 +165,7 @@ const Homepage = () => {
   }, [currentUser]);
 
   return (
-    <div className="Home-Page">
+    <div className={`Home-Page ${!currentUser ? 'no-user' : ''}`}>
       <header className="Home-Roof">
         <div className="Home-txt">
           <h1>GTH</h1>
@@ -188,7 +188,6 @@ const Homepage = () => {
             <button
               type="button"
               className="Log-Btn"
-              style={noUserStyles.logBtn}
               onClick={toggleLogin}
             >
               <h3 className="Log-Btn-txt">Loguearse</h3>

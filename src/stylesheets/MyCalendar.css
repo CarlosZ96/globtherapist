@@ -142,7 +142,7 @@
     }
 
     .Calendar-cont {
-        height: 80%;
+        height: 45%;
     }
 
     .MyCalendar-cont {
@@ -150,7 +150,21 @@
         height: 100vh;
     }
 
+    .MyCalendar-header {
+        height: 4%;
+    }
+
     .MyCalendar-header h1 {
         font-size: 3.5vw;
+    }
+
+    .MyCalendar-header button {
+        width: 6%;
+        font-size: 1vw;
+    }
+
+
+    .MyCalendar-cont {
+        width: 58%;
     }
 }
