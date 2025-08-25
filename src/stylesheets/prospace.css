@@ -69,7 +69,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 3%;
+    margin: 1.5% 0 1.5% 0;
 }
 
 .user-image-cont {
@@ -610,7 +610,7 @@
 }
 
 .pp-cont {
-    width: 100vw;
+    width: 100%;
     height: 80vh;
     display: flex;
     flex-direction: column;
@@ -821,7 +821,7 @@
 }
 
 .therapies {
-    width: 100vw;
+    width: 100%;
 }
 
 .therapies-title {
@@ -907,6 +907,10 @@
         height: 90%;
     }
 
+    .question-cont {
+        width: 4%;
+    }
+
     .prodata-title h1 {
         font-size: 3vw;
     }
@@ -916,11 +920,12 @@
     }
 
     .user-image-cont {
-        width: 16%;
+        width: 12%;
+        height: 90%;
     }
 
     .pro-data-img {
-        max-width: 20%;
+        max-width: 85%;
     }
 
     .pro-personal-info {
@@ -929,13 +934,102 @@
 
     .save-btn {
         height: 10%;
+        width: 25%;
+        font-size: 2.5vw;
     }
 
     .pro-personal-info-data h3 {
         font-size: 2.5vw;
     }
 
-    .hdv-cont h2, .pro-professional-card h2, .pro-certificates-cont h2 {
+    .hdv-cont,
+    .pro-professional-card,
+    .pro-certificates-cont {
+        height: 25%;
+    }
+
+    .hdv-cont h2,
+    .pro-professional-card h2,
+    .pro-certificates-cont h2 {
         font-size: 2.5vw;
+    }
+
+    .file-link-cert,
+    .file-link {
+        font-size: 2vw;
+        height: 82%;
+    }
+
+    .prodata-cont {
+        height: 120vh;
+    }
+
+    .pro-personal-info-data p {
+        font-size: 2vw;
+    }
+
+    .edit-btn,
+    .edit-btn-certificates {
+        font-size: 2vw;
+    }
+
+    .pp-cont {
+        height: 100vh;
+    }
+
+    .hdv-name-cont {
+        height: 20%;
+    }
+
+    .fields-cont {
+        height: 80%;
+    }
+
+    .PP-Title h1 {
+        font-size: 3vw;
+    }
+
+    .hdv-name-cont h2 {
+        font-size: 3vw;
+        justify-content: center;
+    }
+
+    .hdv-name-cont .edit-btn {
+        font-size: 2.3vw;
+    }
+
+    .hdv-field-cont h3,
+    .hdv-years-cont h3,
+    .hdv-desc-cont h3 {
+        font-size: 2.5vw;
+    }
+
+    .hdv-year,
+    .specialization {
+        font-size: 1.5vw;
+        height: 70%;
+    }
+
+
+    .hdv-year {
+        height: 80%;
+        width: 5%;
+        padding: 0;
+        text-align: center;
+        border-radius: 3px;
+    }
+
+    .hdv-desc {
+        font-size: 1.5vw;
+        width: 44%;
+        padding: 1%;
+    }
+
+    .hdv-button-cont {
+        height: 100%;
+    }
+
+    .pro-img {
+        height: 80%;
     }
 }
