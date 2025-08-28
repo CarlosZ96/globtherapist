@@ -13,8 +13,6 @@ const Who = ({ onClose }) => {
       try {
         const publicProIds = ['I0AULHKRBZYVAJ3JQ7rhWuBbxhe2',
           'V5zxUoV4SrZYVyX1QA79UovUCVG2', '5sQCDthzpIerAeLVMN2lYiO41AE2'];
-
-        // Obtener documentos específicos
         const prosSnapshot = await getDoc(
           collection(db, 'pros'),
         );

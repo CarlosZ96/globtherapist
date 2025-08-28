@@ -1,3 +1,4 @@
+/* eslint-disable react/button-has-type */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
@@ -22,6 +23,7 @@ const Therapy = () => {
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [retryPayment, setRetryPayment] = useState(false);
+  const [showDateModal, setShowDateModal] = useState(true);
   const therapyPrices = {
     Fisica: 70000,
     Lenguaje: 55000,
@@ -509,6 +511,12 @@ const Therapy = () => {
     window.location.reload();
   };
 
+  useEffect(() => {
+    if (citaGlobal?.date && citaGlobal?.month && citaGlobal?.time && citaGlobal?.proName) {
+      setShowDateModal(true);
+    }
+  }, [citaGlobal]);
+
   return (
     <>
       <form className="Therapy-body" onSubmit={handleSubmit}>
@@ -598,48 +606,60 @@ const Therapy = () => {
         </div>
         {citaGlobal.date && citaGlobal.month && citaGlobal.time && citaGlobal.proName && (
           <div className="DynamiCanlendar-btn-cont">
-            <div className="Date-info-cont">
-              <div className="Date-info-txt">
-                <h3>Tu cita quedó para el:</h3>
-              </div>
-              <div className="Date-info-description">
-                <p className="appointment-date">
-                  {citaGlobal.date}
-                  {' '}
-                  de
-                  {' '}
-                  {citaGlobal.month}
-                  {' '}
-                  del
-                  {' '}
-                  {new Date().getFullYear()}
-                </p>
-                <p className="appointment-time">
-                  de
-                  {' '}
-                  {citaGlobal.time}
-                  {' '}
-                  a
-                  {' '}
-                  {calculateEndTime(normalizeTime(citaGlobal.time), 40)}
-                </p>
-                <p className="appointment-doctor">
-                  Asignada a:
-                  {' '}
-                  {citaGlobal.proName}
-                </p>
-                <div className="therapy-price-info">
-                  <p className="appointment-therapy">
-                    Terapia
-                    {' '}
-                    {formData.therapyType}
-                    : $
-                    {therapyPrices[formData.therapyType]?.toLocaleString('es-CO')}
-                  </p>
-                </div>
-              </div>
-            </div>
+            {citaGlobal?.date
+              && citaGlobal?.month && citaGlobal?.time && citaGlobal?.proName && showDateModal && (
+                <div className="date-overlay">
+                  <div className="Date-info-cont">
+                    <button
+                      className="close-date-btn"
+                      onClick={() => setShowDateModal(false)}
+                    >
+                      ✖
+                    </button>
+                    <div className="Date-info-txt">
+                      <h3>Tu cita quedó para el:</h3>
+                    </div>
+                    <div className="Date-info-description">
+                      <p className="appointment-date">
+                        {citaGlobal.date}
+                        {' '}
+                        de
+                        {citaGlobal.month}
+                        {' '}
+                        del
+                        {new Date().getFullYear()}
+                      </p>
+                      <p className="appointment-time">
+                        de
+                        {' '}
+                        {citaGlobal.time}
+                        {' '}
+                        a
+                        {' '}
+                        {calculateEndTime(normalizeTime(citaGlobal.time), 40)}
+                      </p>
+                      <p className="appointment-doctor">
+                        Asignada a:
+                        {' '}
+                        {citaGlobal.proName}
+                      </p>
+                      <div className="therapy-price-info">
+                        <p className="appointment-therapy">
+                          Terapia
+                          {' '}
+                          {formData.therapyType}
+                          : $
+                          {therapyPrices[formData.therapyType]?.toLocaleString('es-CO')}
+                        </p>
+                      </div>
+                    </div>
 
+                    <button type="submit" className="DynamiCanlendar-btn">
+                      <h4>Confirmar e ir a pagar</h4>
+                    </button>
+                  </div>
+                </div>
+              )}
             {showPayment && (
               <div className="payment-overlay">
                 <div className="payment-modal">
