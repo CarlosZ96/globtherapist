@@ -211,8 +211,8 @@
 }
 
 .video-button-img {
-    width: 7.5vw;
-    height: 7.5vw;
+    width: 20%;
+    height: 54%;
 }
 
 .chat-txt-field-cont {
@@ -239,4 +239,12 @@
 
 .chat-btn img {
     max-height: 60%;
+}
+
+
+@media (min-width: 800px) {
+    .video-buttons {
+        font-size: 1.5vw;
+    }
+
 }
