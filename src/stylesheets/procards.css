@@ -246,6 +246,7 @@
 
 .ProTeras-list ul li {
    border-radius: 5px;
+   height: 71%;
 }
 
 .ProTeras-list ul li:nth-child(1) {
@@ -253,7 +254,6 @@
    flex-direction: column;
    align-items: center;
    justify-content: center;
-   height: 50%;
    width: 85%;
    font-size: 2.5vw;
    background-color: #38DDE3;
@@ -267,7 +267,6 @@
    flex-direction: column;
    align-items: center;
    justify-content: center;
-   height: 50%;
    width: 85%;
    background-color: #041B5E;
    color: #fff;
@@ -281,11 +280,10 @@
    flex-direction: column;
    align-items: center;
    justify-content: center;
-   height: 50%;
    width: 85%;
    background-color: #EF5557;
    color: #fff;
-   font-size: 2.6vw;
+   font-size: 2.4vw;
    font-family: 'Poppins', sans-serif;
    font-weight: normal;
 }
@@ -295,7 +293,6 @@
    flex-direction: column;
    align-items: center;
    justify-content: center;
-   height: 50%;
    width: 85%;
    background-color: #687AD7;
    color: #fff;
