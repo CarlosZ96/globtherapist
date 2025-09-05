@@ -247,4 +247,38 @@
         font-size: 1.5vw;
     }
 
+    .video-header h1 {
+        font-size: 3vw;
+    }
+
+    .video-header-img {
+        max-width: 30%;
+    }
+
+    .video-header h5 {
+        font-size: 1.2vw;
+    }
+
+    .video-button-img {
+        width: 20%;
+        height: 48%;
+    }
+
+    .video-buttons {
+        font-size: 1.3vw;
+    }
+
+    .video-controls-cont {
+        height: 18%;
+    }
+
+    .video-buttons img {
+        width: 20%;
+        height: 48%;
+    }
+
+    .cam-txt {
+        font-size: 3vw;
+        text-align: center;
+    }
 }

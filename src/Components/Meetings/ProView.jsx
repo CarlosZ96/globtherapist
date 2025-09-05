@@ -323,7 +323,7 @@ const ProView = ({ meetingParams }) => {
               className="video-buttons"
               onClick={handleEndCall}
             >
-              <img src={endCallIcon} alt="Colgar" width="20" height="20" />
+              <img src={endCallIcon} alt="Colgar" width="20" height="48" />
               Cerrar llamada
             </button>
           </div>
@@ -383,7 +383,6 @@ const ProView = ({ meetingParams }) => {
         </div>
       )}
 
-      {/* Modal para ProInfo */}
       {showProInfo && citaGlobal && (
         <div
           className="pro-info-modal"
