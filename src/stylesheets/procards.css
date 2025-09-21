@@ -17,6 +17,11 @@
    background-color: #041B5E;
 }
 
+.ProsCards-cont p {
+   color: #fff;
+   font-size: 1.5em;
+}
+
 .close-button-procrd {
    width: 5vw;
    position: absolute;

@@ -23,7 +23,7 @@
 .Login-title-cont h1 {
     width: 90%;
     text-align: center;
-    font-family: Itim, serif;
+    font-family: krona one, sans-serif;
     font-weight: 200;
     display: flex;
     justify-content: center;
@@ -54,7 +54,7 @@
 .Create-title-cont h1 {
     width: 90%;
     color: #fff;
-    font-family: Itim, serif;
+    font-family: krona one, sans-serif;
     font-weight: 300;
     font-style: normal;
     margin: 0;
@@ -123,7 +123,7 @@
     width: 60%;
     font-size: 4.9vw;
     color: #2B3A67;
-    font-family: Itim, serif;
+    font-family: krona one, sans-serif;
     font-weight: 300;
     font-style: normal;
     margin: 1%;
@@ -142,7 +142,7 @@
     width: 40%;
     font-size: 5.8vw;
     color: #2B3A67;
-    font-family: Itim, serif;
+    font-family: krona one, sans-serif;
     font-weight: 300;
     font-style: normal;
     margin: 1% 0 1% 3%;
@@ -475,7 +475,7 @@
 .swal2-popup {
     background-color: #1c2e88;
     color: #fff;
-    font-family: Itim, serif;
+    font-family: roboto, sans-serif;
     font-weight: 100;
     font-size: 2.5vw;
 }
@@ -483,7 +483,7 @@
 .swal2-title {
     color: #fff;
     font-size: 5vw;
-    font-family: Itim, serif;
+    font-family: roboto, sans-serif;
     font-weight: 300;
     padding: 0;
 }
@@ -649,7 +649,7 @@
     }
 
     .pending-dates {
-        left: 14%;
+        left: -9%;
     }
 
     .log-txt-h {
@@ -657,14 +657,14 @@
     }
 
     .Login-input {
-        height: 70%;
+        height: 60%;
         border: #2B3A67 4px solid;
         font-size: 2.8vw;
     }
 
     .Login-submit-cont button {
-        font-family: 'font-family: Itim, serif';
-        font-size: 3vw;
+        font-family: roboto, sans-serif;
+        font-size: 2vw;
     }
 
     .Create-cont {
@@ -677,11 +677,11 @@
     }
 
     .Create-title-cont h1 {
-        font-size: 3.5vw;
+        font-size: 2.8vw;
     }
 
     .Crt-input-cont h3 {
-        font-size: 3vw;
+        font-size: 2vw;
     }
 
     .Create-input {

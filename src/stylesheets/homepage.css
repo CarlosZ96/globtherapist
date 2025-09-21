@@ -27,9 +27,9 @@
     background: none;
     border: none;
     color: #fff;
-    font-family: Itim, serif;
+    font-family: "Roboto", sans-serif;
     font-size: 3vw;
-    font-weight: lighter;
+    font-weight: normal;
 }
 
 .text-button:hover {
@@ -267,7 +267,7 @@
 
 .Glob-btn h3 {
     font-size: 3.1vw;
-    font-family: Itim, serif;
+    font-family: roboto, sans-serif;
 }
 
 .Glob-txt-cont p {
@@ -312,7 +312,7 @@
 }
 
 .Theras-body {
-    height: 80%;
+    height: 70%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -327,12 +327,16 @@
 }
 
 .Therapy-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: #041B5E;
-    font-family: Itim, serif;
+    font-family: "Krona One", sans-serif;
     font-weight: 400;
     font-style: normal;
     margin: 0;
     text-align: center;
+    height: 30%;
 }
 
 .Theras-btn-cont {
@@ -390,6 +394,11 @@
     background-color: #2b3e9d;
     position: absolute;
 }
+
+    .Glob-txt-btn-conts p {
+        font-family: "Roboto", sans-serif;
+        font-weight: 300;
+    }
 
 @media (max-width: 370px) {
     .Body-therapie {
@@ -462,7 +471,7 @@
     }
 
     .Therapy-title {
-        font-size: clamp(16px, 2.8vw, 32px);
+        font-size: clamp(16px, 2.8vw, 24px);
     }
 
     .Home-windows {
@@ -471,7 +480,7 @@
 
     .Log-Btn-Cont {
         flex-direction: row;
-        width: 26%;
+        width: 10%;
     }
 
     .Log-Btn {
@@ -590,7 +599,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 26%;
+        height: 36%;
     }
 
     .Body-therapie {
@@ -618,7 +627,7 @@
     }
 
     .Log-Btn-Cont-User {
-        width: 22%;
+        width: 100%;
     }
 
     .Log-Btn-user h3 {
@@ -646,7 +655,7 @@
 }
 
 @media (min-width: 800px) {
-  .Home-Page.no-user .Log-Btn {
-    width: 41%;
-  }
+    .Home-Page.no-user .Log-Btn {
+        width: 100%;
+    }
 }

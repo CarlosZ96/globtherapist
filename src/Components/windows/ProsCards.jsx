@@ -65,9 +65,6 @@ const ProsCards = ({ onClose }) => {
   if (loading) {
     return (
       <div className="ProsCards-cont">
-        <button type="button" className="close-button" onClick={onClose}>
-          <img src={close} alt="Cerrar" />
-        </button>
         <p>Cargando profesionales...</p>
       </div>
     );
