@@ -620,8 +620,9 @@ const Therapy = () => {
                       <h3>Tu cita quedó para el:</h3>
                     </div>
                     <div className="Date-info-description">
+                      <p>{citaGlobal.date}</p>
                       <p className="appointment-date">
-                        {citaGlobal.date}
+
                         {' '}
                         de
                         {citaGlobal.month}

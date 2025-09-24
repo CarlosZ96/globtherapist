@@ -453,15 +453,19 @@ const Calendar = ({
 
       {showContainers && collectionName === 'users' && (
         <div className="Pros-cont">
-          <div className="Pros-btn-cont">
-            <button
-              type="button"
-              disabled={!isConfirmed}
-              onClick={handleShowPros}
-            >
-              <h3>Ver pros</h3>
-            </button>
-          </div>
+          {/* Sólo renderizamos el botón si aún NO se han mostrado los pros */}
+          {!showPros && (
+            <div className="Pros-btn-cont">
+              <button
+                type="button"
+                disabled={!isConfirmed}
+                onClick={handleShowPros}
+              >
+                <h3>Ver pros</h3>
+              </button>
+            </div>
+          )}
+
           <div className="pro-img-def-cont">
             {showPros && (
               <div className="pro-img-def">
@@ -502,6 +506,7 @@ const Calendar = ({
           </div>
         </div>
       )}
+
     </div>
   );
 };
