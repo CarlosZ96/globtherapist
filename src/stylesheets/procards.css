@@ -430,8 +430,8 @@
    }
 
    .therapy-info-cont {
-      height: 57%;
-      width: 43%;
+      height: 33%;
+      width: 40%;
    }
 
    .therapy-info-text p {
@@ -444,8 +444,8 @@
    }
 
    .therapy-close-button {
-      top: 24%;
-      right: 30%;
+      top: 36%;
+      right: 33%;
       width: 3vw;
    }
 

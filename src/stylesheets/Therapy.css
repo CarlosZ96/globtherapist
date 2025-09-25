@@ -26,11 +26,11 @@
 
 .Therapy-title-cont h1 {
     color: #ffffff21;
-    margin: 1% 0;
+    margin: 3% 0;
     font-family: krona one, sans-serif;
     font-weight: 400;
     font-style: normal;
-    font-size: clamp(20px, 10vw, 66px);
+    font-size: clamp(20px, 6vw, 33px);
 }
 
 .Ask-Therapy {
@@ -63,12 +63,12 @@
 }
 
 .Ask-Therapy-subtittle h2 {
-    color: #ffd;
+    color: #fff;
     margin: 1% 0;
     font-family: Krona One, sans-serif;
     font-weight: 400;
     font-style: normal;
-    font-size: 6vw;
+    font-size: 3.5vw;
 }
 
 .Ask-Therapy-fields-conts {
@@ -132,7 +132,7 @@
 }
 
 .Ask-Therapy-txt h3 {
-    font-size: clamp(20px, 4vw, 40px);
+    font-size: clamp(13px, 3vw, 20px);
     font-family: Itim, serif;
     font-weight: 300;
     font-style: normal;
@@ -205,7 +205,7 @@
     height: 100%;
     width: 98%;
     background-color: #fff;
-    font-size: clamp(16px, 22vw, 22px);
+    font-size: clamp(16px, 6vw, 18px);
     font-family: Roboto, sans-serif;
     font-weight: normal;
     color: #000;
@@ -216,7 +216,7 @@
 
 .Therapy-txt-field::placeholder {
     width: 98%;
-   font-size: clamp(16px, 22vw, 22px);
+    font-size: clamp(16px, 6vw, 18px);
     text-align: left;
     padding-top: 0.5%;
     padding-left: 1%;
@@ -455,7 +455,7 @@
         height: 100%;
         margin: 0;
         padding: 0;
-        font-size: 5.3vw;
+        font-size: 3.5vw;
     }
 }
 
@@ -469,16 +469,42 @@
         display: flex;
         justify-content: center;
         height: 100vh;
-        width: 96vw;
+        width: 94vw;
     }
 
+
+    .Ask-Therapy-data-cont {
+        height: 60vh;
+    }
+
+    .Ask-Therapy-fields-conts {
+        height: 70%;
+        margin: 0;
+    }
+
+    .Ask-Therapy-field-cont {
+        height: 34%;
+    }
+
+    .Ask-Therapy-data-cont,
+    .Ask-Therapy-txt h3 {
+        margin: 0;
+    }
+
+    .Therapies-cont {
+        height: 40%;
+    }
+
+    .Therapy-info {
+        height: 35%;
+    }
 }
 
 @media (min-width: 571px) {
     .Ask-Therapy-data-cont {
         justify-content: flex-start;
         height: 55vh;
-        width: 80%;
+        width: 90%;
         margin: 0;
     }
 
@@ -487,7 +513,7 @@
     }
 
     .Therapy-title-cont h1 {
-        font-size: clamp(20px, 15vw, 48px);
+        font-size: clamp(16px, 10vw, 30px);
     }
 
     .Ask-Therapy-fields-conts {
@@ -496,6 +522,10 @@
 
     .Ask-Therapy-txt h3 {
         margin: 0;
+    }
+
+    .Ask-Therapy-subtittle h2 {
+        font-size: clamp(16px, 2vw, 30px);
     }
 }
 
@@ -547,6 +577,7 @@
 
     .Therapy-title-cont h1 {
         font-size: clamp(20px, 15vw, 49px);
+        margin: 1% 0;
     }
 
     .Ask-Therapy-txt h3 {
@@ -561,7 +592,7 @@
 
     .Therapy-txt-field {
         height: 80%;
-
+        font-size: clamp(16px, 22vw, 22px);
     }
 
     .inactive-txt,

@@ -661,7 +661,7 @@
 
 @media (min-width: 371px) and (max-width: 799px) {
     .DynamiCanlendar-cont {
-        width: 80%;
+        width: 100%;
         min-width: 370px;
     }
 
