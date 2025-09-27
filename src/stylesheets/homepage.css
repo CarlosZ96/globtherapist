@@ -558,6 +558,10 @@
     .Log-Btn-txt {
         font-size: 2.6vw;
     }
+
+    .Log-Btn:last-child .Log-Btn-txt {
+        font-size: 2.2vw;
+    }
 }
 
 @media (min-width: 571px) {
