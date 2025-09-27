@@ -409,6 +409,16 @@
     .Home-txt {
         height: 56%;
     }
+
+    .Glob-title {
+        margin: 2% 0;
+        font-size: clamp(19px, 6vw, 33px);
+    }
+
+    .GlobFront {
+        height: 406px;
+        margin: 2% 0 0 0;
+    }
 }
 
 @media (max-width: 570px) {
@@ -454,6 +464,19 @@
         height: 100%;
         justify-items: center;
     }
+
+    .Log-Btn-Cont {
+        height: 80%;
+        justify-content: space-around;
+    }
+
+    .Log-Btn-txt {
+        font-size: 2.5vw;
+    }
+
+    .Log-Btn:last-child .Log-Btn-txt {
+        font-size: 2.4vw;
+    }
 }
 
 @media (min-width: 571px) {
@@ -481,11 +504,12 @@
 
     .Log-Btn-Cont {
         flex-direction: row;
-        width: 10%;
+        width: 15%;
     }
 
     .Log-Btn {
-        width: 50%;
+        width: 93%;
+        height: 43%;
     }
 
     .Glob-img-cont {
@@ -529,6 +553,10 @@
 
     .Glob-btn h3 {
         font-size: 2vw;
+    }
+
+    .Log-Btn-txt {
+        font-size: 2.6vw;
     }
 }
 
@@ -646,11 +674,19 @@
     }
 
     .Theras-cont {
-        max-height: 305px;
+        max-height: 246px;
     }
 
     .GlobThera {
         height: 50%;
+    }
+
+    .Glob-img {
+        max-width: 124%;
+    }
+
+    .GlobThera-body {
+        height: 72%;
     }
 }
 

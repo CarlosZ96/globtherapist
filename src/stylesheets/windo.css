@@ -251,7 +251,7 @@
 .Create-pro-popup button {
     background-color: #041B5E;
     width: 40%;
-    height: 3vh;
+    height: 4vh;
     font-size: 2.9vw;
     color: #fff;
     font-family: Itim, serif;
@@ -636,6 +636,29 @@
 
     .Who-txt-cont p {
         font-size: clamp(2.5vw, 4vw, 18px);
+    }
+
+    .log-txt-h {
+        font-size: 4vw;
+    }
+}
+
+@media (min-width: 571px) and (max-width: 799px) {
+
+    .Create-title-cont h1 {
+        font-size: 4.5vw;
+    }
+
+    .Crt-input-cont h3 {
+        font-size: 3.2vw;
+    }
+
+    .close-button-crt {
+        top: -4%;
+    }
+
+    .log-txt-h {
+        font-size: 4.2vw;
     }
 }
 
