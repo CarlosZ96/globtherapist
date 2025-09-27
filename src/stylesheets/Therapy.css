@@ -457,6 +457,11 @@
         padding: 0;
         font-size: 3.5vw;
     }
+
+    .inactive-txt {
+        font-size: clamp(12px, 2vw, 36px);
+
+    }
 }
 
 @media (min-width: 371px) and (max-width: 799px) {
