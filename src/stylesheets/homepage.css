@@ -142,10 +142,6 @@
     background-color: #fff;
 }
 
-.Log-Btn-Cont-User:hover+.Log-Btn {
-    border: 2px #fff solid;
-}
-
 .Log-Btn-txt:hover {
     color: #fff;
 }
@@ -668,6 +664,14 @@
 
     .Log-Btn {
         width: 25%;
+    }
+
+    .Log-Btn-txt {
+        font-size: 2vw;
+    }
+
+    .Log-Btn:last-child .Log-Btn-txt {
+        font-size: 1.8vw;
     }
 }
 

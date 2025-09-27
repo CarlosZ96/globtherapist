@@ -660,6 +660,14 @@
     .log-txt-h {
         font-size: 4.2vw;
     }
+
+    .Login-input {
+        font-size: 3.5vw;
+    }
+
+    .pending-dates {
+        left: -26%;
+    }
 }
 
 @media (min-width: 800px) {
