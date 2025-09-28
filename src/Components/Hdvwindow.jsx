@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { doc, getDoc } from 'firebase/firestore';
+import '../stylesheets/prospace.css';
 import { getStorage, ref as storageRef, getDownloadURL } from 'firebase/storage';
 import { db } from '../firebase';
 import User from '../img/user.png';
@@ -38,7 +39,7 @@ const Hdvwindow = ({ proId, onClose }) => {
         if (!cancelled) setProData(hdvData);
 
         const profileImageUrlFromHdv = hdvData?.files?.profileImageUrl
-         || hdvData?.files?.profileImageURL || null;
+          || hdvData?.files?.profileImageURL || null;
         const profileImageFileName = hdvData?.files?.profileImageFileName
           || hdvData?.files?.profileImageName
           || data?.files?.profileImageFileName
@@ -94,36 +95,44 @@ const Hdvwindow = ({ proId, onClose }) => {
         <button type="button" className="close-button" onClick={onClose}>
           &times;
         </button>
-
-        <div className="user-image-comt">
-          <img src={profileImage} alt="Perfil profesional" className="pro-img" />
+        <div className="Pro-img-name-cont">
+          <div className="user-image-comt">
+            <img src={profileImage} alt="Perfil profesional" className="pro-img" />
+          </div>
+          <h2>{proName || proData?.name || 'Nombre no disponible'}</h2>
         </div>
-
-        {/* Nombre a nivel raíz del documento (si está disponible) */}
-        <h2>{proName || proData?.name || 'Nombre no disponible'}</h2>
-
-        {/* Datos desde Hdv */}
-        <h3>{proData.profession || 'Profesión no disponible'}</h3>
-        <p>
-          <strong>Especialización:</strong>
-          {' '}
-          {proData.specialization || 'No disponible'}
-        </p>
-        <p>
-          <strong>Años de experiencia:</strong>
-          {' '}
-          {proData.yearsOfExperience || 'No disponible'}
-        </p>
-        <p>
-          <strong>Egresado en:</strong>
-          {' '}
-          {proData.university || 'No disponible'}
-        </p>
-        <p>
-          <strong>Historia profesional:</strong>
-          {' '}
-          {proData.professionalHistory || 'No disponible'}
-        </p>
+        <div className="hdv-info-cont">
+          <div className="secction-hdv">
+            <strong>Profesional en:</strong>
+            <p>
+              {proData.profession || 'Profesión no disponible'}
+            </p>
+          </div>
+          <div className="secction-hdv">
+            <strong>Especialización:</strong>
+            <p>
+              {proData.specialization || 'No disponible'}
+            </p>
+          </div>
+          <div className="secction-hdv">
+            <strong>Años de experiencia:</strong>
+            <p>
+              {proData.yearsOfExperience || 'No disponible'}
+            </p>
+          </div>
+          <div className="secction-hdv">
+            <strong>Egresado en:</strong>
+            <p>
+              {proData.university || 'No disponible'}
+            </p>
+          </div>
+          <div className="secction-hdv">
+            <strong>Historia profesional:</strong>
+            <p>
+              {proData.professionalHistory || 'No disponible'}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

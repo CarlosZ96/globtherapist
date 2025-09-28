@@ -875,6 +875,56 @@
     width: 100%;
 }
 
+.Pro-img-name-cont {
+    height: 30%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.hdv-info-cont {
+    height: 70%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5%;
+}
+
+.secction-hdv {
+    width: 94%;
+    height: 20%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.secction-hdv strong {
+    width: 40%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    color: #fff;
+    font-size: 4vw;
+    font-weight: lighter;
+    margin-right: 2%;
+}
+
+.secction-hdv p {
+    width: 60%;
+    height: 86%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    color: #041b5e;
+    font-size: 3.5vw;
+    background-color: #687AD7;
+    padding: 1% 2% 1% 2%;
+    border-radius: 5px;
+}
+
 @media (min-width: 800px) {
     .therapies {
         display: flex;
