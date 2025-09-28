@@ -634,6 +634,16 @@
     .Ask-Therapy-txt h3 {
         margin: 2% 0 8% 0;
     }
+
+    .Edit-Hours {
+        height: 4%;
+        left: 85%;
+        bottom: -153%;
+    }
+
+    .Pros-btn-cont {
+        height: 40%;
+    }
 }
 
 @media (min-width: 571px) {
@@ -721,6 +731,12 @@
 
     .calendar-day {
         font-size: 4vw;
+    }
+
+    .Edit-Hours {
+        height: 4%;
+        left: 80%;
+        bottom: -153%;
     }
 }
 
