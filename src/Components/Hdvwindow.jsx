@@ -15,11 +15,8 @@ const Hdvwindow = ({ proId, onClose }) => {
         const proDoc = await getDoc(doc(db, 'pros', proId));
         if (proDoc.exists()) {
           const data = proDoc.data();
-          // Acceder al mapa Hdv dentro del documento
           const hdvData = data.Hdv || {};
-          setProData(hdvData); // Guardar solo los datos de Hdv
-
-          // Verificar imagen de perfil (ajusta la ruta si está dentro de Hdv)
+          setProData(hdvData);
           if (hdvData.files && hdvData.files.profileImageUrl) {
             setProfileImage(hdvData.files.profileImageUrl);
           } else {
