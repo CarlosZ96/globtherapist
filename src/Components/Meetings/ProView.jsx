@@ -74,13 +74,29 @@ const ProView = ({ meetingParams }) => {
   const [remoteCameraOn, setRemoteCameraOn] = useState(false);
   const [screenTrack, setScreenTrack] = useState(null);
   const [sharingScreen, setSharingScreen] = useState(false);
-  const [showChat, setShowChat] = useState(false);
+
+  /* --- NUEVO: responsive/mobile state --- */
+  const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth <= 570 : false));
+  const [showChat, setShowChat] = useState(() => (typeof window !== 'undefined' ? window.innerWidth <= 570 : false));
   const [showProInfo, setShowProInfo] = useState(false);
+
+  useEffect(() => {
+    const onResize = () => {
+      const mobile = window.innerWidth <= 570;
+      setIsMobile(mobile);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  /* Mantener el chat abierto por defecto al entrar en mobile, y cerrado al salir */
+  useEffect(() => {
+    setShowChat(isMobile);
+  }, [isMobile]);
 
   // Función para limpiar todos los recursos de Agora
   const cleanupAgoraResources = async () => {
     try {
-      // Cerrar todas las pistas locales
       if (micTrack) {
         micTrack.close();
         setMicTrack(null);
@@ -97,13 +113,11 @@ const ProView = ({ meetingParams }) => {
         setSharingScreen(false);
       }
 
-      // Dejar el canal
       if (client) {
         await client.leave();
         setClient(null);
       }
 
-      // Limpiar el reproductor de video remoto
       setRemoteCameraOn(false);
       if (remoteVideoRef.current) {
         remoteVideoRef.current.innerHTML = '';
@@ -113,7 +127,6 @@ const ProView = ({ meetingParams }) => {
     }
   };
 
-  // Inicializar Agora
   useEffect(() => {
     const initAgora = async () => {
       const agoraClient = AgoraRTC.createClient({
@@ -177,13 +190,11 @@ const ProView = ({ meetingParams }) => {
     return () => { };
   }, [meetingParams]);
 
-  // Función para colgar la llamada y regresar al inicio
   const handleEndCall = async () => {
     await cleanupAgoraResources();
     navigate('/');
   };
 
-  // Función para el botón Home
   const handleGoHome = async () => {
     await cleanupAgoraResources();
     navigate('/');
@@ -336,52 +347,73 @@ const ProView = ({ meetingParams }) => {
             </p>
           </div>
         </div>
-      </div>
 
-      {showChat && (
-        <div style={{
-          position: 'fixed',
-          top: '50%',
-          right: '20px',
-          transform: 'translateY(-50%)',
-          width: '300px',
-          height: '400px',
-          backgroundColor: 'white',
-          zIndex: 1000,
-          boxShadow: '0 0 10px rgba(0,0,0,0.5)',
-          borderRadius: '8px',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-        >
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '10px',
-            borderBottom: '1px solid #eee',
-          }}
-          >
-            <h3>Chat</h3>
-            <button
-              type="button"
-              onClick={() => setShowChat(false)}
+        {showChat && (
+          isMobile ? (
+            <div className="chat-mobile-cont">
+              <div className="chat-mobile-header">
+                <h3>Chat</h3>
+                <button
+                  type="button"
+                  className="chat-close-btn"
+                  onClick={() => setShowChat(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="chat-mobile-body">
+                <ChatComponent clientId={currentPro.uid} channelId={meetingParams.channelId} />
+              </div>
+            </div>
+          ) : (
+            <div
+              className="chat-desktop-floating"
               style={{
-                background: 'none',
-                border: 'none',
-                fontSize: '20px',
-                cursor: 'pointer',
-                color: '#666',
-              }}
+              position: 'fixed',
+              top: '50%',
+              right: '20px',
+              transform: 'translateY(-50%)',
+              width: '300px',
+              height: '400px',
+              backgroundColor: 'white',
+              zIndex: 1000,
+              boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+              borderRadius: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
             >
-              ×
-            </button>
-          </div>
-          <div style={{ flex: 1, overflow: 'hidden' }}>
-            <ChatComponent clientId={currentPro.uid} channelId={meetingParams.channelId} />
-          </div>
-        </div>
-      )}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '10px',
+                borderBottom: '1px solid #eee',
+              }}
+              >
+                <h3>Chat</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowChat(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '20px',
+                    cursor: 'pointer',
+                    color: '#666',
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                <ChatComponent clientId={currentPro.uid} channelId={meetingParams.channelId} />
+              </div>
+            </div>
+          )
+        )}
+
+      </div>
 
       {showProInfo && citaGlobal && (
         <div

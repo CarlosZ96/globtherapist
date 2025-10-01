@@ -27,13 +27,24 @@ const UserView = ({ meetingParams }) => {
   const [micOn, setMicOn] = useState(false);
   const [cameraOn, setCameraOn] = useState(false);
   const [remoteCameraOn, setRemoteCameraOn] = useState(false);
-
-  // Estados para compartir pantalla
   const [screenTrack, setScreenTrack] = useState(null);
   const [sharingScreen, setSharingScreen] = useState(false);
 
-  // Estado para mostrar/ocultar el chat
-  const [showChat, setShowChat] = useState(false);
+  /* --- NUEVO: responsive/mobile state --- */
+  const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth <= 570 : false));
+  const [showChat, setShowChat] = useState(() => (typeof window !== 'undefined' ? window.innerWidth <= 570 : false));
+
+  useEffect(() => {
+    const onResize = () => {
+      setIsMobile(window.innerWidth <= 570);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  useEffect(() => {
+    setShowChat(isMobile);
+  }, [isMobile]);
 
   useEffect(() => {
     if (meetingAccess !== 'approved') return;
@@ -57,13 +68,11 @@ const UserView = ({ meetingParams }) => {
         await agoraClient.join(appId, meetingParams.channelId, meetingParams.token, 0);
         console.log('Usuario invitado se unió al canal');
 
-        // Evento: usuario publica un track (audio o video)
         agoraClient.on('user-published', async (user, mediaType) => {
           await agoraClient.subscribe(user, mediaType);
           console.log('Subscripción a usuario remoto', mediaType, user.uid);
 
           if (mediaType === 'video') {
-            // El contenedor remoto ya está renderizado, se actualiza su visibilidad
             user.videoTrack.play(remoteVideoRef.current);
             setRemoteCameraOn(true);
           }
@@ -72,7 +81,6 @@ const UserView = ({ meetingParams }) => {
           }
         });
 
-        // Evento: usuario deja de publicar un track (por ejemplo, apaga la cámara)
         agoraClient.on('user-unpublished', (user, mediaType) => {
           if (mediaType === 'video') {
             setRemoteCameraOn(false);
@@ -82,7 +90,6 @@ const UserView = ({ meetingParams }) => {
           }
         });
 
-        // Evento: usuario abandona el canal
         agoraClient.on('user-left', (user) => {
           console.log('El usuario', user.uid, 'ha salido del canal');
           setRemoteCameraOn(false);
@@ -107,7 +114,6 @@ const UserView = ({ meetingParams }) => {
 
   const cleanupAgoraResources = async () => {
     try {
-      // Cerrar todas las pistas locales
       if (micTrack) {
         micTrack.close();
         setMicTrack(null);
@@ -124,13 +130,11 @@ const UserView = ({ meetingParams }) => {
         setSharingScreen(false);
       }
 
-      // Dejar el canal
       if (client) {
         await client.leave();
         setClient(null);
       }
 
-      // Limpiar el reproductor de video remoto
       setRemoteCameraOn(false);
       if (remoteVideoRef.current) {
         remoteVideoRef.current.innerHTML = '';
@@ -187,7 +191,6 @@ const UserView = ({ meetingParams }) => {
     }
   };
 
-  // Función para compartir pantalla
   const handleScreenShare = async () => {
     if (!client) return;
     if (!sharingScreen) {
@@ -299,51 +302,73 @@ const UserView = ({ meetingParams }) => {
               </p>
             </div>
           </div>
-        </div>
-      )}
 
-      {showChat && (
-        <div style={{
-          position: 'fixed',
-          top: '50%',
-          right: '20px',
-          transform: 'translateY(-50%)',
-          width: '300px',
-          height: '400px',
-          backgroundColor: 'white',
-          zIndex: 1000,
-          boxShadow: '0 0 10px rgba(0,0,0,0.5)',
-          borderRadius: '8px',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-        >
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '10px',
-            borderBottom: '1px solid #eee',
-          }}
-          >
-            <h3>Chat</h3>
-            <button
-              type="button"
-              onClick={() => setShowChat(false)}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontSize: '20px',
-                cursor: 'pointer',
-                color: '#666',
+          {/* CHAT responsive */}
+          {showChat && (
+            isMobile ? (
+              <div className="chat-mobile-cont">
+                <div className="chat-mobile-header">
+                  <h3>Chat</h3>
+                  <button
+                    type="button"
+                    className="chat-close-btn"
+                    onClick={() => setShowChat(false)}
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="chat-mobile-body">
+                  <ChatComponent clientId={currentUser.uid} channelId={meetingParams.channelId} />
+                </div>
+              </div>
+            ) : (
+              <div
+                className="chat-desktop-floating"
+                style={{
+                position: 'fixed',
+                top: '50%',
+                right: '20px',
+                transform: 'translateY(-50%)',
+                width: '300px',
+                height: '400px',
+                backgroundColor: 'white',
+                zIndex: 1000,
+                boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+                borderRadius: '8px',
+                display: 'flex',
+                flexDirection: 'column',
               }}
-            >
-              ×
-            </button>
-          </div>
-          <div style={{ flex: 1, overflow: 'hidden' }}>
-            <ChatComponent clientId={currentUser.uid} channelId={meetingParams.channelId} />
-          </div>
+              >
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '10px',
+                  borderBottom: '1px solid #eee',
+                }}
+                >
+                  <h3>Chat</h3>
+                  <button
+                    type="button"
+                    onClick={() => setShowChat(false)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '20px',
+                      cursor: 'pointer',
+                      color: '#666',
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+                <div style={{ flex: 1, overflow: 'hidden' }}>
+                  <ChatComponent clientId={currentUser.uid} channelId={meetingParams.channelId} />
+                </div>
+              </div>
+            )
+          )}
+
         </div>
       )}
     </div>
