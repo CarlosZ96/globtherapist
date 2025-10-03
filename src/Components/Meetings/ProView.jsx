@@ -352,7 +352,6 @@ const ProView = ({ meetingParams }) => {
           isMobile ? (
             <div className="chat-mobile-cont">
               <div className="chat-mobile-header">
-                <h3>Chat</h3>
                 <button
                   type="button"
                   className="chat-close-btn"
@@ -391,7 +390,6 @@ const ProView = ({ meetingParams }) => {
                 borderBottom: '1px solid #eee',
               }}
               >
-                <h3>Chat</h3>
                 <button
                   type="button"
                   onClick={() => setShowChat(false)}

@@ -303,12 +303,10 @@ const UserView = ({ meetingParams }) => {
             </div>
           </div>
 
-          {/* CHAT responsive */}
           {showChat && (
             isMobile ? (
               <div className="chat-mobile-cont">
                 <div className="chat-mobile-header">
-                  <h3>Chat</h3>
                   <button
                     type="button"
                     className="chat-close-btn"
@@ -327,10 +325,10 @@ const UserView = ({ meetingParams }) => {
                 style={{
                 position: 'fixed',
                 top: '50%',
-                right: '20px',
+                left: '0.5%',
                 transform: 'translateY(-50%)',
-                width: '300px',
-                height: '400px',
+                width: '30%',
+                height: '54%',
                 backgroundColor: 'white',
                 zIndex: 1000,
                 boxShadow: '0 0 10px rgba(0,0,0,0.5)',
@@ -343,11 +341,10 @@ const UserView = ({ meetingParams }) => {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '10px',
+                  padding: '2% 4%',
                   borderBottom: '1px solid #eee',
                 }}
                 >
-                  <h3>Chat</h3>
                   <button
                     type="button"
                     onClick={() => setShowChat(false)}
