@@ -46,12 +46,12 @@
 
 .calendar-month-cont {
     display: flex;
-    width: 98%;
-    height: 6vh;
+    width: 99.9%;
+    height: 7vh;
     justify-content: center;
     align-items: center;
     background-color: #2b3a67;
-    margin: 2% 0;
+    margin: 1% 0;
     padding: 1% 2%;
 }
 
@@ -60,10 +60,9 @@
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
     place-items: center center;
-    gap: 10px;
-    width: 90%;
-    height: 40vh;
-    margin-top: 1%;
+    gap: 1.4%;
+    width: 100%;
+    height: 50vh;
     background-color: #fff;
 }
 

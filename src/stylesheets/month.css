@@ -9,7 +9,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    width: 96%;
     height: max-content;
     background-color: #fff;
     margin-bottom: 2%;
@@ -18,7 +18,7 @@
 .calendar-month-cont {
     display: flex;
     width: 100%;
-    height: 6vh;
+    height: 8%;
     justify-content: center;
     align-items: center;
     background-color: #2b3a67;
@@ -31,20 +31,26 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-around;
-    column-gap: 10px;
-    width: 94%;
+    column-gap: 1%;
+    width: 100%;
+    height: 10%;
     background-color: #fff;
 }
 
 .calendar-day-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
     font-size: 4vw;
-    font-family: Itim, serif;
+    background-color: #2b3a67;
+    font-family: roboto, serif;
     font-style: normal;
-    color: #000;
-    font-weight: bold;
+    color: #fff;
+    font-weight: normal;
     padding: 3% 1% 3% 1%;
-    border-radius: 5px;
-    width: 10%;
+    border-radius: 2px;
+    width: 13%;
 }
 
 .calendar-month-btn {
@@ -81,10 +87,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 96%;
+    width: 100%;
     height: 50vh;
+    min-height: 50px;
     background-color: #fff;
-    margin-top: 1%;
 }
 
 .Calendar-cont {
@@ -268,7 +274,7 @@
 }
 
 .calendar-day {
-    border-radius: 5px;
+    border-radius: 1px;
     font-size: 5vw;
     font-family: Itim, serif;
     text-align: center;
@@ -354,7 +360,7 @@
     color: #fff;
     border: none;
     width: 100%;
-    height: 100%;
+    height: 94%;
 }
 
 
@@ -497,7 +503,7 @@
     justify-content: center;
     align-items: center;
     height: 90%;
-    width: 100%;
+    width: 65%;
     flex-direction: column;
 }
 
@@ -520,16 +526,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 60%;
-    width: 74%;
+    height: 80%;
+    width: 96%;
 }
 
 .Time-control button {
     width: 18%;
-    height: 80%;
+    height: 75%;
     background: none;
-    border: #000 solid 3px;
+    border: none;
     font-size: 6vw;
+    background-color: #fff;
 }
 
 .Time-control-pro {
@@ -578,17 +585,17 @@
 
 .Time-hour-txt {
     display: flex;
-    height: 100%;
-    width: 60%;
-    border: #000 solid 3px;
-    border-radius: 5px;
+    height: 95%;
+    width: 58%;
+    border-radius: 1px;
     align-items: center;
     justify-content: center;
+    background-color: #fff;
 }
 
 .Time-hour-txt h3 {
     display: flex;
-    font-size: 5vw;
+    font-size: 4vw;
     font-family: Itim, serif;
     font-style: normal;
     text-align: center;
@@ -606,6 +613,19 @@
     align-items: center;
     height: 80%;
     width: 100%;
+    background-color: #2b3e9d;
+}
+
+.Hours-selector-cont p {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 30%;
+    height: 80%;
+    background-color: #fff;
+    color: #000;
+    font-size: 4vw;
 }
 
 .Confirm-button {

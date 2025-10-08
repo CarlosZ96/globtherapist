@@ -268,7 +268,6 @@ const Calendar = ({
           →
         </button>
       </div>
-      <hr className="date-blue-line" />
       <div className="calendar-week-cont">
         {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
           <div key={uuidv4()} className="calendar-day-header">
@@ -276,7 +275,6 @@ const Calendar = ({
           </div>
         ))}
       </div>
-      <hr className="date-blue-line" />
       <div className="Choose-Day-Cont">
         <div className="Calendar-cont" style={{ backgroundColor: '#fff' }}>
           {days.map((day) => (
@@ -291,30 +289,14 @@ const Calendar = ({
             </button>
           ))}
         </div>
-        <div className="Choose-Day-btns-cont">
-          <h3 className="Choose-Day-txt">
-            {collectionName === 'users'
-              ? 'Elige el día de tu valoración.'
-              : '¿Qué días estarás disponible para trabajar?'}
-          </h3>
-          <div className="Dispos-cont">
-            <div className="Dispo-cont">
-              <h3>Dispo</h3>
-              <div className="Dispos-btn" />
-            </div>
-            <div className="Dispo-cont">
-              <h3>No Dispo</h3>
-              <div className="Dispos-btn" />
-            </div>
-          </div>
-        </div>
       </div>
-      <hr className="date-blue-line" />
       <div className="Hours-cont">
+
         <div
           className="Hours-selector-cont"
           style={isConfirmed ? { height: '90%' } : {}}
         >
+          <p>¿A que hora?</p>
           {collectionName === 'pros' ? (
             <div className="Hours-selector-pro">
               <div className="Time-selector-pro">
