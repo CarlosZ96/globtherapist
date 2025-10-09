@@ -564,8 +564,8 @@
     .GlobFront {
         align-items: center;
         justify-content: space-around;
-        margin: 8% 0;
-        height: 35vh;
+        margin: 2% 0;
+        height: 42vh;
         min-height: 200px;
     }
 
@@ -631,7 +631,7 @@
     }
 
     .Body-therapie {
-        width: 98%;
+        width: 100%;
     }
 }
 
@@ -648,6 +648,9 @@
 
     .Glob-img {
         max-width: 78%;
+        min-height: 285.72px;
+        min-width: 285.72px;
+        max-height: 293.72px;
     }
 
     .Body-therapie {
@@ -686,11 +689,11 @@
     }
 
     .GlobThera {
-        height: 50%;
+        height: 40%;
     }
 
     .Glob-img {
-        max-width: 124%;
+        max-width: 85%;
     }
 
     .GlobThera-body {

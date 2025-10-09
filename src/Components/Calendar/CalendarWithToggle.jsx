@@ -431,11 +431,8 @@ const Calendar = ({
           </button>
         </div>
       )}
-      <hr className="date-blue-line" />
-
       {showContainers && collectionName === 'users' && (
         <div className="Pros-cont">
-          {/* Sólo renderizamos el botón si aún NO se han mostrado los pros */}
           {!showPros && (
             <div className="Pros-btn-cont">
               <button
