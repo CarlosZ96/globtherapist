@@ -624,7 +624,6 @@ const Therapy = () => {
                         <p className="date-info-day">{citaGlobal.date}</p>
                         {' '}
                         <p className="appointment-date">
-
                           {' '}
                           de
                           {' '}
