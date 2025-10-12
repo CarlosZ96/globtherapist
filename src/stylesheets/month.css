@@ -647,6 +647,19 @@
     margin-top: 15px;
 }
 
+.therapy-button-cont {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 94%;
+    width: 94%;
+}
+
+.price-input {
+    width: 48%;
+}
+
 @media (min-width: 370px) {
     .DynamiCanlendar-cont {
         height: 100%;

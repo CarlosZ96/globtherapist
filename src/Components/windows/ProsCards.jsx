@@ -1,3 +1,4 @@
+/* eslint-disable no-dupe-keys */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { doc, getDoc } from 'firebase/firestore';
@@ -15,7 +16,7 @@ const ProsCards = ({ onClose }) => {
     const fetchHdvWithImages = async () => {
       const allowedIds = [
         'I0AULHKRBZYVAJ3JQ7rhWuBbxhe2',
-        'V5zxUoV4SrZYVyX1QA79UovUCVG2',
+        'X3JGiHJRFfNbUnThmXFvZWbsB1p2',
         '5sQCDthzpIerAeLVMN2lYiO41AE2',
       ];
 
@@ -84,6 +85,40 @@ const ProsCards = ({ onClose }) => {
   const currentPro = pros[currentIndex];
   const hdv = currentPro.Hdv || {};
 
+  // helpers para manejar ambos esquemas de 'terapias'
+  const normalizeText = (text) => {
+    if (!text || typeof text !== 'string') return '';
+    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  };
+
+  // mapeo para mostrar nombres legibles (en caso de que el name guardado esté normalizado)
+  const displayNameFromNormalized = (norm) => {
+    const map = {
+      fisica: 'Física',
+      fisíca: 'Física',
+      fisíca: 'Física',
+      lenguaje: 'Lenguaje',
+      mental: 'Mental',
+      ocupacional: 'Ocupacional',
+    };
+    return map[norm] || (norm ? `${norm.charAt(0).toUpperCase()}${norm.slice(1)}` : '');
+  };
+
+  const getTherapyName = (item) => {
+    if (!item) return '';
+    if (typeof item === 'string') return item;
+    // objeto: intentamos distintas propiedades
+    if (item.name) {
+      // si name está normalizado, devolvemos version amigable
+      const n = normalizeText(item.name);
+      const friendly = displayNameFromNormalized(n);
+      return friendly || item.name;
+    }
+    if (item.Nombre) return item.Nombre;
+    if (item.terapia) return item.terapia;
+    return '';
+  };
+
   return (
     <div className="ProsCards-cont">
       <button type="button" className="close-button-procrd" onClick={onClose}>
@@ -118,6 +153,7 @@ const ProsCards = ({ onClose }) => {
               egresado en la universidad
               {' '}
               {hdv.university || 'no especificada'}
+              {' '}
               con
               {' '}
               {hdv.yearsOfExperience || 'varios'}
@@ -129,9 +165,20 @@ const ProsCards = ({ onClose }) => {
             <h2>Terapias Disponibles:</h2>
             <div className="ProTeras-list">
               <ul>
-                {currentPro.terapias?.map((terapia) => (
-                  <li key={`${currentPro.id}-${terapia}`}>{terapia}</li>
-                ))}
+                {Array.isArray(currentPro.terapias) && currentPro.terapias.length > 0 ? (
+                  currentPro.terapias.map((terapiaItem, idx) => {
+                    const name = getTherapyName(terapiaItem);
+                    const key = `${currentPro.id}-ter-${idx}-${normalizeText(name)}`;
+
+                    return (
+                      <li key={key}>
+                        {name || 'Terapia'}
+                      </li>
+                    );
+                  })
+                ) : (
+                  <li>No especificadas</li>
+                )}
               </ul>
             </div>
           </div>

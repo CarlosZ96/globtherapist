@@ -681,10 +681,6 @@ const Therapy = () => {
                 </div>
               </div>
             )}
-
-            <button type="submit" className="DynamiCanlendar-btn">
-              <h4>Confirmar e ir a pagar</h4>
-            </button>
           </div>
         )}
         {paymentStatus === 'success' && paymentDetails && (

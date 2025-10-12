@@ -295,7 +295,7 @@
     top: 7%;
     z-index: 102;
     width: 94vw;
-    height: 85vh;
+    height: 92vh;
     border: 3px #01268d solid;
     background-color: #fff;
 }
@@ -311,7 +311,7 @@
     align-items: center;
     justify-content: space-around;
     width: 100%;
-    height: 9%;
+    height: 8%;
 }
 
 .CreatePro-input-cont label {
@@ -365,7 +365,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 20%;
+    height: 30%;
 }
 
 .CreatePro-therapies label {
@@ -393,14 +393,13 @@
 
 .therapy-button {
     width: 90%;
-    height: 90%;
+    height: 50%;
     background-color: #7C95A6;
     color: #AEBECA;
     font-size: 4.2vw;
     font-family: Itim, serif;
     font-weight: 100;
     border: none;
-    border-radius: 5px;
     margin: 0 1%;
     cursor: pointer;
 }
@@ -412,13 +411,14 @@
     font-family: Itim, serif;
     font-weight: 100;
     border: none;
-    border-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
     margin: 0 1%;
 }
 
 .CreatePro-submit {
     width: 100%;
-    height: 10%;
+    height: 7%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -605,6 +605,18 @@
     font-family: Itim, serif;
     font-weight: 300;
     text-align: center;
+}
+
+.therapy-price {
+    width: 90%;
+    flex-direction: row;
+    align-items: center;
+}
+
+.therapy-price span {
+    font-size: 3vw;
+    font-family: roboto, sans-serif;
+    font-weight: 300;
 }
 
 @media (max-width: 370px) {
