@@ -205,6 +205,7 @@
     font-size: clamp(20px, 6vw, 33px);
     text-align: center;
     color: #ffffff1c;
+    margin: 1% 0;
 }
 
 .GlobThera-body {
@@ -478,7 +479,7 @@
 @media (min-width: 571px) {
 
     .text-button {
-        font-size: 2.5vw;
+        font-size: clamp(12px, 4vw, 30px);
     }
 
     .GlobFront {
@@ -491,7 +492,7 @@
     }
 
     .Therapy-title {
-        font-size: clamp(13px, 2.2vw, 20px);
+        font-size: clamp(12px, 2vw, 28px);
     }
 
     .Home-windows {
@@ -565,7 +566,7 @@
         align-items: center;
         justify-content: space-around;
         margin: 2% 0;
-        height: 42vh;
+        height: 36vh;
         min-height: 200px;
     }
 
@@ -670,11 +671,12 @@
     }
 
     .Log-Btn-txt {
-        font-size: 2vw;
+        font-size: clamp(12px, 3vw, 25px);
     }
 
     .Log-Btn:last-child .Log-Btn-txt {
-        font-size: 1.8vw;
+        margin-top: 1%;
+        font-size: clamp(12px, 3vw, 20px);
     }
 }
 

@@ -313,7 +313,7 @@
     align-items: center;
     justify-content: center;
     width: 50%;
-    height: 25%;
+    height: 15%;
     background-color: #1c2e88;
     color: #fff;
     border: none;
@@ -323,18 +323,19 @@
 
 .Date-info-txt {
     display: flex;
-    width: 68%;
-    height: 30%;
+    width: 80%;
+    height: 20%;
     text-align: center;
     border: solid 2px #1c2e88;
     flex-direction: column;
     justify-content: center;
     margin-bottom: 3%;
+    padding: 4%;
 }
 
 .Date-info-txt h3 {
     font-size: 5.5vw;
-    font-family: Itim, serif;
+    font-family: roboto, sans-serif;
     font-weight: 500;
     font-style: normal;
     color: #1c2e88;
@@ -409,6 +410,21 @@
 
 .Ask-Therapy-txt h3 {
     font-family: krona one, sans-serif;
+}
+
+.date-info-first,
+.appointment-time,
+.appointment-doctor,
+.therapy-price-info {
+    display: flex;
+    justify-content: center;
+    height: 20%;
+    font-size: 2vw;
+    font-family: krona one, sans-serif;
+}
+
+.date-info-day {
+    margin-right: 1%;
 }
 
 @media (max-width: 370px) {

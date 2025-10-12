@@ -763,6 +763,14 @@
         left: 80%;
         bottom: -153%;
     }
+
+    .show-modal-btn {
+        width: 13%;
+    }
+
+    .Pros-cont {
+        margin: 0;
+    }
 }
 
 @media (min-width: 800px) {
@@ -804,11 +812,11 @@
     }
 
     .Time-hour-txt h3 {
-        font-size: 2.8vw;
+        font-size: 2.2vw;
     }
 
     .Time-control button {
-        font-size: 3vw;
+        font-size: 2vw;
     }
 
     .Hours-selector-cont {
@@ -834,5 +842,9 @@
 
     .DynamiCanlendar-cont {
         margin: 0;
+    }
+
+    .Hours-selector-cont p {
+        font-size: clamp(12px, 3vw, 26px);
     }
 }
