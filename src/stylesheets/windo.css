@@ -631,6 +631,24 @@
         top: 24%;
         right: 6%;
     }
+
+    .Login-submit-cont button {
+        font-size: 3vw;
+        font-family: roboto, sans-serif;
+        font-weight: 300;
+    }
+
+    .log-txt-h {
+        font-size: 4.6vw;
+    }
+
+    .Login-title-cont h1 {
+        font-size: 6vw;
+    }
+
+    .Crt-input-cont h3 {
+        font-size: 3.8vw;
+    }
 }
 
 @media (min-width: 371px) and (max-width: 570px) {
