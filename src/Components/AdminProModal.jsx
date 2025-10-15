@@ -48,7 +48,27 @@ const AdminProModal = ({
 
   // Función para normalizar el texto (elimina tildes y pasa a minúsculas)
   const normalizeText = (text) => {
-    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    if (!text || typeof text !== 'string') return '';
+    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  };
+
+  // helper: obtener nombre de terapia desde item que puede ser string u objeto
+  const getNameFromItem = (item) => {
+    if (!item) return '';
+    if (typeof item === 'string') return item;
+    // si es objeto, intenta propiedades comunes
+    if (item.name) return item.name;
+    if (item.Nombre) return item.Nombre;
+    if (item.terapia) return item.terapia;
+    return '';
+  };
+
+  // helper: obtener precio desde item (si existe)
+  const getPriceFromItem = (item) => {
+    if (!item || typeof item === 'string') return null;
+    if (item.price !== undefined && item.price !== null) return Number(item.price);
+    if (item.precio !== undefined && item.precio !== null) return Number(item.precio);
+    return null;
   };
 
   // Función para activar o desactivar una terapia al hacer click
@@ -59,33 +79,88 @@ const AdminProModal = ({
     );
     if (exists) {
       // Remueve la terapia del array
-      setSelectedTherapies(selectedTherapies.filter(
+      setSelectedTherapies((prev) => prev.filter(
         (t) => normalizeText(t) !== normalizedTherapy,
       ));
     } else {
       // Agrega la terapia
-      setSelectedTherapies([...selectedTherapies, therapy]);
+      setSelectedTherapies((prev) => [...prev, therapy]);
     }
   };
 
   const handleApprove = async () => {
     try {
-      const activeTherapiesNormalized = selectedTherapies.map((therapy) => normalizeText(therapy));
-      const currentTherapies = proData.terapias || [];
-      const currentTherapiesNormalized = currentTherapies.map((therapy) => normalizeText(therapy));
-      // eslint-disable-next-line max-len
-      const updatedTherapies = currentTherapiesNormalized.filter((therapy) => activeTherapiesNormalized.includes(therapy));
-      activeTherapiesNormalized.forEach((therapy) => {
-        if (!updatedTherapies.includes(therapy)) {
-          updatedTherapies.push(therapy);
-        }
-      });
+      // Normaliza las terapias activas seleccionadas por el admin
+      const activeTherapiesNormalized = selectedTherapies
+        .map((therapy) => normalizeText(therapy))
+        .filter(Boolean);
+
+      // Traer terapias actuales del pro (pueden ser strings o objetos)
+      const currentTherapies = Array.isArray(proData.terapias) ? proData.terapias : [];
+
+      // Determinar formato actual: si existe al menos un objeto, consideramos esquema de objetos
+      const currentHasObjects = currentTherapies.some((it) => typeof it === 'object' && it !== null);
+
+      // Normalizar nombres actuales para comparación
+      // eslint-disable-next-line no-unused-vars
+      const currentNamesNormalized = currentTherapies.map(
+        (it) => normalizeText(getNameFromItem(it)),
+      );
+
+      // Construir updatedTherapies manteniendo formato
+      let updatedTherapies;
+      if (currentHasObjects) {
+        // Empieza con los objetos actuales que están en la lista activa (preservando price)
+        updatedTherapies = currentTherapies
+          .filter((it) => {
+            const nm = normalizeText(getNameFromItem(it));
+            return activeTherapiesNormalized.includes(nm);
+          })
+          .map((it) => {
+            // asegurarnos de que el campo name esté normalizado (mantener price)
+            const nameRaw = getNameFromItem(it);
+            const normalized = normalizeText(nameRaw);
+            return {
+              ...it,
+              name: normalized,
+              price: getPriceFromItem(it) ?? 0,
+            };
+          });
+
+        // Añadir las terapias seleccionadas que no estaban en current
+        activeTherapiesNormalized.forEach((normName) => {
+          const already = updatedTherapies.some(
+            (it) => normalizeText(getNameFromItem(it)) === normName,
+          );
+          if (!already) {
+            updatedTherapies.push({ name: normName, price: 0 });
+          }
+        });
+      } else {
+        // current es array de strings (legacy) -> guardamos strings normalizados
+        // empezamos con los strings actuales que estén activos
+        updatedTherapies = currentTherapies
+          .map((s) => normalizeText(getNameFromItem(s)))
+          .filter((nm) => activeTherapiesNormalized.includes(nm));
+
+        // añadir activos que no estén ya
+        activeTherapiesNormalized.forEach((nm) => {
+          if (!updatedTherapies.includes(nm)) {
+            updatedTherapies.push(nm);
+          }
+        });
+      }
+
+      // Actualizar documento en Firestore
       const proRef = doc(db, 'pros', docId);
       await updateDoc(proRef, {
         status: 'aprobado',
         terapias: updatedTherapies,
       });
+
       console.log('Status actualizado a aprobado');
+
+      // Preparar y enviar correo (enviamos nombres normalizados)
       const emailContent = getSuccessEmailHtml(activeTherapiesNormalized);
       await setDoc(doc(db, 'mail', docId), {
         to: email,
@@ -94,9 +169,10 @@ const AdminProModal = ({
           html: emailContent,
         },
       });
+
       console.log('Correo de aprobación enviado a:', email);
-      onApprove();
-      onClose();
+      if (typeof onApprove === 'function') onApprove();
+      if (typeof onClose === 'function') onClose();
     } catch (error) {
       console.error('Error al aprobar:', error);
     }
@@ -211,7 +287,7 @@ const AdminProModal = ({
         <div className="adminProModal-row-certificates">
           <label>Certificaciones:</label>
           <div className="adminProModal-cert-list">
-            {certificateFiles.length > 0 ? (
+            {Array.isArray(certificateFiles) && certificateFiles.length > 0 ? (
               certificateFiles.map((cert) => (
                 <a
                   key={cert.url}
@@ -300,7 +376,8 @@ AdminProModal.propTypes = {
       ),
     }),
     docId: PropTypes.string,
-    terapias: PropTypes.arrayOf(PropTypes.string),
+    // terapias puede ser array de strings (legacy) o array de objetos { name, price }
+    terapias: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.object])),
   }).isRequired,
   onReject: PropTypes.func,
 };
