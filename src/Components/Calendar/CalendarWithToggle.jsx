@@ -37,7 +37,7 @@ const Calendar = ({
     const normalized = text
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\p{L}\p{N}\s]/gu, '')
       .replace(/\s+/g, '');
     console.log(`Normalizing text: "${text}" -> "${normalized}"`);
     return normalized;
@@ -65,6 +65,9 @@ const Calendar = ({
 
   const normalizedTherapyType = normalizeText(therapyType);
   console.log('Therapy type passed to Calendar (normalized):', normalizedTherapyType);
+
+  // Helper para capitalizar la primera letra (se usa en el título del calendario)
+  const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
   const {
     startTime,
@@ -249,8 +252,13 @@ const Calendar = ({
     setCurrentSlotIndex((prev) => Math.max(prev - 3, 0));
   };
 
+  // Cambiamos la clase del contenedor principal dependiendo de la colección:
+  // - si collectionName === 'pros' usamos 'MyCalendar-cont'
+  // - en caso contrario mantenemos 'DynamiCanlendar-cont'
+  const containerClass = collectionName === 'pros' ? 'MyCalendar-cont' : 'DynamiCanlendar-cont';
+
   return (
-    <div className="DynamiCanlendar-cont">
+    <div className={containerClass}>
       <div className="calendar-month-cont">
         <button
           className="calendar-month-btn"
@@ -259,7 +267,7 @@ const Calendar = ({
         >
           ←
         </button>
-        <h2 className="calendar-title">{monthName}</h2>
+        <h2 className="calendar-title">{capitalize(monthName)}</h2>
         <button
           className="calendar-month-btn"
           type="button"
@@ -296,7 +304,7 @@ const Calendar = ({
           className="Hours-selector-cont"
           style={isConfirmed ? { height: '90%' } : {}}
         >
-          <p>¿A que hora?</p>
+          <p style={collectionName === 'pros' ? { width: '26%' } : {}}>¿A que hora?</p>
           {collectionName === 'pros' ? (
             <div className="Hours-selector-pro">
               <div className="Time-selector-pro">
