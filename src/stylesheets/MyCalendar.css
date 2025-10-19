@@ -120,6 +120,45 @@
     height: 100%;
 }
 
+@media (max-width: 270px) {
+
+    .MyCalendar-cont {
+        width: 96%;
+    }
+
+    .Calendar-cont {
+        height: 29vh;
+    }
+
+    .calendar-week-cont {
+        height: 5.5vh;
+    }
+
+    .calendar-day-header {
+        height: 100%;
+    }
+
+    .calendar-title {
+        font-size: 7vw;
+    }
+
+    .calendar-month-cont {
+        height: 6vh;
+    }
+
+    .calendar-month-btn {
+        height: 74%;
+        width: 12%;
+    }
+
+    .schedule-info {
+        height: 6.5vh;
+        width: 104%;
+        margin:  1% 0 0 0;
+    }
+}
+
+
 @media (min-width: 371px) and (max-width: 799px) {
     .calendar-month-cont {
         height: 8%;
@@ -167,7 +206,8 @@
         width: 58%;
     }
 
-    .work-schedule h3, .lunch-info {
+    .work-schedule h3,
+    .lunch-info {
         font-size: 2vw;
     }
 
