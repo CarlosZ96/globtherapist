@@ -15,6 +15,7 @@ import User from '../../img/user.png';
 import up from '../../img/up-arrow.png';
 import dwn from '../../img/dwn-arrow.png';
 import edit from '../../img/editar.png';
+import arrow from '../../img/right-arrow.png';
 import '../../stylesheets/month.css';
 
 const Calendar = ({
@@ -252,9 +253,6 @@ const Calendar = ({
     setCurrentSlotIndex((prev) => Math.max(prev - 3, 0));
   };
 
-  // Cambiamos la clase del contenedor principal dependiendo de la colección:
-  // - si collectionName === 'pros' usamos 'MyCalendar-cont'
-  // - en caso contrario mantenemos 'DynamiCanlendar-cont'
   const containerClass = collectionName === 'pros' ? 'MyCalendar-cont' : 'DynamiCanlendar-cont';
 
   return (
@@ -265,7 +263,7 @@ const Calendar = ({
           type="button"
           onClick={() => changeMonth(-1)}
         >
-          ←
+          <img src={arrow} alt="" className="arrow" />
         </button>
         <h2 className="calendar-title">{capitalize(monthName)}</h2>
         <button
@@ -273,7 +271,7 @@ const Calendar = ({
           type="button"
           onClick={() => changeMonth(1)}
         >
-          →
+          <img src={arrow} alt="" className="arrow" />
         </button>
       </div>
       <div className="calendar-week-cont">

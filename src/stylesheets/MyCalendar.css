@@ -75,7 +75,7 @@
 
 .schedule-info {
     width: 100%;
-    height: 10%;
+    height: 7vh;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -161,7 +161,7 @@
 
 @media (min-width: 371px) and (max-width: 799px) {
     .calendar-month-cont {
-        height: 8%;
+        height: 10%;
     }
 
     .Calendar-cont {
@@ -170,6 +170,12 @@
 
     .Choose-Day-btns-cont {
         height: 10%;
+    }
+
+    .MyCalendar-cont {
+        width: 96%;
+        height: 80vh;
+        justify-content: center;
     }
 }
 

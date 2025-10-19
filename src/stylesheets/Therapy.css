@@ -160,7 +160,7 @@
     align-items: center;
     justify-content: center;
     width: 82%;
-    height: 52%;
+    height: 70%;
     border: none;
 }
 
@@ -182,7 +182,7 @@
     align-items: center;
     justify-content: center;
     width: 80%;
-    height: 50%;
+    height: 70%;
 }
 
 .inactive-txt {
@@ -517,7 +517,7 @@
     }
 
     .Therapies-cont {
-        height: 70%;
+        height: 50%;
         width: 100%;
     }
 
