@@ -5,14 +5,29 @@ import {
 import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
 
+// Normaliza un texto: elimina tildes, espacios y devuelve lower case.
+// Si no es string, devuelve ''.
 const normalizeText = (text) => {
+  if (!text || typeof text !== 'string') return '';
   const normalized = text
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, '');
-  console.log(`normalizeText: "${text}" -> "${normalized}"`);
+  // console.log(`normalizeText: "${text}" -> "${normalized}"`);
   return normalized;
+};
+
+const getNameFromItem = (item) => {
+  if (!item) return '';
+  if (typeof item === 'string') return item;
+  // si es objeto, intentamos las propiedades comunes
+  if (typeof item === 'object') {
+    if (item.name && typeof item.name === 'string') return item.name;
+    if (item.Nombre && typeof item.Nombre === 'string') return item.Nombre;
+    if (item.terapia && typeof item.terapia === 'string') return item.terapia;
+  }
+  return '';
 };
 
 const usePros = () => {
@@ -35,7 +50,7 @@ const usePros = () => {
       const prosQuerySnapshot = await getDocs(prosCollectionRef);
       const matchingPros = [];
 
-      // Normalizar el therapyType
+      // Normalizar el therapyType recibido (puede ser string vacío)
       const normalizedTherapyType = normalizeText(therapyType);
       console.log('therapyType normalizado:', normalizedTherapyType);
 
@@ -45,7 +60,7 @@ const usePros = () => {
           horarios, terapias, Nombre, status,
         } = proData;
         console.log('Profesional:', Nombre);
-        console.log('Terapias del profesional:', terapias);
+        console.log('Terapias del profesional raw:', terapias);
         console.log('Horarios del profesional:', horarios);
 
         // Solo sigue si el status es 'aprobado'
@@ -54,21 +69,28 @@ const usePros = () => {
           return;
         }
 
-        const normalizedTerapias = terapias?.map((t) => normalizeText(t));
+        // Manejar terapias: puede ser undefined, array de strings o array de objetos
+        const normalizedTerapias = Array.isArray(terapias)
+          ? terapias
+            .map((t) => normalizeText(getNameFromItem(t)))
+            .filter(Boolean)
+          : [];
+
         console.log('Terapias del profesional normalizadas:', normalizedTerapias);
 
-        if (normalizedTerapias && normalizedTerapias.includes(normalizedTherapyType)) {
+        if (normalizedTerapias.length > 0 && normalizedTerapias.includes(normalizedTherapyType)) {
           console.log('El profesional ofrece la terapia:', therapyType);
           const monthHorarios = horarios?.[month];
           if (monthHorarios) {
             const dayHorario = monthHorarios.find((d) => d.date === date);
             if (dayHorario) {
               console.log(`Encontrado horario para el día ${date} en el mes ${month} para ${Nombre}`);
-              const hasMatchingTime = dayHorario.Timeslots.some((timeSlot) => {
-                const [startTimeStr] = timeSlot.split('-');
-                console.log(`Comparando timeSlot: "${startTimeStr}" con time: "${time}"`);
-                return startTimeStr === time;
-              });
+              const hasMatchingTime = Array.isArray(dayHorario.Timeslots)
+                && dayHorario.Timeslots.some((timeSlot) => {
+                  const [startTimeStr] = timeSlot.split('-');
+                  console.log(`Comparando timeSlot: "${startTimeStr}" con time: "${time}"`);
+                  return startTimeStr === time;
+                });
 
               if (hasMatchingTime) {
                 console.log('Profesional coincide:', Nombre);
@@ -86,10 +108,12 @@ const usePros = () => {
           console.log(`El profesional ${Nombre} no ofrece la terapia normalizada: ${normalizedTherapyType}`);
         }
       });
+
       console.log('Profesionales encontrados:', matchingPros);
       setAvailablePros(matchingPros);
     } catch (error) {
       console.error('Error al obtener los profesionales:', error);
+      setAvailablePros([]);
     }
   };
 
