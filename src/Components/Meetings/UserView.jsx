@@ -222,6 +222,46 @@ const UserView = ({ meetingParams }) => {
     console.log('Solicitud de acceso enviada');
   };
 
+  // --- Dynamic styles when chat is active ---
+  const videoControlsContStyle = showChat
+    ? {
+      width: '15%',
+      height: '64%',
+      position: 'absolute',
+      right: '0',
+      top: '0',
+      zIndex: 1500,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      background: 'none',
+    }
+    : {};
+
+  const videoControlsInnerStyle = showChat
+    ? {
+      display: 'flex', flexDirection: 'column', gap: '0.6rem', alignItems: 'center',
+    }
+    : {
+      display: 'flex', flexDirection: 'row', gap: '0.6rem', alignItems: 'center',
+    };
+
+  // --- New shared styles requested ---
+  const videoButtonStyle = {
+    width: '100%',
+    fontSize: '2.8vw',
+  };
+
+  const videoButtonImgStyle = {
+    width: '64%',
+    opacity: 0.66,
+  };
+
+  const videoUserInfoStyle = {
+    marginTop: '0.6rem',
+    left: '-526% ',
+  };
+
   return (
     <div className="UserView-cont" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <header className="video-header">
@@ -261,39 +301,41 @@ const UserView = ({ meetingParams }) => {
           <div className="video-pre-view-cont" style={{ display: remoteCameraOn ? 'block' : 'none' }}>
             <div className="video-pre-view" ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
           </div>
-          <div className="video-controls-cont">
-            <div className="video-controls">
-              <button type="button" className="video-buttons" onClick={handleToggleCamera}>
-                <img src={CamIcon} className="video-button-img" />
-                {cameraOn ? 'Apagar cámara' : 'Encender cámara'}
+
+          <div className="video-controls-cont" style={videoControlsContStyle}>
+            <div className="video-controls" style={videoControlsInnerStyle}>
+              <button type="button" className="video-buttons" onClick={handleToggleCamera} style={videoButtonStyle}>
+                <img src={CamIcon} className="video-button-img" style={videoButtonImgStyle} />
+                {cameraOn ? 'Apagar cámara' : 'Camara'}
               </button>
-              <button type="button" className="video-buttons" onClick={handleToggleMic}>
-                <img src={MicroIcon} className="video-button-img" />
-                {micOn ? 'Apagar micrófono' : 'Encender micrófono'}
+              <button type="button" className="video-buttons" onClick={handleToggleMic} style={videoButtonStyle}>
+                <img src={MicroIcon} className="video-button-img" style={videoButtonImgStyle} />
+                {micOn ? 'Apagar micrófono' : 'Mic'}
               </button>
-              <button type="button" className="video-buttons" onClick={handleScreenShare}>
-                <img src={ShareIcon} className="video-button-img" />
-                {sharingScreen ? 'Detener pantalla' : 'Compartir pantalla'}
+              <button type="button" className="video-buttons" onClick={handleScreenShare} style={videoButtonStyle}>
+                <img src={ShareIcon} className="video-button-img" style={videoButtonImgStyle} />
+                {sharingScreen ? 'Detener pantalla' : 'Compartir'}
               </button>
               <button
                 type="button"
                 className="video-buttons"
                 onClick={() => setShowChat(!showChat)}
-                style={{ background: showChat ? '#233cb5' : '' }}
+                style={{ ...videoButtonStyle, background: showChat ? '#233cb5' : '' }}
               >
-                <img src={chatIcon} className="video-button-img" />
-                Abrir chat
+                <img src={chatIcon} className="video-button-img" style={videoButtonImgStyle} />
+                Chat
               </button>
               <button
                 type="button"
                 className="video-buttons"
                 onClick={handleEndCall}
+                style={videoButtonStyle}
               >
                 <img src={endCallIcon} alt="Colgar" width="20" height="20" />
-                Cerrar llamada
+                Salir
               </button>
             </div>
-            <div className="video-user-info">
+            <div className="video-user-info" style={videoUserInfoStyle}>
               <p>
                 {currentUser.username || 'Usuario'}
               </p>
@@ -306,15 +348,6 @@ const UserView = ({ meetingParams }) => {
           {showChat && (
             isMobile ? (
               <div className="chat-mobile-cont">
-                <div className="chat-mobile-header">
-                  <button
-                    type="button"
-                    className="chat-close-btn"
-                    onClick={() => setShowChat(false)}
-                  >
-                    ×
-                  </button>
-                </div>
                 <div className="chat-mobile-body">
                   <ChatComponent clientId={currentUser.uid} channelId={meetingParams.channelId} />
                 </div>
@@ -323,19 +356,19 @@ const UserView = ({ meetingParams }) => {
               <div
                 className="chat-desktop-floating"
                 style={{
-                position: 'fixed',
-                top: '50%',
-                left: '0.5%',
-                transform: 'translateY(-50%)',
-                width: '30%',
-                height: '54%',
-                backgroundColor: 'white',
-                zIndex: 1000,
-                boxShadow: '0 0 10px rgba(0,0,0,0.5)',
-                borderRadius: '8px',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
+                  position: 'fixed',
+                  top: '50%',
+                  left: '0.5%',
+                  transform: 'translateY(-50%)',
+                  width: '30%',
+                  height: '54%',
+                  backgroundColor: 'white',
+                  zIndex: 1000,
+                  boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
               >
                 <div style={{
                   display: 'flex',

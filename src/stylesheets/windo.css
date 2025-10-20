@@ -366,7 +366,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 30%;
+    height: 25%;
 }
 
 .CreatePro-therapies label {
@@ -706,8 +706,8 @@
     .Login-cont {
         left: 19%;
         top: 12%;
-        width: 68vw;
-        height: 65vh;
+        width: 55vw;
+        height: 79vh;
     }
 
     .pending-dates {
@@ -715,7 +715,7 @@
     }
 
     .log-txt-h {
-        font-size: 3.5vw;
+        font-size: 2.2vw;
     }
 
     .Login-input {
@@ -739,7 +739,7 @@
     }
 
     .Create-title-cont h1 {
-        font-size: 2.8vw;
+        font-size: 2.2vw;
     }
 
     .Crt-input-cont h3 {
@@ -806,21 +806,21 @@
     }
 
     .CreatePro-input-cont label {
-        font-size: 2.8vw;
+        font-size: 2.2vw;
     }
 
 
     .CreatePro-input-cont input,
     .CreatePro-input-cont select {
         height: 70%;
-        font-size: 2vw;
+        font-size: 1.2vw;
     }
 
     .CreatePro-input-cont select {
         position: absolute;
         left: 41.5%;
         width: 10%;
-        height: 6vh;
+        height: 5.4vh;
     }
 
     .CreatePro-therapies label {
@@ -849,12 +849,16 @@
     }
 
     .close-button-crtp {
-        top: -3%;
+        top: -2%;
         left: 93%;
-        font-size: 5vw;
+        font-size: 4vw;
     }
 
     .CreatePro-input-cont:nth-of-type(4) {
         justify-content: space-between;
+    }
+
+    .Login-title-cont h1 {
+        font-size: 3.2vw;
     }
 }

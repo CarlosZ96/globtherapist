@@ -74,8 +74,6 @@ const ProView = ({ meetingParams }) => {
   const [remoteCameraOn, setRemoteCameraOn] = useState(false);
   const [screenTrack, setScreenTrack] = useState(null);
   const [sharingScreen, setSharingScreen] = useState(false);
-
-  /* --- NUEVO: responsive/mobile state --- */
   const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth <= 570 : false));
   const [showChat, setShowChat] = useState(() => (typeof window !== 'undefined' ? window.innerWidth <= 570 : false));
   const [showProInfo, setShowProInfo] = useState(false);
@@ -89,12 +87,10 @@ const ProView = ({ meetingParams }) => {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  /* Mantener el chat abierto por defecto al entrar en mobile, y cerrado al salir */
   useEffect(() => {
     setShowChat(isMobile);
   }, [isMobile]);
 
-  // Función para limpiar todos los recursos de Agora
   const cleanupAgoraResources = async () => {
     try {
       if (micTrack) {
@@ -186,7 +182,6 @@ const ProView = ({ meetingParams }) => {
 
     initAgora();
 
-    // SOLUCIÓN: Remover el cleanup automático
     return () => { };
   }, [meetingParams]);
 
@@ -268,12 +263,38 @@ const ProView = ({ meetingParams }) => {
     }
   };
 
+  const chatActive = showChat && isMobile;
+  const videoControlsContStyle = chatActive
+    ? {
+      width: '15%',
+      height: '56%',
+      position: 'absolute',
+      top: '9%',
+      right: '0',
+      background: 'none',
+    }
+    : undefined;
+
+  const videoControlsStyle = chatActive ? { flexDirection: 'column' } : undefined;
+  const videoButtonStyle = chatActive ? { width: '100%', fontSize: '2.8vw' } : undefined;
+  const videoButtonImgStyle = chatActive ? { width: '64%', opacity: 0.66 } : undefined;
+  const videoUserInfoStyle = chatActive ? { left: 0, right: '608%' } : undefined;
+  const userMedicalInfoStyle = chatActive ? { top: '-17%' } : undefined;
+  const videoUserInfoShiftStyle = chatActive ? { left: '-530%' } : undefined;
+  const camTxtStyle = chatActive ? { top: '30%' } : undefined;
+
+  const mergedVideoUserInfoStyle = {
+    ...(videoUserInfoStyle || {}),
+    ...(videoUserInfoShiftStyle || {}),
+  };
+
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
+        width: '100%',
         position: 'relative',
       }}
     >
@@ -290,55 +311,71 @@ const ProView = ({ meetingParams }) => {
       <div className="UserView-video-container">
         <div ref={localVideoRef} className="video-cont" />
         {!cameraOn && (
-          <div className="cam-txt">
+          <div className="cam-txt" style={camTxtStyle}>
             La cámara está apagada
           </div>
         )}
         <div className="video-pre-view-cont" style={{ display: remoteCameraOn ? 'block' : 'none' }}>
           <div className="video-pre-view" ref={remoteVideoRef} style={{ width: '100%', height: '100%' }} />
         </div>
-        <div className="video-controls-cont">
-          <div className="video-controls">
-            <button type="button" className="video-buttons" onClick={handleToggleCamera}>
-              <img src={CamIcon} className="video-button-img" />
-              {cameraOn ? 'Apagar cámara' : 'Encender cámara'}
+        <div className="video-controls-cont" style={videoControlsContStyle}>
+          <div className="video-controls" style={videoControlsStyle}>
+            <button
+              type="button"
+              className="video-buttons"
+              onClick={handleToggleCamera}
+              style={{ ...(videoButtonStyle || {}) }}
+            >
+              <img src={CamIcon} className="video-button-img" style={videoButtonImgStyle} />
+              {cameraOn ? 'Apagar cámara' : 'Cámara'}
             </button>
-            <button type="button" className="video-buttons" onClick={handleToggleMic}>
-              <img src={MicroIcon} className="video-button-img" />
-              {micOn ? 'Apagar micrófono' : 'Encender micrófono'}
+            <button
+              type="button"
+              className="video-buttons"
+              onClick={handleToggleMic}
+              style={{ ...(videoButtonStyle || {}) }}
+            >
+              <img src={MicroIcon} className="video-button-img" style={videoButtonImgStyle} />
+              {micOn ? 'Apagar micrófono' : 'Mic'}
             </button>
-            <button type="button" className="video-buttons" onClick={handleScreenShare}>
-              <img src={ShareIcon} className="video-button-img" />
-              {sharingScreen ? 'Detener pantalla' : 'Compartir pantalla'}
+            <button
+              type="button"
+              className="video-buttons"
+              onClick={handleScreenShare}
+              style={{ ...(videoButtonStyle || {}) }}
+            >
+              <img src={ShareIcon} className="video-button-img" style={videoButtonImgStyle} />
+              {sharingScreen ? 'Detener pantalla' : 'Compartir'}
             </button>
             <button
               type="button"
               className="video-buttons"
               onClick={() => setShowChat(!showChat)}
-              style={{ background: showChat ? '#4CAF50' : '' }}
+              style={{ ...(videoButtonStyle || {}), background: showChat ? '#233cb5' : '' }}
             >
               <img src={chatIcon} alt="Chat" width="20" height="20" />
-              Abrir chat
+              Chat
             </button>
             <button
               type="button"
               className="user-medical-info"
               onClick={() => setShowProInfo(true)}
-              style={{ background: showProInfo ? '#4CAF50' : '' }}
+              style={{ ...(userMedicalInfoStyle || {}), background: showProInfo ? '#233cb5' : '' }}
             >
               <img src={formIcon} alt="Formulario" width="20" height="20" />
-              Historial Clinico
+              Historia
             </button>
             <button
               type="button"
               className="video-buttons"
               onClick={handleEndCall}
+              style={{ ...(videoButtonStyle || {}) }}
             >
-              <img src={endCallIcon} alt="Colgar" width="20" height="48" />
-              Cerrar llamada
+              <img src={endCallIcon} className="Colgar" width="20" height="48" />
+              Salir
             </button>
           </div>
-          <div className="video-user-info">
+          <div className="video-user-info" style={mergedVideoUserInfoStyle}>
             <p>
               {currentUser.username || 'Usuario'}
             </p>
@@ -351,15 +388,7 @@ const ProView = ({ meetingParams }) => {
         {showChat && (
           isMobile ? (
             <div className="chat-mobile-cont">
-              <div className="chat-mobile-header">
-                <button
-                  type="button"
-                  className="chat-close-btn"
-                  onClick={() => setShowChat(false)}
-                >
-                  ×
-                </button>
-              </div>
+
               <div className="chat-mobile-body">
                 <ChatComponent clientId={currentPro.uid} channelId={meetingParams.channelId} />
               </div>
@@ -368,19 +397,19 @@ const ProView = ({ meetingParams }) => {
             <div
               className="chat-desktop-floating"
               style={{
-              position: 'fixed',
-              top: '50%',
-              right: '20px',
-              transform: 'translateY(-50%)',
-              width: '300px',
-              height: '400px',
-              backgroundColor: 'white',
-              zIndex: 1000,
-              boxShadow: '0 0 10px rgba(0,0,0,0.5)',
-              borderRadius: '8px',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
+                position: 'fixed',
+                top: '50%',
+                right: '20px',
+                transform: 'translateY(-50%)',
+                width: '300px',
+                height: '400px',
+                backgroundColor: 'white',
+                zIndex: 1000,
+                boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+                borderRadius: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
             >
               <div style={{
                 display: 'flex',

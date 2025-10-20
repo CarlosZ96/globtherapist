@@ -687,6 +687,8 @@
 
     .calendar-month-btn {
         font-size: 4vw;
+        height: 100%;
+        width: 3%;
     }
 
     .Time-hour-txt h3 {
@@ -850,7 +852,7 @@
     }
 
     .calendar-title {
-        font-size: 4vw;
+        font-size: 3vw;
     }
 
     .DynamiCanlendar-cont {
