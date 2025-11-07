@@ -24,12 +24,14 @@ const initialFormData = {
 
 const CreatePro = ({ toggleCreatePro }) => {
   const [formData, setFormData] = useState(initialFormData);
+  const [therapyPrices, setTherapyPrices] = useState({}); // { 'Mental': '50000', ... }
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const emailHtml = renderToStaticMarkup(
     <WelcomeEmail userName={formData.fullName} collection="pros" />,
   );
   const therapyOptions = ['Mental', 'Física', 'Ocupacional', 'Lenguaje'];
+
   const normalizeText = (text) => {
     return text
       .normalize('NFD')
@@ -53,12 +55,33 @@ const CreatePro = ({ toggleCreatePro }) => {
   };
 
   const toggleTherapy = (therapy) => {
-    setFormData((prev) => ({
-      ...prev,
-      therapies: prev.therapies.includes(therapy)
+    setFormData((prev) => {
+      const exists = prev.therapies.includes(therapy);
+      const newTherapies = exists
         ? prev.therapies.filter((t) => t !== therapy)
-        : [...prev.therapies, therapy],
-    }));
+        : [...prev.therapies, therapy];
+
+      // if we deselect, remove price for that therapy
+      if (exists) {
+        setTherapyPrices((prevPrices) => {
+          const copy = { ...prevPrices };
+          delete copy[therapy];
+          return copy;
+        });
+      }
+
+      return {
+        ...prev,
+        therapies: newTherapies,
+      };
+    });
+  };
+
+  const handlePriceChange = (therapy, value) => {
+    // allow empty string to let user clear, otherwise keep numeric string
+    // remove leading zeros and spaces
+    const sanitized = value === '' ? '' : value.replace(/[^0-9]/g, '');
+    setTherapyPrices((prev) => ({ ...prev, [therapy]: sanitized }));
   };
 
   const validateForm = () => {
@@ -101,6 +124,22 @@ const CreatePro = ({ toggleCreatePro }) => {
       return;
     }
 
+    // Si hay terapias seleccionadas, validar que tengan precio numérico
+    if (formData.therapies.length > 0) {
+      const missingPrices = formData.therapies.filter((t) => {
+        const val = therapyPrices[t];
+        return val === undefined || val === null || val === '' || Number.isNaN(Number(val));
+      });
+      if (missingPrices.length > 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Falta precio',
+          text: `Debes ingresar un precio numérico para: ${missingPrices.join(', ')}`,
+        });
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -109,7 +148,12 @@ const CreatePro = ({ toggleCreatePro }) => {
         formData.password,
       );
       const { user } = userCredential;
-      const normalizedTherapies = formData.therapies.map((therapy) => normalizeText(therapy));
+
+      // construir array de terapias como subarray de objetos { name: normalized, price: number }
+      const normalizedTherapies = formData.therapies.map((therapy) => ({
+        name: normalizeText(therapy),
+        price: Number(therapyPrices[therapy] || 0),
+      }));
 
       await setDoc(doc(db, 'pros', user.uid), {
         uid: user.uid,
@@ -131,6 +175,7 @@ const CreatePro = ({ toggleCreatePro }) => {
         text: 'Cuenta Pro creada con éxito.',
       });
       setFormData(initialFormData);
+      setTherapyPrices({});
       toggleCreatePro();
       await setDoc(doc(db, 'mail', user.uid), {
         to: formData.email,
@@ -154,6 +199,7 @@ const CreatePro = ({ toggleCreatePro }) => {
 
   const handleClose = () => {
     setFormData(initialFormData);
+    setTherapyPrices({});
     setErrors({});
     toggleCreatePro();
   };
@@ -264,14 +310,32 @@ const CreatePro = ({ toggleCreatePro }) => {
             <label>¿Con qué terapias vas a trabajar?</label>
             <div className="therapy-buttons">
               {therapyOptions.map((therapy) => (
-                <button
-                  key={therapy}
-                  type="button"
-                  className={`therapy-button ${formData.therapies.includes(therapy) ? 'therapy-button-active' : ''}`}
-                  onClick={() => toggleTherapy(therapy)}
-                >
-                  {therapy}
-                </button>
+                <div className="therapy-button-cont" key={therapy}>
+                  <button
+                    type="button"
+                    className={`therapy-button ${formData.therapies.includes(therapy) ? 'therapy-button-active' : ''}`}
+                    onClick={() => toggleTherapy(therapy)}
+                  >
+                    {therapy}
+                  </button>
+                  <div
+                    className="therapy-price"
+                    style={{ display: formData.therapies.includes(therapy) ? 'flex' : 'none' }}
+                  >
+                    <span>Precio por día:</span>
+                    <input
+                      className="price-input"
+                      type="number"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      min="0"
+                      step="1"
+                      placeholder="0"
+                      value={therapyPrices[therapy] ?? ''}
+                      onChange={(e) => handlePriceChange(therapy, e.target.value)}
+                    />
+                  </div>
+                </div>
               ))}
             </div>
           </div>

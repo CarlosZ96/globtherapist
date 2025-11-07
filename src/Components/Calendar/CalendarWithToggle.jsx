@@ -15,6 +15,7 @@ import User from '../../img/user.png';
 import up from '../../img/up-arrow.png';
 import dwn from '../../img/dwn-arrow.png';
 import edit from '../../img/editar.png';
+import arrow from '../../img/right-arrow.png';
 import '../../stylesheets/month.css';
 
 const Calendar = ({
@@ -37,7 +38,7 @@ const Calendar = ({
     const normalized = text
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\p{L}\p{N}\s]/gu, '')
       .replace(/\s+/g, '');
     console.log(`Normalizing text: "${text}" -> "${normalized}"`);
     return normalized;
@@ -65,6 +66,9 @@ const Calendar = ({
 
   const normalizedTherapyType = normalizeText(therapyType);
   console.log('Therapy type passed to Calendar (normalized):', normalizedTherapyType);
+
+  // Helper para capitalizar la primera letra (se usa en el título del calendario)
+  const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
   const {
     startTime,
@@ -249,26 +253,27 @@ const Calendar = ({
     setCurrentSlotIndex((prev) => Math.max(prev - 3, 0));
   };
 
+  const containerClass = collectionName === 'pros' ? 'MyCalendar-cont' : 'DynamiCanlendar-cont';
+
   return (
-    <div className="DynamiCanlendar-cont">
+    <div className={containerClass}>
       <div className="calendar-month-cont">
         <button
           className="calendar-month-btn"
           type="button"
           onClick={() => changeMonth(-1)}
         >
-          ←
+          <img src={arrow} alt="" className="arrow" />
         </button>
-        <h2 className="calendar-title">{monthName}</h2>
+        <h2 className="calendar-title">{capitalize(monthName)}</h2>
         <button
           className="calendar-month-btn"
           type="button"
           onClick={() => changeMonth(1)}
         >
-          →
+          <img src={arrow} alt="" className="arrow" />
         </button>
       </div>
-      <hr className="date-blue-line" />
       <div className="calendar-week-cont">
         {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
           <div key={uuidv4()} className="calendar-day-header">
@@ -276,7 +281,6 @@ const Calendar = ({
           </div>
         ))}
       </div>
-      <hr className="date-blue-line" />
       <div className="Choose-Day-Cont">
         <div className="Calendar-cont" style={{ backgroundColor: '#fff' }}>
           {days.map((day) => (
@@ -291,30 +295,14 @@ const Calendar = ({
             </button>
           ))}
         </div>
-        <div className="Choose-Day-btns-cont">
-          <h3 className="Choose-Day-txt">
-            {collectionName === 'users'
-              ? 'Elige el día de tu valoración.'
-              : '¿Qué días estarás disponible para trabajar?'}
-          </h3>
-          <div className="Dispos-cont">
-            <div className="Dispo-cont">
-              <h3>Dispo</h3>
-              <div className="Dispos-btn" />
-            </div>
-            <div className="Dispo-cont">
-              <h3>No Dispo</h3>
-              <div className="Dispos-btn" />
-            </div>
-          </div>
-        </div>
       </div>
-      <hr className="date-blue-line" />
       <div className="Hours-cont">
+
         <div
           className="Hours-selector-cont"
           style={isConfirmed ? { height: '90%' } : {}}
         >
+          <p style={collectionName === 'pros' ? { width: '26%' } : {}}>¿A que hora?</p>
           {collectionName === 'pros' ? (
             <div className="Hours-selector-pro">
               <div className="Time-selector-pro">
@@ -449,11 +437,8 @@ const Calendar = ({
           </button>
         </div>
       )}
-      <hr className="date-blue-line" />
-
       {showContainers && collectionName === 'users' && (
         <div className="Pros-cont">
-          {/* Sólo renderizamos el botón si aún NO se han mostrado los pros */}
           {!showPros && (
             <div className="Pros-btn-cont">
               <button

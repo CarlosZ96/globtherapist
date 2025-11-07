@@ -30,11 +30,25 @@ const Therapy = () => {
     Mental: 80000,
     Ocupacional: 41000,
   };
+
+  // normalizeText defensiva
   const normalizeText = (text) => {
+    if (!text || typeof text !== 'string') return '';
     return text
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase();
+  };
+
+  const getNameFromItem = (item) => {
+    if (!item) return '';
+    if (typeof item === 'string') return item;
+    if (typeof item === 'object') {
+      if (item.name && typeof item.name === 'string') return item.name;
+      if (item.Nombre && typeof item.Nombre === 'string') return item.Nombre;
+      if (item.terapia && typeof item.terapia === 'string') return item.terapia;
+    }
+    return '';
   };
 
   const calculateEndTime = (start, minutesToAdd) => {
@@ -65,7 +79,7 @@ const Therapy = () => {
   });
 
   const normalizeTime = (time) => {
-    const timeLower = time.toLowerCase();
+    const timeLower = (time || '').toLowerCase();
     const [hour, minute] = timeLower.replace(/[^0-9:]/g, '').split(':');
     let normalizedHour = parseInt(hour, 10);
     if (timeLower.includes('pm') && normalizedHour !== 12) {
@@ -185,11 +199,11 @@ const Therapy = () => {
       const proData = proDoc.data();
       console.log('Professional data:', proData);
       const { horarios, terapias } = proData;
-      const normalizedTerapias = terapias?.map((t) => {
-        const normT = normalizeText(t);
-        console.log(`Therapy "${t}" normalized as:`, normT);
-        return normT;
-      });
+
+      // usar getNameFromItem para soportar objetos o strings
+      const normalizedTerapias = Array.isArray(terapias)
+        ? terapias.map((t) => normalizeText(getNameFromItem(t)))
+        : [];
       console.log('Normalized therapies for professional:', normalizedTerapias);
 
       if (!normalizedTerapias?.includes(normalizedTherapyType)) {
@@ -480,6 +494,7 @@ const Therapy = () => {
         html: `No se pudo completar la operación:<br>
          <strong>Código:</strong> ${error.code || 'N/A'}<br>
          <strong>Mensaje:</strong> ${error.message}`,
+
         footer: 'Verifica las reglas de seguridad en Firestore',
       });
     }
@@ -620,16 +635,20 @@ const Therapy = () => {
                       <h3>Tu cita quedó para el:</h3>
                     </div>
                     <div className="Date-info-description">
-                      <p>{citaGlobal.date}</p>
-                      <p className="appointment-date">
-
+                      <div className="date-info-first">
+                        <p className="date-info-day">{citaGlobal.date}</p>
                         {' '}
-                        de
-                        {citaGlobal.month}
-                        {' '}
-                        del
-                        {new Date().getFullYear()}
-                      </p>
+                        <p className="appointment-date">
+                          {' '}
+                          de
+                          {' '}
+                          {citaGlobal.month}
+                          {' '}
+                          del
+                          {' '}
+                          {new Date().getFullYear()}
+                        </p>
+                      </div>
                       <p className="appointment-time">
                         de
                         {' '}
@@ -677,10 +696,6 @@ const Therapy = () => {
                 </div>
               </div>
             )}
-
-            <button type="submit" className="DynamiCanlendar-btn">
-              <h4>Confirmar e ir a pagar</h4>
-            </button>
           </div>
         )}
         {paymentStatus === 'success' && paymentDetails && (

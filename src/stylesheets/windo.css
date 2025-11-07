@@ -25,6 +25,7 @@
     text-align: center;
     font-family: krona one, sans-serif;
     font-weight: 200;
+    font-size: 5vw;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -59,7 +60,7 @@
     font-style: normal;
     margin: 0;
     text-align: center;
-    font-size: 6vw;
+    font-size: 5vw;
 }
 
 .close-button {
@@ -121,7 +122,7 @@
 
 .Crt-input-cont h3 {
     width: 60%;
-    font-size: 4.9vw;
+    font-size: 3.2vw;
     color: #2B3A67;
     font-family: krona one, sans-serif;
     font-weight: 300;
@@ -295,7 +296,7 @@
     top: 7%;
     z-index: 102;
     width: 94vw;
-    height: 85vh;
+    height: 92vh;
     border: 3px #01268d solid;
     background-color: #fff;
 }
@@ -311,7 +312,7 @@
     align-items: center;
     justify-content: space-around;
     width: 100%;
-    height: 9%;
+    height: 8%;
 }
 
 .CreatePro-input-cont label {
@@ -365,7 +366,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 20%;
+    height: 25%;
 }
 
 .CreatePro-therapies label {
@@ -393,14 +394,13 @@
 
 .therapy-button {
     width: 90%;
-    height: 90%;
+    height: 50%;
     background-color: #7C95A6;
     color: #AEBECA;
     font-size: 4.2vw;
     font-family: Itim, serif;
     font-weight: 100;
     border: none;
-    border-radius: 5px;
     margin: 0 1%;
     cursor: pointer;
 }
@@ -412,13 +412,14 @@
     font-family: Itim, serif;
     font-weight: 100;
     border: none;
-    border-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
     margin: 0 1%;
 }
 
 .CreatePro-submit {
     width: 100%;
-    height: 10%;
+    height: 7%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -607,6 +608,18 @@
     text-align: center;
 }
 
+.therapy-price {
+    width: 90%;
+    flex-direction: row;
+    align-items: center;
+}
+
+.therapy-price span {
+    font-size: 3vw;
+    font-family: roboto, sans-serif;
+    font-weight: 300;
+}
+
 @media (max-width: 370px) {
 
     .pending-dates {
@@ -618,6 +631,24 @@
     .close-button-who {
         top: 24%;
         right: 6%;
+    }
+
+    .Login-submit-cont button {
+        font-size: 3vw;
+        font-family: roboto, sans-serif;
+        font-weight: 300;
+    }
+
+    .log-txt-h {
+        font-size: 4.6vw;
+    }
+
+    .Login-title-cont h1 {
+        font-size: 6vw;
+    }
+
+    .Crt-input-cont h3 {
+        font-size: 3.8vw;
     }
 }
 
@@ -675,8 +706,8 @@
     .Login-cont {
         left: 19%;
         top: 12%;
-        width: 68vw;
-        height: 65vh;
+        width: 55vw;
+        height: 79vh;
     }
 
     .pending-dates {
@@ -684,7 +715,7 @@
     }
 
     .log-txt-h {
-        font-size: 3.5vw;
+        font-size: 2.2vw;
     }
 
     .Login-input {
@@ -708,7 +739,7 @@
     }
 
     .Create-title-cont h1 {
-        font-size: 2.8vw;
+        font-size: 2.2vw;
     }
 
     .Crt-input-cont h3 {
@@ -775,21 +806,21 @@
     }
 
     .CreatePro-input-cont label {
-        font-size: 2.8vw;
+        font-size: 2.2vw;
     }
 
 
     .CreatePro-input-cont input,
     .CreatePro-input-cont select {
         height: 70%;
-        font-size: 2vw;
+        font-size: 1.2vw;
     }
 
     .CreatePro-input-cont select {
         position: absolute;
         left: 41.5%;
         width: 10%;
-        height: 6vh;
+        height: 5.4vh;
     }
 
     .CreatePro-therapies label {
@@ -818,12 +849,16 @@
     }
 
     .close-button-crtp {
-        top: -3%;
+        top: -2%;
         left: 93%;
-        font-size: 5vw;
+        font-size: 4vw;
     }
 
     .CreatePro-input-cont:nth-of-type(4) {
         justify-content: space-between;
+    }
+
+    .Login-title-cont h1 {
+        font-size: 3.2vw;
     }
 }

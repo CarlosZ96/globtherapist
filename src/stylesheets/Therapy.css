@@ -160,7 +160,7 @@
     align-items: center;
     justify-content: center;
     width: 82%;
-    height: 52%;
+    height: 70%;
     border: none;
 }
 
@@ -182,7 +182,7 @@
     align-items: center;
     justify-content: center;
     width: 80%;
-    height: 50%;
+    height: 70%;
 }
 
 .inactive-txt {
@@ -313,7 +313,7 @@
     align-items: center;
     justify-content: center;
     width: 50%;
-    height: 25%;
+    height: 15%;
     background-color: #1c2e88;
     color: #fff;
     border: none;
@@ -323,18 +323,19 @@
 
 .Date-info-txt {
     display: flex;
-    width: 68%;
-    height: 30%;
+    width: 80%;
+    height: 20%;
     text-align: center;
     border: solid 2px #1c2e88;
     flex-direction: column;
     justify-content: center;
     margin-bottom: 3%;
+    padding: 4%;
 }
 
 .Date-info-txt h3 {
     font-size: 5.5vw;
-    font-family: Itim, serif;
+    font-family: roboto, sans-serif;
     font-weight: 500;
     font-style: normal;
     color: #1c2e88;
@@ -367,6 +368,9 @@
 }
 
 .calendar-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     background-color: #fff;
 }
 
@@ -408,13 +412,28 @@
     font-family: krona one, sans-serif;
 }
 
+.date-info-first,
+.appointment-time,
+.appointment-doctor,
+.therapy-price-info {
+    display: flex;
+    justify-content: center;
+    height: 20%;
+    font-size: 2vw;
+    font-family: krona one, sans-serif;
+}
+
+.date-info-day {
+    margin-right: 1%;
+}
+
 @media (max-width: 370px) {
     .Therapy-body {
         height: 60%;
     }
 
     .calendar-cont {
-        height: 40%;
+        height: 33%;
         width: 100%;
     }
 
@@ -435,7 +454,7 @@
     }
 
     .Choose-Day-Cont {
-        height: 40vh;
+        height: 30vh;
     }
 
     .Ask-Therapy-data-cont {
@@ -473,8 +492,9 @@
     .calendar-cont {
         display: flex;
         justify-content: center;
-        height: 100vh;
-        width: 94vw;
+        height: 75vh;
+        min-height: 575px;
+        width: 96%;
     }
 
 
@@ -497,11 +517,18 @@
     }
 
     .Therapies-cont {
-        height: 40%;
+        height: 50%;
+        width: 100%;
     }
 
     .Therapy-info {
         height: 35%;
+    }
+}
+
+@media (min-width: 371px) and (max-width: 571px) {
+    .calendar-cont {
+        min-height: 450px;
     }
 }
 
@@ -608,7 +635,7 @@
     .calendar-cont {
         display: flex;
         justify-content: center;
-        height: 120vh;
+        height: 100vh;
         width: 96vw;
     }
 

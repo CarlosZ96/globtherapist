@@ -381,7 +381,7 @@
 }
 
 .prospace-request-img-cont {
-    width: 30%;
+    width: 43%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -390,7 +390,8 @@
 }
 
 .her-img {
-    width: 200px;
+    width: 90%;
+    max-width: 233px;
 }
 
 .prospace-request-txt-cont {
@@ -409,13 +410,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
 }
 
 .prospace-request-txt h1 {
     text-align: center;
-    font-size: 6vw;
+    font-size: 4vw;
     color: #fff;
-    font-family: Itim, serif;
+    font-family: 'Krona One';
     font-weight: lighter;
     height: 30%;
     display: flex;
@@ -425,10 +427,10 @@
 
 .prospace-request-txt p {
     text-align: center;
-    font-size: 4vw;
+    font-size: 2.5vw;
     color: #fff;
-    font-family: Itim, serif;
-    font-weight: lighter;
+    font-family: roboto, serif;
+    font-weight: light;
     height: 55%;
     width: 87%;
     display: flex;
@@ -470,10 +472,10 @@
 
 .prospace-explain-txt-cont p {
     width: 91%;
-    font-size: 4vw;
+    font-size: 3vw;
     color: #fff;
-    font-family: Itim, serif;
-    font-weight: lighter;
+    font-family: roboto, serif;
+    font-weight: light;
     align-items: center;
 }
 
@@ -492,6 +494,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    margin-bottom: 2%;
 }
 
 .prospace-title-cont h1 {
@@ -593,19 +596,19 @@
 }
 
 .bubble {
-    height: 12%;
-    width: 16%;
+    height: 8%;
+    width: 13%;
     background-color: #4f63c2;
     border-radius: 50%;
     position: absolute;
-    left: 76%;
+    left: 80%;
     top: 50%;
 }
 
 .prospace-request-img-cont .bubble:last-child {
-    left: 96%;
+    left: 91%;
     top: 36%;
-    height: 15%;
+    height: 11%;
     width: 20%;
 }
 
@@ -821,12 +824,13 @@
 }
 
 .therapies {
+    height: 40vh;
     width: 100%;
 }
 
 .therapies-title {
     width: 100%;
-    height: 8vh;
+    height: 30%;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -842,7 +846,7 @@
 }
 
 .thera-cont-act {
-    width: 60%;
+    width: 90%;
     height: 80%;
     border: none;
     color: #fff;

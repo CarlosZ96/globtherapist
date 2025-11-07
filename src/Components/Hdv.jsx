@@ -1,6 +1,9 @@
 /* eslint-disable no-nested-ternary */
+/* Hdv.jsx (solo reemplaza este archivo o la parte del componente) */
 import React, { useState, useEffect } from 'react';
-import { ref, getDownloadURL } from 'firebase/storage';
+import {
+  ref, getDownloadURL, listAll, getMetadata,
+} from 'firebase/storage';
 import { doc, setDoc, updateDoc } from 'firebase/firestore';
 import Swal from 'sweetalert2';
 import { db, storage } from '../firebase';
@@ -23,15 +26,27 @@ const Hdv = () => {
 
   useEffect(() => {
     const fetchProfileImage = async () => {
-      if (currentUser) {
-        const imageRef = ref(storage, `profileImages/${currentUser.uid}`);
-        try {
-          const url = await getDownloadURL(imageRef);
-          setProfileImage(url);
-        } catch (error) {
-          console.error('Error fetching profile image:', error);
+      if (!currentUser) return;
+      try {
+        const folderRef = ref(storage, `profileImages/${currentUser.uid}`);
+        const list = await listAll(folderRef);
+        if (!list.items || list.items.length === 0) {
           setProfileImage(User);
+          return;
         }
+        // obtener metadatos y url de cada item, ordenar por timeCreated
+        const itemsWithMeta = await Promise.all(
+          list.items.map(async (item) => {
+            const meta = await getMetadata(item);
+            const url = await getDownloadURL(item);
+            return { name: item.name, url, timeCreated: meta.timeCreated };
+          }),
+        );
+        itemsWithMeta.sort((a, b) => new Date(b.timeCreated) - new Date(a.timeCreated));
+        setProfileImage(itemsWithMeta[0].url);
+      } catch (error) {
+        console.error('Error fetching profile image:', error);
+        setProfileImage(User);
       }
     };
 
@@ -48,15 +63,15 @@ const Hdv = () => {
     fetchProfileImage();
   }, [currentPro, currentUser]);
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
+  const handleEdit = () => setIsEditing(true);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
-    if (!currentUser) return;
+    if (!currentUser) {
+      setIsLoading(false);
+      return;
+    }
 
     const proRef = doc(db, 'pros', currentUser.uid);
     const hdvData = {
@@ -71,8 +86,6 @@ const Hdv = () => {
       await setDoc(proRef, { Hdv: hdvData }, { merge: true });
       if (!initialDataLoaded) {
         await updateDoc(proRef, { status: 'pendiente' });
-        console.log('Status actualizado a pendiente');
-
         const emailContent = getValidationEmailHtml();
         await setDoc(doc(db, 'mail', currentUser.uid), {
           to: currentUser.email,
@@ -81,8 +94,6 @@ const Hdv = () => {
             html: emailContent,
           },
         });
-        console.log('Correo de validación enviado al pro:', currentUser.email);
-
         setInitialDataLoaded(true);
       }
 
@@ -96,7 +107,6 @@ const Hdv = () => {
         background: '#f0f9ff',
         iconColor: '#4ade80',
       });
-
       setIsEditing(false);
     } catch (error) {
       console.error('Error guardando datos en Firestore:', error);

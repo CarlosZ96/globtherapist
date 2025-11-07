@@ -430,7 +430,7 @@
    }
 
    .therapy-info-cont {
-      height: 33%;
+      height: 59%;
       width: 40%;
    }
 
@@ -444,9 +444,9 @@
    }
 
    .therapy-close-button {
-      top: 36%;
-      right: 33%;
-      width: 3vw;
+      top: 24%;
+      right: 32%;
+      width: 2vw;
    }
 
    .therapy-icon {

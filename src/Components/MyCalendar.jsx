@@ -212,8 +212,6 @@ const MyCalendar = ({ onEdit }) => {
         </button>
       </div>
 
-      <hr className="date-blue-line" />
-
       <div className="calendar-week-cont">
         {weekDays.map((day) => (
           <div key={uuidv4()} className="calendar-day-header">
@@ -221,8 +219,6 @@ const MyCalendar = ({ onEdit }) => {
           </div>
         ))}
       </div>
-
-      <hr className="date-blue-line" />
 
       <div className="Calendar-cont">
         {calendarDays.map((day) => (
