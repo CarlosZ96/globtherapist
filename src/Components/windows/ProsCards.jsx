@@ -5,7 +5,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../firebase';
 import '../../stylesheets/procards.css';
-import close from '../../img/close.png';
+import close from '../../img/Closegt.png';
 
 const ProsCards = ({ onClose }) => {
   const [pros, setPros] = useState([]);
@@ -74,7 +74,7 @@ const ProsCards = ({ onClose }) => {
   if (pros.length === 0) {
     return (
       <div className="ProsCards-cont">
-        <button type="button" className="close-button" onClick={onClose}>
+        <button type="button" className="close-buttonProCards" onClick={onClose}>
           <img src={close} alt="Cerrar" />
         </button>
         <p>No hay profesionales disponibles en este momento.</p>
