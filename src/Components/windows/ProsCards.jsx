@@ -15,9 +15,9 @@ const ProsCards = ({ onClose }) => {
   useEffect(() => {
     const fetchHdvWithImages = async () => {
       const allowedIds = [
-        'I0AULHKRBZYVAJ3JQ7rhWuBbxhe2',
-        'X3JGiHJRFfNbUnThmXFvZWbsB1p2',
-        '5sQCDthzpIerAeLVMN2lYiO41AE2',
+        '3sBssmNM8uNOhVTMWz1uXMqQrv23',
+        'ubCCQ3beS7Y8qO2kkgAZcXTwO4P2',
+        'jipPeRptYEMof8Z2OMLMvAyBOtj1',
       ];
 
       try {
