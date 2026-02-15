@@ -65,7 +65,8 @@
         "tsx": "never"
       }
     ],
-    "no-console": "off"
+    "no-console": "off",
+    "react-hooks/exhaustive-deps": "off"
   },
   "overrides": [
     {
