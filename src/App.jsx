@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import GlobMeeting from './Components/Meetings/GlobMeeting ';
+import GlobMeeting from './Components/Meetings/GlobMeeting';
 import './App.css';
 import Mainpage from './Components/Homepage';
 import EmailPreview from './Components/EmailPreview';
