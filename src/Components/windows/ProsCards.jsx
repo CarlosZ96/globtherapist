@@ -5,7 +5,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../firebase';
 import '../../stylesheets/procards.css';
-import close from '../../img/Closegt.png';
+import close from '../../img/close.png';
 
 const ProsCards = ({ onClose }) => {
   const [pros, setPros] = useState([]);

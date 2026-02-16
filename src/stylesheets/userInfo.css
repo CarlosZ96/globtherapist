@@ -241,6 +241,7 @@
 }
 
 .close-button-dates {
+    width: 2%;
     position: absolute;
     top: 10%;
     right: 5%;
@@ -321,11 +322,12 @@
     .dates-modal-content {
         height: 90%;
         width: 70%;
+        border: #fff 6px solid;
     }
 
     .close-button-dates {
-        top: 5%;
-        left: 65%;
+        top: 8.5%;
+        left: 79%;
         font-size: 3rem;
     }
 
