@@ -41,6 +41,25 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
     }));
   };
 
+  const getFirebaseAuthErrorMessage = (errorCode) => {
+    switch (errorCode) {
+      case 'auth/email-already-in-use':
+        return 'Este correo ya está registrado. Intenta iniciar sesión.';
+      case 'auth/invalid-email':
+        return 'El formato del correo no es válido.';
+      case 'auth/weak-password':
+        return 'La contraseña es demasiado débil (mínimo 6 caracteres).';
+      case 'auth/missing-password':
+        return 'Debes ingresar una contraseña.';
+      case 'auth/network-request-failed':
+        return 'Error de red. Verifica tu conexión.';
+      case 'auth/too-many-requests':
+        return 'Demasiados intentos. Intenta más tarde.';
+      default:
+        return 'Ocurrió un error al crear el usuario.';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
@@ -103,10 +122,18 @@ const Create = ({ toggleCreate, toggleCreatePro }) => {
       toggleCreate();
     } catch (error) {
       console.error('Error creando el usuario:', error);
+      const mensaje = getFirebaseAuthErrorMessage(error.code);
+
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Hubo un error al crear el usuario.',
+        title: 'No se pudo crear la cuenta',
+        text: mensaje,
+        confirmButtonText: 'Entendido',
+        customClass: {
+          popup: 'mi-popup',
+          confirmButton: 'mi-boton-confirmar',
+        },
+        buttonsStyling: false,
       });
     }
   };

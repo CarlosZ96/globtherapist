@@ -711,7 +711,15 @@
     }
 
     .pending-dates {
-        left: -9%;
+        left: 0;
+        width: 12%;
+        height: 50%;
+        font-size: 1.5vw;
+        border-radius: 50%;
+    }
+
+    .pending-dates:hover {
+        background-color: #f5d4d4;
     }
 
     .log-txt-h {
