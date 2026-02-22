@@ -43,6 +43,7 @@
     align-items: center;
     justify-content: center;
     width: 20%;
+    height: 100%;
     border-radius: 5px;
 }
 
@@ -58,7 +59,7 @@
 
 .Log-Btn:last-child {
     background: none;
-    height: 20%;
+    height: 60%;
 }
 
 .Log-Btn img {

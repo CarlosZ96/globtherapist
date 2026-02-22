@@ -152,11 +152,11 @@
 }
 
 .profile-image {
-   width: 20vw;
-   max-width: 83px;
-   border: solid 3px #fff;
-   border-radius: 50%;
-   background-color: #fff;
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+   object-position: center;
+   display: block;
 }
 
 .proInfo-cont h1 {
@@ -260,7 +260,7 @@
    align-items: center;
    justify-content: center;
    width: 85%;
-   font-size: 2.5vw;
+   font-size: 2vw;
    background-color: #38DDE3;
    color: #041B5E;
    font-family: 'Poppins', sans-serif;
@@ -319,6 +319,16 @@
 .close-buttonProCards img {
    width: 100%;
    height: 100%;
+}
+
+.profile-image-cont {
+   height: 22vh;
+   width: 12vw;
+   background-color: #687AD7;
+   overflow: hidden;
+   border-radius: 50%;
+   display: inline-block;
+   border: #fff 5px solid;
 }
 
 @media (max-width: 370px) {
@@ -433,15 +443,15 @@
    }
 
    .ProTeras-list ul li:nth-child(2) {
-      font-size: 2.4vw;
+      font-size: 2vw;
    }
 
    .ProTeras-list ul li:nth-child(3) {
-      font-size: 2.4vw;
+      font-size: 2vw;
    }
 
    .ProTeras-list ul li:nth-child(4) {
-      font-size: 2.4vw;
+      font-size: 2vw;
    }
 
    .therapy-info-cont {
@@ -481,11 +491,6 @@
       width: 3.2vw;
    }
 
-   .profile-image {
-      width: 11vw;
-      max-width: 150px;
-   }
-
    .carousel-controls {
       top: 81%;
    }
@@ -499,7 +504,7 @@
    }
 
    .ProTeras-cont h2 {
-      font-size: 2.2vw;
+      font-size: 2.4vw;
    }
 
    .GlobProDescription-cont p {
@@ -509,5 +514,11 @@
    .close-buttonProCards {
       width: 2.9%;
       height: 5.2%;
+   }
+
+   .profile-image-cont {
+    height: 22vh;
+    width: 10vw;
+    min-width: 165px;
    }
 }

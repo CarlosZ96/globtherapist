@@ -128,11 +128,13 @@ const ProsCards = ({ onClose }) => {
         <div className="ProCard-sec1">
           <div className="proInfo-cont">
             {currentPro.imageUrl ? (
-              <img
-                src={currentPro.imageUrl}
-                alt="Perfil profesional"
-                className="profile-image"
-              />
+              <div className="profile-image-cont">
+                <img
+                  src={currentPro.imageUrl}
+                  alt="Perfil profesional"
+                  className="profile-image"
+                />
+              </div>
             ) : (
               <div className="profile-placeholder">Sin imagen</div>
             )}

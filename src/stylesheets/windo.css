@@ -556,6 +556,7 @@
     justify-content: center;
     align-items: center;
     height: 100%;
+    border: #fff 10px solid;
 }
 
 .close-button-who {
@@ -592,7 +593,7 @@
 .Who-title-cont h1 {
     width: 90%;
     font-size: 9vw;
-    color: #ffffff4a;
+    color: #ffffffb9;
     font-family: Itim, serif;
     font-weight: 300;
     text-align: center;
@@ -602,7 +603,7 @@
 .Who-txt-cont p {
     width: 90%;
     font-size: clamp(2.5vw, 4vw, 28px);
-    color: #fff;
+    color: #ffffff6b;
     font-family: Itim, serif;
     font-weight: 300;
     text-align: center;
@@ -804,8 +805,8 @@
     }
 
     .close-button-who {
-        top: 6%;
-        right: 10%;
+        top: 7%;
+        right: 11%;
     }
 
     .CreatePro-cont {
