@@ -332,6 +332,17 @@
    border: #fff 5px solid;
 }
 
+.modal-content-procards {
+   position: relative;
+}
+
+.profile-image-cont {
+   height: 22vh;
+   width: 10vw;
+   min-width: 192px;
+   min-height: 192px;
+}
+
 @media (max-width: 370px) {
    .modal-content {
       height: 60vh;
@@ -478,22 +489,32 @@
    .therapy-icon {
       font-size: 3vw;
    }
+
+   .close-button-procrd {
+      top: 3%;
+   }
+
+   .carousel-controls {
+      width: 54%;
+      top: 96%;
+   }
 }
 
 @media (min-width: 800px) {
    .modal-content-procards {
       height: 70%;
-      width: 70%;
+      width: 96%;
+      max-width: 1000px;
    }
 
    .close-button-procrd {
-      top: 17%;
-      left: 81%;
-      width: 3.2vw;
+      top: 3%;
+      left: 95%;
+      width: 2.2vw;
    }
 
    .carousel-controls {
-      top: 81%;
+      top: 95%;
    }
 
    .carousel-controls button {
@@ -515,11 +536,5 @@
    .close-buttonProCards {
       width: 2.9%;
       height: 5.2%;
-   }
-
-   .profile-image-cont {
-      height: 22vh;
-      width: 10vw;
-      min-width: 165px;
    }
 }
