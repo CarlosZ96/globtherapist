@@ -343,6 +343,15 @@
    min-height: 192px;
 }
 
+.close-button-procrd {
+   top: 3%;
+}
+
+.carousel-controls {
+   width: 54%;
+   top: 96%;
+}
+
 @media (max-width: 370px) {
    .modal-content {
       height: 60vh;
@@ -488,15 +497,6 @@
 
    .therapy-icon {
       font-size: 3vw;
-   }
-
-   .close-button-procrd {
-      top: 3%;
-   }
-
-   .carousel-controls {
-      width: 54%;
-      top: 96%;
    }
 }
 
