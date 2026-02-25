@@ -59,7 +59,7 @@
 
 .Log-Btn:last-child {
     background: none;
-    height: 60%;
+    height: 40%;
 }
 
 .Log-Btn img {
@@ -480,7 +480,7 @@
 @media (min-width: 571px) {
 
     .text-button {
-        font-size: clamp(12px, 4vw, 30px);
+        font-size: clamp(12px, 3vw, 30px);
     }
 
     .GlobFront {
@@ -502,7 +502,8 @@
 
     .Log-Btn-Cont {
         flex-direction: row;
-        width: 15%;
+        width: 20%;
+        max-width: 160px;
     }
 
     .Log-Btn {
@@ -638,6 +639,14 @@
 }
 
 @media (min-width: 800px) {
+
+    .Home-Roof {
+        min-height: 59px;
+    }
+
+    .GlobFront {
+        min-height: 369px;
+    }
 
     .Home-txt {
         width: 8%;

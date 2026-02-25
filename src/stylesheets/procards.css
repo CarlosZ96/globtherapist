@@ -60,6 +60,7 @@
 }
 
 .therapy-info-cont {
+   position: relative;
    display: flex;
    flex-direction: column;
    align-items: center;
@@ -469,8 +470,8 @@
    }
 
    .therapy-close-button {
-      top: 24%;
-      right: 32%;
+      top: 6%;
+      right: 6%;
       width: 2vw;
    }
 
@@ -517,8 +518,8 @@
    }
 
    .profile-image-cont {
-    height: 22vh;
-    width: 10vw;
-    min-width: 165px;
+      height: 22vh;
+      width: 10vw;
+      min-width: 165px;
    }
 }
