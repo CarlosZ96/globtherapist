@@ -14,6 +14,7 @@
 
 .Login-title-cont {
     display: flex;
+    position: relative;
     background-color: #01268d;
     color: #fff;
     width: 100%;
@@ -328,6 +329,7 @@
 .CreatePro-input-cont input {
     width: 48%;
     height: 5vh;
+    color: #2B3A67;
     border: #2B3A67 3px solid;
     border-radius: 5px;
     font-size: 4.5vw;
@@ -438,7 +440,7 @@
 .close-button-crtp {
     position: absolute;
     left: 90%;
-    top: 0px;
+    top: -3%;
     width: 10%;
     background: none;
     font-size: 7vw;
@@ -650,6 +652,12 @@
 
     .Crt-input-cont h3 {
         font-size: 3.8vw;
+        width: 30%;
+
+    }
+
+    .Create-input {
+        width: 60%;
     }
 }
 
@@ -705,10 +713,11 @@
 @media (min-width: 800px) {
 
     .Login-cont {
-        left: 19%;
+        left: 15%;
         top: 12%;
         width: 55vw;
-        height: 79vh;
+        height: 67vh;
+        min-width: 640px;
     }
 
     .pending-dates {
@@ -724,18 +733,18 @@
     }
 
     .log-txt-h {
-        font-size: 2.2vw;
+        font-size: clamp(12px, 3vw, 36px);
     }
 
     .Login-input {
-        height: 60%;
+        height: 52%;
         border: #2B3A67 4px solid;
         font-size: 2.8vw;
     }
 
     .Login-submit-cont button {
         font-family: roboto, sans-serif;
-        font-size: 2vw;
+        font-size: clamp(12px, 3vw, 30px);
     }
 
     .Create-cont {
@@ -790,7 +799,7 @@
     }
 
     .close-button-crt {
-        top: -4%;
+        top: 0;
         left: 93%;
         font-size: 5vw;
     }
@@ -868,6 +877,6 @@
     }
 
     .Login-title-cont h1 {
-        font-size: 3.2vw;
+        font-size: clamp(18px, 3.5vw, 44px);
     }
 }

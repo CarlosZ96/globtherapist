@@ -65,7 +65,7 @@
    flex-direction: column;
    align-items: center;
    justify-content: center;
-   height: 43%;
+   height: 51%;
    width: 80%;
    border-radius: 25px;
 }
@@ -339,8 +339,6 @@
 .profile-image-cont {
    height: 22vh;
    width: 10vw;
-   min-width: 192px;
-   min-height: 192px;
 }
 
 .close-button-procrd {
@@ -440,8 +438,8 @@
 
 @media (min-width: 371px) {
    .therapy-info-cont p {
-      font-size: 1em;
-      color: #fff;
+      font-size: 1.2em;
+      color: #000;
    }
 
    .therapy-icon {
@@ -450,6 +448,8 @@
 
    .therapy-close-button {
       width: 5vw;
+      top: 6%;
+      right: 4%;
    }
 
    .modal-content-procards {
@@ -477,16 +477,17 @@
 
    .therapy-info-cont {
       height: 59%;
-      width: 40%;
+      width: 75%;
+      max-width: 620px;
    }
 
    .therapy-info-text p {
-      font-size: clamp(16px, 2.8vw, 28px);
+      font-size: clamp(29px, 3vw, 36px);
       color: #000;
    }
 
    .therapy-info-cont h1 {
-      font-size: clamp(20px, 4vw, 50px);
+      font-size: clamp(40px, 4vw, 50px);
    }
 
    .therapy-close-button {
@@ -496,11 +497,32 @@
    }
 
    .therapy-icon {
-      font-size: 3vw;
+      font-size: 4vw;
+   }
+
+}
+
+@media (max-width: 799px) {
+   .profile-image-cont {
+      height: 22vh;
+      width: 15vw;
+      min-width: 110px;
+      max-width: 124px;
+      max-height: 120px;
    }
 }
 
 @media (min-width: 800px) {
+
+   .profile-image-cont {
+      height: 25vh;
+      width: 17.9vw;
+      min-width: 120px;
+      min-height: 118px;
+      max-width: 150px;
+      max-height: 150px;
+   }
+
    .modal-content-procards {
       height: 70%;
       width: 96%;
@@ -518,7 +540,7 @@
    }
 
    .carousel-controls button {
-      font-size: 5vw;
+      font-size: clamp(36px, 4vw, 40px);
    }
 
    .proDescription-cont p {
