@@ -657,7 +657,13 @@
 }
 
 .price-input {
-    width: 48%;
+    width: 36%;
+    height: 72%;
+    background-color: #fff;
+    color: #0c2b86;
+    border: none;
+    text-align: center;
+    font-weight: bold;
 }
 
 @media (min-width: 370px) {
@@ -862,5 +868,10 @@
 
     .Hours-selector-cont p {
         font-size: clamp(12px, 3vw, 26px);
+    }
+
+    .price-input {
+        height: 42%;
+        width: 92%;
     }
 }

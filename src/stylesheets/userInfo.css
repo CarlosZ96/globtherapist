@@ -230,6 +230,7 @@
     background-color: #2B3E9D;
     width: 80%;
     height: 94%;
+    max-height: 600px;
 }
 
 .cita-card.completed-cita .cita-status button,

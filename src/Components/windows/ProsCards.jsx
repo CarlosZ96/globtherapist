@@ -65,7 +65,7 @@ const ProsCards = ({ onClose }) => {
 
   if (loading) {
     return (
-      <div className="ProsCards-cont">
+      <div className="ProsCards-wait">
         <p>Cargando profesionales...</p>
       </div>
     );

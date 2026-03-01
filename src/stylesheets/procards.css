@@ -350,6 +350,24 @@
    top: 96%;
 }
 
+.ProsCards-wait {
+   display: flex;
+   flex-direction: row;
+   justify-content: center;
+   align-items: center;
+   height: 100%;
+   width: 96vw;
+   max-width: 1000px;
+   background-color: #041B5E;
+   border: #fff solid 5px;
+}
+
+.ProsCards-wait p {
+   font-family: 'Courier New', Courier, monospace;
+   color: #fff;
+   font-size: medium;
+}
+
 @media (max-width: 370px) {
    .modal-content {
       height: 60vh;
