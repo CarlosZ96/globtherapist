@@ -887,6 +887,19 @@
     align-items: center;
 }
 
+.Pro-img-name-cont h2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    height: 100%;
+    font-size: 4vw;
+    color: #fff;
+    font-family: Itim, serif;
+    font-weight: lighter;
+}
+
 .hdv-info-cont {
     height: 70%;
     display: flex;
@@ -894,6 +907,24 @@
     justify-content: center;
     align-items: center;
     margin-bottom: 5%;
+}
+
+.userhvw-image-cont {
+    height: 85%;
+    width: 14%;
+    overflow: hidden;
+    display: inline-block;
+    border: #fff 5px solid;
+    border-radius: 15px;
+    border: 5px solid #fff;
+}
+
+.pro-img-hvw {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
 }
 
 .secction-hdv {
@@ -910,23 +941,38 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
+    font-family: Itim, serif;
+    font-weight: 300;
+    font-style: normal;
+    margin: 1% 0 0 1%;
+    font-size: clamp(25px, 4vw, 30px);
     color: #fff;
-    font-size: 4vw;
-    font-weight: lighter;
-    margin-right: 2%;
 }
 
 .secction-hdv p {
     width: 60%;
     height: 86%;
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
-    color: #041b5e;
-    font-size: 3.5vw;
+    color: #15275f;
+    font-size: clamp(25px, 4vw, 30px);
+    font-family: Itim, serif;
+    font-weight: 300;
+    font-style: normal;
     background-color: #687AD7;
     padding: 1% 2% 1% 2%;
     border-radius: 5px;
+}
+
+.hdv-w {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
+    height: 90%;
+    width: 88%;
+    background-color: #15275f;
 }
 
 @media (min-width: 800px) {

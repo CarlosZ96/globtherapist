@@ -448,8 +448,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 53%;
-    width: 35%;
+    height: 79%;
+    width: 16%;
     background-color: #030f32;
     border-radius: 5px;
     margin-left: 3%;
@@ -462,7 +462,7 @@
 }
 
 .pro-inactive {
-    background-color: #2b3e9d;
+    background-color: #1c2a71;
     border: none;
 }
 
@@ -481,7 +481,7 @@
 .user-info-comt h3 {
     display: flex;
     height: 40%;
-    width: 66%;
+    width: 83%;
     font-size: 2vw;
     color: #fff;
     text-align: center;

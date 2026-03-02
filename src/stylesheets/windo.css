@@ -1,7 +1,5 @@
 .Login-cont {
     position: absolute;
-    left: 4%;
-    top: 27%;
     width: 92vw;
     height: 47vh;
     border: 4px #01268d solid;
@@ -764,17 +762,14 @@
     }
 
     .Login-cont {
-        left: 15%;
-        top: 12%;
         width: 55vw;
         height: 67vh;
         min-width: 640px;
     }
 
     .pending-dates {
-        left: 0;
-        width: 12%;
-        height: 50%;
+        width: 16%;
+        height: 32%;
         font-size: 1.5vw;
         border-radius: 50%;
     }
@@ -790,7 +785,7 @@
     .Login-input {
         height: 52%;
         border: #2B3A67 4px solid;
-        font-size: 2.8vw;
+        font-size: clamp(12px, 2.8vw, 36px);
     }
 
     .Login-submit-cont button {
@@ -944,12 +939,13 @@
         justify-content: space-evenly;
     }
 
-    .therapy-price span{
+    .therapy-price span {
         width: 92%;
         height: 40%;
     }
 
-    .therapy-price span, .price-input {
+    .therapy-price span,
+    .price-input {
         font-size: clamp(18px, 2vw, 24px);
     }
 }

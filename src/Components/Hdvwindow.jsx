@@ -91,13 +91,13 @@ const Hdvwindow = ({ proId, onClose }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
+      <div className="hdv-w">
         <button type="button" className="close-button" onClick={onClose}>
           &times;
         </button>
         <div className="Pro-img-name-cont">
-          <div className="user-image-comt">
-            <img src={profileImage} alt="Perfil profesional" className="pro-img" />
+          <div className="userhvw-image-cont">
+            <img src={profileImage} alt="Perfil profesional" className="pro-img-hvw" />
           </div>
           <h2>{proName || proData?.name || 'Nombre no disponible'}</h2>
         </div>
