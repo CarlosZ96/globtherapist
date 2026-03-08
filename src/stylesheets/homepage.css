@@ -510,8 +510,8 @@
     }
 
     .Log-Btn {
-        width: 43%;
-        height: 93%;
+        width: 83%;
+        height: 41%;
     }
 
     .Glob-img-cont {
@@ -684,7 +684,7 @@
     }
 
     .Log-Btn-txt {
-        font-size: clamp(12px, 3vw, 25px);
+        font-size: clamp(12px, 2.8vw, 25px);
     }
 
     .Log-Btn:last-child .Log-Btn-txt {

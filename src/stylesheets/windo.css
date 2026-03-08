@@ -751,6 +751,11 @@
     .therapy-button {
         height: 88%;
     }
+
+    .therapy-buttons {
+        display: flex;
+        flex-direction: row;
+    }
 }
 
 @media (min-width: 800px) {
@@ -860,7 +865,7 @@
     }
 
     .close-button-who {
-        top: 16%;
+        top: 6%;
         right: 11%;
     }
 

@@ -328,6 +328,21 @@
     }
 }
 
+@media (min-width: 571px) and (max-width: 799px) {
+    .modal-content-who {
+        width: 96%;
+    }
+
+    .Who-txt-cont p {
+        font-size: clamp(12px, 4vw, 40px);
+    }
+
+    .close-button-who {
+        right: 3%;
+        top: 6%;
+    }
+}
+
 @media (min-width: 800px) {
     .dates-modal-content {
         height: 90%;
